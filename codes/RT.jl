@@ -1,5 +1,7 @@
 using LinearAlgebra, PyPlot, Random, DelimitedFiles, Printf
-function onUnitCircle(n::Int)
+
+#generating IC on unit circle
+function onUnitCircle(n::Int=3)
 	z = Array{ComplexF64,1}(undef, n);
 	for i = 1 : n
 		x = 2*(rand()-0.5)
@@ -17,6 +19,25 @@ function onUnitCircle(n::Int)
 	return z
 end
 
+function intRT()
+	ω = rand(1:20,3)
+	x = rand(3)
+	for i = 1 : 3
+    	if x[i]>0.5
+    		ω[i] = -ω[i]
+    	end
+    end
+    x = rand();
+    if x <= 1/3;
+    	ω[1] = - (ω[2]+ω[3])
+    elseif x > 1/3 && x <=2/3
+    	ω[2] = - (ω[1] + ω[3])
+    else
+    	ω[3] = - (ω[1] + ω[2])
+    end
+    return ω
+end 
+#tendency for a resonant triad with ω = [ω₁, ω₂, ω₃] frequencies and ϵ=slow time scale << 1.
 @inline function tendRT(z::Array{T,1}, tend::Array{T,1}; ω, ϵ, C) where T<:ComplexF64
 	tend[1] = im*ω[1]*z[1] + ϵ*C[1]*conj(z[2])*conj(z[3])
 	tend[2] = im*ω[2]*z[2] + ϵ*C[2]*conj(z[3])*conj(z[1])
@@ -50,7 +71,8 @@ end
     end
 end
 
-function RT(N::Int, h::Float64, every::Int, z::Array{T,1}; ω, ϵ, C, stepper::Function=RK4_step) where T<:ComplexF64
+function RT(N::Int, h::Float64, every::Int, z::Array{ComplexF64,1}; 
+	ω, ϵ, C, stepper::Function=RK4_step)
 	zAmp = Array{Float64,2}(undef,N+1,3)
 	tend = deepcopy(z)
 	newtxt!(abs.(z))
@@ -64,7 +86,7 @@ function RT(N::Int, h::Float64, every::Int, z::Array{T,1}; ω, ϵ, C, stepper::F
 end
 
 
-Random.seed!(3)
+Random.seed!(4)
 ϵ = 0.01;
 ω = [1, 2, -3]
 C = [-2, 1, 1]
@@ -74,4 +96,4 @@ T = 1000; h = 1e-1; every = Int(1e1);
 z = onUnitCircle(3);
 RT(Int(ceil(T/h)), h, every, z, ω=ω, ϵ=ϵ, C=C);
 plot(readdlm("./zAmp.txt"))
-savefig("h6.png")
+savefig("h1.png")
