@@ -20,14 +20,12 @@ end
 steppers = [IFE_step, ETD1_step, CNimex_step]
 colors = ["r","b","g"]
 ss = length(steppers)
-for i in R
-	for j = 1 : ss
-		name=string(steppers[j])*string(i)
-		T = exp10(i); ϵ=exp10(-i); 
-		N = Int(exp10(i+3)); #Int(ceil(T/h)); 
-		every =Int(exp10(i+1)); #Int(ceil(N/100))
-		RT_amp(N, h, every, IC, ω=ω, ϵ=ϵ, C=C, stepper=steppers[j], name=name);		
-	end
+for i in R, j = 1 : ss
+	name=string(steppers[j])*string(i)
+	T = exp10(i); ϵ=exp10(-i); 
+	N = Int(exp10(i+3)); #Int(ceil(T/h)); 
+	every =Int(exp10(i+1)); #Int(ceil(N/100))
+	RT_amp(N, h, every, IC, ω=ω, ϵ=ϵ, C=C, stepper=steppers[j], name=name);		
 end
 
 #Plot amplitudes for each of the variables separately. 

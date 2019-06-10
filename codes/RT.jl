@@ -23,40 +23,28 @@ function intRT(N::Int64)
     ω = randperm(N)[1:3]
     x = rand(3)
     for i = 1 : 3  
-        if x[i]>0.5
-            ω[i] = -ω[i]
-        end
+        x[i]>0.5 ? ω[i]=-ω[i] : ω[i]=ω[i]
     end
     x = rand();
-    if x <= 1/3;
-        ω[1] = - (ω[2]+ω[3])
-    elseif x > 1/3 && x <=2/3
-        ω[2] = - (ω[1] + ω[3])
-    else
-        ω[3] = - (ω[1] + ω[2])
-    end
+    x<=1/3 ? ω[1] = - (ω[2]+ω[3]) :
+    x>2/3 ? ω[3] = - (ω[1] + ω[2]) : ω[2] = - (ω[1] + ω[3]) 
     return ω
 end 
 
 function floatRT(N::Int64)
     #pick from uniform distribution(-N,N)
-    ω = (rand(3) .- .5)*2*N
+    C = (rand(3) .- .5)*2*N
     x = rand();
-    if x <= 1/3;
-        ω[1] = - (ω[2]+ω[3])
-    elseif x > 1/3 && x <=2/3
-        ω[2] = - (ω[1] + ω[3])
-    else
-        ω[3] = - (ω[1] + ω[2])
-    end
-    return ω
+    x<=1/3 ? C[1] = -(C[2]+C[3]) :
+    x>2/3 ? C[3] = -(C[1] + C[2]) : C[2] = -(C[1] + C[3])
+    return C
 end 
 
 #tendency for a resonant triad with ω = [ω₁, ω₂, ω₃] frequencies and ϵ=slow time scale << 1.
 @inline function tendRT(z::Array{T,1}, tend::Array{T,1}; ω, ϵ, C) where T<:ComplexF64
-    tend[1] = im*ω[1]*z[1] + ϵ*C[1]*conj(z[2])*conj(z[3])
-    tend[2] = im*ω[2]*z[2] + ϵ*C[2]*conj(z[3])*conj(z[1])
-    tend[3] = im*ω[3]*z[3] + ϵ*C[3]*conj(z[1])*conj(z[2])
+    for i = 1 : 3
+        tend[i] = im*ω[i]*z[i] + ϵ*C[i]*prod(conj.(z[1:end .!=i]))
+    end
     return tend
 end
 
