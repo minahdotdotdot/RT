@@ -115,7 +115,6 @@ end
 
 function RT_amp(N::Int, h::Float64, every::Int, IC::Array{ComplexF64,1}; 
     ω, ϵ, C, stepper::Function=RK4_step, name::String="zAmp")
-    zAmp = Array{Float64,2}(undef,N+1,3)
     z = deepcopy(IC)
     tend = deepcopy(IC)
     newtxt!(abs.(z), name=name)
@@ -130,7 +129,6 @@ end
 
 function RT(N::Int, h::Float64, every::Int, z::Array{ComplexF64,1}; 
     ω, ϵ, C, stepper::Function=RK4_step, name::String="z")
-    zAmp = Array{ComplexF64,2}(undef,N+1,3)
     tend = deepcopy(z)
     newtxt!(z[1], name=name*string(1))
     newtxt!(z[2], name=name*string(2))
