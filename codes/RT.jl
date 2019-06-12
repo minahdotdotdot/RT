@@ -118,7 +118,7 @@ function RT_amp(N::Int, h::Float64, every::Int, IC::Array{ComplexF64,1};
     z = deepcopy(IC)
     tend = deepcopy(IC)
     newtxt!(abs.(z), name=name)
-    for i=1:N
+    for i=2:N+1
         z = stepper(h, z, tend, ω=ω, ϵ=ϵ, C=C)
         if rem(i, every) ==1
             #@printf("%d\t",div(i, every))
@@ -133,7 +133,7 @@ function RT(N::Int, h::Float64, every::Int, z::Array{ComplexF64,1};
     newtxt!(z[1], name=name*string(1))
     newtxt!(z[2], name=name*string(2))
     newtxt!(z[3], name=name*string(3))
-    for i=1:N
+    for i=2:N+1
         z = stepper(h, z, tend, ω=ω, ϵ=ϵ, C=C)
         if rem(i, every) ==1
             #@printf("%d\t",div(i, every))
