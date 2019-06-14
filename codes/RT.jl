@@ -104,11 +104,11 @@ end
 end
 
 @inline function newtxt!(zAmp::Array{T,1}; name::String="zAmp") where T<:Float64
-    writedlm("./"*name*".txt", zAmp')
+    writedlm("../txtfiles/"*name*".txt", zAmp')
 end
 
 @inline function addtxt!(zAmp::Array{T,1}; name::String="zAmp") where T<:Float64
-    open("./"*name*".txt", "a") do io
+    open("../txtfiles/"*name*".txt", "a") do io
         writedlm(io, zAmp')
     end
 end
