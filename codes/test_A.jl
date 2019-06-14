@@ -27,11 +27,9 @@ for i = 1 : length(hs), j = 1 : ss
 	else
 		every = 1
 	end
-	RT_amp(N, h, every, IC, ω=ω, ϵ=ϵ, C=C, stepper=steppers[j], name=name);		
+	RT_amp(N, h, every, IC, ω=ω, ϵ=ϵ, C=C, stepper=steppers[j], name=txtname);		
 end
 
-steppers = [IFE_step, ETD1_step, CNimex_step]
-ss = length(steppers)
 ###PLOT errors for each of the 3 waves separately. 
 colors = ["r","b","g"]
 for k = 1 : 3
@@ -41,7 +39,7 @@ for k = 1 : 3
 		title("h="*string(hs[i]))
 		for j = 1 : ss
 			txtname=string(steppers[j])*"_A"*string(i)
-			y = readdlm(txtname*string(i)*".txt")[:,k]
+			y = readdlm(txtname*".txt")[:,k]
 			if length(y)==length(x)
 				semilogy(x, abs.(tsol[:,k]-y), c=colors[j], label=string(steppers[j]))
 				ylim(top=10.0)
@@ -61,8 +59,6 @@ end
 
 
 ####PLOT all methods for each of the 3 waves separately.
-steppers = [IFE_step, ETD1_step, CNimex_step]
-ss = length(steppers)
 for k = 1 : 3
 	for i =1:length(hs)
 		tsol = readdlm("true_seed"*string(seed)*".txt")
