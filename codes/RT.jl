@@ -49,7 +49,7 @@ end
 end
 
 #Runge-Kutta 4(explicit)
-@inline function RK4_step(h::Float64, z::Array{T,1}, tend::Array{T,1};ω, ϵ, C) where T<:ComplexF64
+@inline function RK4(h::Float64, z::Array{T,1}, tend::Array{T,1};ω, ϵ, C) where T<:ComplexF64
     yn = deepcopy(z);
     tendRT(yn, tend, ω=ω, ϵ=ϵ, C=C);
     k = h * tend; #k1
@@ -65,7 +65,7 @@ end
     return yn + (1/6)*k
 end
 
-@inline function IFE_step(h::Float64, z::Array{T,1}, update::Array{T,1};ω, ϵ, C) where T<:ComplexF64
+@inline function IFE(h::Float64, z::Array{T,1}, update::Array{T,1};ω, ϵ, C) where T<:ComplexF64
     for i = 1 : 3
         update[i] = exp(im*ω[i]*h) * (z[i] + ϵ*C[i]*h*prod(conj.(z[1:end .!=i])))
     end
@@ -76,14 +76,14 @@ end
     return expm1(A)/A
 end
 
-@inline function ETD1_step(h::Float64, z::Array{T,1}, update::Array{T,1};ω, ϵ, C) where T<:ComplexF64
+@inline function ETD1(h::Float64, z::Array{T,1}, update::Array{T,1};ω, ϵ, C) where T<:ComplexF64
     for i = 1 : 3
         update[i] = exp(im*ω[i]*h)*z[i] + ϵ*C[i]*h*phi(im*ω[i]*h)*prod(conj.(z[1:end .!=i]))
     end
     return update
 end
 
-@inline function EUimex_step(h::Float64, z::Array{T,1}, RHS::Array{T,1};ω, ϵ, C) where T<:ComplexF64
+@inline function EUimex(h::Float64, z::Array{T,1}, RHS::Array{T,1};ω, ϵ, C) where T<:ComplexF64
     for i = 1 : 3
         RHS[i] = z[i] + h*ϵ*C[i]*prod(conj.(z[1:end .!=i]))
     end
@@ -93,7 +93,7 @@ end
     return z
 end
 
-@inline function CNimex_step(h::Float64, z::Array{T,1}, RHS::Array{T,1};ω, ϵ, C) where T<:ComplexF64
+@inline function CNimex(h::Float64, z::Array{T,1}, RHS::Array{T,1};ω, ϵ, C) where T<:ComplexF64
     for i = 1 : 3
         RHS[i] = (1+im*ω[i]*h/2)*z[i] + h*ϵ*C[i]*prod(conj.(z[1:end .!=i]))
     end
@@ -114,7 +114,7 @@ end
 end
 
 function RT_amp(N::Int, h::Float64, every::Int, IC::Array{ComplexF64,1}; 
-    ω, ϵ, C, stepper::Function=RK4_step, name::String="zAmp")
+    ω, ϵ, C, stepper::Function=RK4, name::String="zAmp")
     z = deepcopy(IC)
     tend = deepcopy(IC)
     newtxt!(abs.(z), name=name)
