@@ -64,7 +64,7 @@ for k = 1 : 3
 		tsol = readdlm("true_seed"*string(seed)*".txt")
 		subplot(100+length(hs)*10+i)
 		title("h="*string(hs[i]))
-		for j = 1 : ss-1
+		for j = 1 : ss
 			txtname=string(steppers[j])*"_A"*string(i)
 			y = readdlm(txtname*".txt")[:,k]
 			if length(y)==length(x)
@@ -89,7 +89,7 @@ end
 for j = 1 : ss
 	for i =1:length(hs)
 		subplot(100*length(hs)+10+i)
-		title(string(steppers[j]))
+		title(string(hs[i]))
 		txtname=string(steppers[j])*"_A"*string(i)
 		y = readdlm(txtname*".txt")
 		if size(y)[1]==length(x)
