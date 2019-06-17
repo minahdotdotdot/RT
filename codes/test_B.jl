@@ -4,7 +4,7 @@ seed=7
 Random.seed!(seed);
 ϵ = 0.01; T=1000; L=1000; x=range(0,1000,length=L+1);
 ω = [-1, 3, -2]
-C = floatRT(5)
+C = floatRT(5) #this means C1, C2, and C3 are numbers between -5 and 5.
 IC = onUnitCircle(3);
 #RK4, EUimex
 hs = [0.02, 0.025, 0.05]
@@ -13,14 +13,14 @@ test="_B"
 trname="true_seed"*string(seed)*"B"; h=exp10(-6)
 N = Int(ceil(T/h)); 
 every = Int(ceil(N/L)) #only save 1001 values total
-#=
+
 RT_amp(N, h, every, IC, ω=ω, ϵ=ϵ, C=C, stepper=RK4, name=trname);
-=#
+
 
 #### Methods we are comparing.
 steppers = [IFE, ETD1, CNimex]
 ss = length(steppers)
-#=
+
 for i = 1 : length(hs), j = 1 : ss
 	txtname=string(steppers[j])*test*string(i)
 	h = hs[i]; N = Int(ceil(T/h)); 
@@ -31,11 +31,11 @@ for i = 1 : length(hs), j = 1 : ss
 	end
 	RT_amp(N, h, every, IC, ω=ω, ϵ=ϵ, C=C, stepper=steppers[j], name=txtname);		
 end
-=#
+
 
 ###PLOT errors for each of the 3 waves separately. 
 colors = ["r","b","g"]
-#=
+
 for k = 1 : 3
 	for i =1: length(hs)
 		tsol = readdlm("../txtfiles/"*trname*".txt")
@@ -57,10 +57,10 @@ for k = 1 : 3
 		end
 		legend()
 	end
-	savefig("../plots/seed"*string(seed)*"-errz"*string(k)*".png")
+	savefig("../plots/seed"*string(seed)*test*"-errz"*string(k)*".png")
 	close()
 end
-=#
+
 
 ####PLOT each wave separately.
 for k = 1 : 3
