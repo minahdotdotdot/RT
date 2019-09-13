@@ -19,6 +19,7 @@ function onUnitCircle(n::Int=3)
     return z
 end
 
+#Finds 3 integers that add to 0, where N is the largest possible magnitude.
 function intRT(N::Int64)
     ω = randperm(N)[1:3]
     x = rand(3)
@@ -31,21 +32,34 @@ function intRT(N::Int64)
     return ω
 end 
 
+#Finds 3 floats that add to 0.
 function floatRT(N::Int64)
-    #pick from uniform distribution(-N,N)
+    #pick  3 floats from uniform distribution(-N,N)
     C = (rand(3) .- .5)*2*N
     x = rand();
-    x<=1/3 ? C[1] = -(C[2]+C[3]) :
+    # change the first float  if x <=1/3    to meet C1+C2+C3=0
+    # change the second float if 1/3<=x<2/3 to meet C1+C2+C3=0
+    # change the third float  if x>2/3      to meet C1+C2+C3 = 0
+    x<=1/3 ? C[1] = -(C[2]+C[3]) : #
     x>2/3 ? C[3] = -(C[1] + C[2]) : C[2] = -(C[1] + C[3])
     return C
 end 
 
+@inline function Lfunc(z, ω, h)
+	return exp.(im*h*ω) .* z
+end
+
+@inline function NLfunc(z, ϵ, C)
+	N = deepcopy(z)
+	for i = 1 : 3
+		N[i] = ϵ*C[i]*prod(conj.(z[1:end .!=i]))
+	end
+	return N
+end
+
 #tendency for a resonant triad with ω = [ω₁, ω₂, ω₃] frequencies and ϵ=slow time scale << 1.
 @inline function tendRT(z::Array{T,1}, tend::Array{T,1}; ω, ϵ, C) where T<:ComplexF64
-    for i = 1 : 3
-        tend[i] = im*ω[i]*z[i] + ϵ*C[i]*prod(conj.(z[1:end .!=i]))
-    end
-    return tend
+    return im*ω .* z + NLfunc(z, ϵ, C)
 end
 
 #Runge-Kutta 4(explicit)
@@ -54,23 +68,21 @@ end
     tendRT(yn, tend, ω=ω, ϵ=ϵ, C=C);
     k = h * tend; #k1
     yn += 1/6*k;
-    tendRT(yn + .5*k, tend, ω=ω, ϵ=ϵ, C=C);
+    tendRT(z + .5*k, tend, ω=ω, ϵ=ϵ, C=C);
     k = h * tend; #k2
     yn += 1/3*k;
-    tendRT(yn + .5*k, tend, ω=ω, ϵ=ϵ, C=C);
+    tendRT(z + .5*k, tend, ω=ω, ϵ=ϵ, C=C);
     k = h * tend; #k3
     yn += 1/3*k;
-    tendRT(yn + k, tend, ω=ω, ϵ=ϵ, C=C);
+    tendRT(z + k, tend, ω=ω, ϵ=ϵ, C=C);
     k = h * tend; #k4
     return yn + (1/6)*k
 end
 
 @inline function IFE(h::Float64, z::Array{T,1}, update::Array{T,1};ω, ϵ, C) where T<:ComplexF64
-    for i = 1 : 3
-        update[i] = exp(im*ω[i]*h) * (z[i] + ϵ*C[i]*h*prod(conj.(z[1:end .!=i])))
-    end
-    return update
+    return exp.(im*h*ω) * (z + NLfunc(z, ϵ, C))
 end
+
 
 @inline function phi(A::T) where T<:Complex
     return expm1(A)/A
@@ -84,23 +96,34 @@ end
 end
 
 @inline function EUimex(h::Float64, z::Array{T,1}, RHS::Array{T,1};ω, ϵ, C) where T<:ComplexF64
-    for i = 1 : 3
-        RHS[i] = z[i] + h*ϵ*C[i]*prod(conj.(z[1:end .!=i]))
-    end
-    for i = 1 : 3
-        z[i] = RHS[i]/(1-im*h*ω[i])
-    end
-    return z
+	RHS = z + NLfunc(z, ϵ, C)
+    return RHS ./ ( 1 .- im*h*ω)
 end
 
 @inline function CNimex(h::Float64, z::Array{T,1}, RHS::Array{T,1};ω, ϵ, C) where T<:ComplexF64
-    for i = 1 : 3
-        RHS[i] = (1+im*ω[i]*h/2)*z[i] + h*ϵ*C[i]*prod(conj.(z[1:end .!=i]))
-    end
-    for i = 1 : 3
-        z[i] = RHS[i]/(1-im*h*ω[i]/2)
-    end
-    return z
+	RHS = (1+im*ω*h/2) .*z + NLfunc(z, ϵ, C)
+    return RHS ./ (1 .- im*h/2*ω)
+end
+
+@inline function IFRK2(h::Float64, z::Array{T,1}, RHS::Array{T,1};ω, ϵ, C) where T<:ComplexF64
+	yn = deepcopy(z)
+	k = NLfunc(z, ϵ, C)                   # k1
+	yn += h/2*k
+	k = NLfunc(z + h*k) # k2
+	return exp.(im*h*ω) .* (yn .+ h/2*k)
+end
+
+
+@inline function IFRK4(h::Float64, z::Array{T,1}, RHS::Array{T,1};ω, ϵ, C) where T<:ComplexF64
+	yn = deepcopy(z)
+	k = NLfunc(z, ϵ, C)   # k1
+	yn += h/6*k
+	k = NLfunc(z + h/2*k) # k2
+	yn += h/3*k
+	k = NLfunc(z + h/2*k) # k3
+	yn += h/3*k
+	k = NLfunc(z + h*k)   # k4
+	return  exp.(im*h*ω) .* (yn + h/6*k)
 end
 
 @inline function newtxt!(zAmp::Array{T,1}; name::String="zAmp") where T<:Float64
@@ -111,6 +134,24 @@ end
     open("../txtfiles/"*name*".txt", "a") do io
         writedlm(io, zAmp')
     end
+end
+
+@inline function newtxt!(zAmp::Array{T,1}; name::String="zAmp") where T<:Complex{Float64}
+    writedlm("../txtfiles/"*name*"_Re.txt", real.(zAmp'))
+    writedlm("../txtfiles/"*name*"_Im.txt", imag.(zAmp'))
+end
+
+@inline function addtxt!(zAmp::Array{T,1}; name::String="zAmp") where T<:Complex{Float64}
+    open("../txtfiles/"*name*"_Re.txt", "a") do io
+        writedlm(io, real.(zAmp'))
+    end
+    open("../txtfiles/"*name*"_Im.txt", "a") do io
+        writedlm(io, imag.(zAmp'))
+    end
+end
+
+@inline function readCfile(name::String)
+	return readdlm("../txtfiles/"*name*"_Re.txt") + im * readdlm("../txtfiles/"*name*"_Im.txt")
 end
 
 function RT_amp(N::Int, h::Float64, every::Int, IC::Array{ComplexF64,1}; 
@@ -137,16 +178,12 @@ end
 function RT(N::Int, h::Float64, every::Int, z::Array{ComplexF64,1}; 
     ω, ϵ, C, stepper::Function=RK4_step, name::String="z")
     tend = deepcopy(z)
-    newtxt!(z[1], name=name*string(1))
-    newtxt!(z[2], name=name*string(2))
-    newtxt!(z[3], name=name*string(3))
+    newtxt!(z, name=name)
     for i=2:N+1
         z = stepper(h, z, tend, ω=ω, ϵ=ϵ, C=C)
+       	print(z)
         if rem(i, every) ==1
-            #@printf("%d\t",div(i, every))
-            addtxt!(z[1], name=name*string(1))
-            addtxt!(z[1], name=name*string(1))
-            addtxt!(z[1], name=name*string(1))
+            addtxt!(z, name=name)
         end
     end
 end
