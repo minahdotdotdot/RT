@@ -1,0 +1,282 @@
+\documentclass{article}
+%Packages
+\usepackage[utf8]{inputenc}
+\usepackage{geometry, graphicx,wrapfig}
+\usepackage{enumerate}
+\usepackage{amsmath,amssymb,amsfonts,amsthm, bm}
+\usepackage{xcolor} %just for visible comments.
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage[toc,page]{appendix}
+\usepackage{makecell}
+
+% New theorems and commands
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{assump}[theorem]{Assumption}
+\newcommand\mycommfont[1]{\ttfamily\textcolor{orange}{#1}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\dd}{\delta}
+\newcommand{\tth}{\theta}
+\newcommand{\bb}[1]{\mathbf{#1}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\ddt}{\frac{\mathrm{d}}{\mathrm{d}t}}
+\SetCommentSty{mycommfont}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newcommand\comment[1]{\color{blue}#1}
+% Document
+\title{Integrating Factor Methods}
+%\date{\today}
+
+\begin{document}
+\maketitle
+We study ODEs of type
+\begin{equation}
+	\ddt y = Ly + N(y),
+\end{equation}
+where $y$ may be a vector, $L$ is a linear operator, and $N$ is a nonlinear operator. 
+\section{IF Methods}
+One form of the Integrating Factor method makes the change of variables $v(t)=e^{(t_{n-1}-t)L}y(t)$, which results in a new form.
+\begin{equation}
+	\ddt v = f(v,t) = e^{(t_{n-1}-t)L} N(e^{(t-t_{n-1})L} v)
+	\label{eqn:tnIF}
+\end{equation}
+
+Note that while $t_{n-1}$ can be replaced by any constant, this choice helps simplify the discretization of Equation~\ref{eqn:tnIF}.
+For example, at $t=t_{n-1}$, we have exactly $y(t_{n-1})=v(t_{n-1})$. 
+We will simplify the above notation as $y(t_n) = y_n$ and $v(t_n) = v_n$. 
+
+
+This class of methods apply explicit methods to Equation \ref{eqn:tnIF}, then returns to the original variables. 
+
+\paragraph{IF-Euler} Applying explicit Euler to Equation~\ref{eqn:tnIF} results in,
+\begin{equation*}
+v_n = v_{n-1} + h f(v_{n-1, t_{n-1}}) = v_{n-1} + h N(v_{n-1}). 
+\end{equation*}
+
+Returning to the original variables gives us the full IF-Euler discretization.
+\begin{equation}
+y_n = e^{hL}v_n =e^{hL} (y_{n-1}+hN(y_{n-1}))
+\end{equation}
+
+\paragraph{IF-RK2 (Heun/Trapezoidal)} This is one of the simplest non-trivial Runge-Kutta method. 
+\begin{align*}
+k_1 &= f(v_{n-1}, t_{n-1})\\
+k_2 &= f(v_{n-1}+hk_1, t_{n-1}+h)\\
+v_n &= v_{n-1} + h\left(\frac{1}{2}k_1 +\frac{1}{2}k_2\right)
+\end{align*}
+
+Converting back to original variables:
+\begin{align*}
+k_1 &= f(v_{n-1}, t_{n-1})=N(y_{n-1})\\
+k_2 &= f(v_{n-1}+hk_1, t_{n-1}+h) =e^{-hL}N(e^{hL}(y_{n-1}+hk_1))\\
+y_n &= e^{hL}v_n  = e^{hL}\left(y_{n-1} + h\left(\frac{1}{2}k_1 +\frac{1}{2}k_2\right)\right)\\
+&=  e^{hL} \left(y_{n-1} +\frac{h}{2}N(y_{n-1})\right)+\frac{h}{2}N(e^{hL}(y_{n-1}+hN(y_{n-1})))
+\end{align*}
+%\paragraph{IF-RK2 (Explicit Midpoint Method)} This is one of the simplest non-trivial Runge-Kutta method. 
+%\begin{align*}
+%k_1 &= f(v_{n-1}, t_{n-1})\\
+%k_2 &= f(v_{n-1}+\frac{h}{2}k_1, t_{n-1}+\frac{h}{2})\\
+%v_n &= v_{n-1} + hk_2
+%\end{align*}
+%
+%Converting back to original variables:
+%\begin{align*}
+%k_1 &= f(v_{n-1}, t_{n-1}) = N(y_{n-1})\\
+%k_2 &= f(v_{n-1}+\frac{h}{2}k_1, t_{n-1}+\frac{h}{2})\\
+%&= e^{-\frac{1}{2}hL}N(e^{\frac{1}{2}hL}(y_{n-1}+\frac{h}{2}k_1))\\
+%y_n &= e^{hL}v_n = e^{hL}(y_{n-1} + hk_2)
+%\end{align*}
+%
+%\paragraph{IF-RK2 (Ralston's Method)} This is one of the simplest non-trivial Runge-Kutta method. 
+%\begin{align*}
+%k_1 &= f(v_{n-1}, t_{n-1})\\
+%k_2 &= f(v_{n-1}+\frac{2}{3}hk_1, t_{n-1}+\frac{2}{3}h)\\
+%v_n &= v_{n-1} + h(\frac{1}{4}k_1+\frac{3}{4}k_2)
+%\end{align*}
+%
+%Converting back to original variables:
+%\begin{align*}
+%k_1 &= f(v_{n-1}, t_{n-1}) = y_{n-1}\\
+%k_2 &= f(v_{n-1}+\frac{2}{3}hk_1, t_{n-1}+\frac{2}{3}h)\\
+%&= e^{-\frac{2}{3}hL}N\left(e^{\frac{2}{3}hL}(y_{n-1}+\frac{2}{3}hk_1)\right)\\
+%y_n &= e^{hL}v_n = e^{hL}\left(y_{n-1} + h(\frac{1}{4}k_1+\frac{3}{4}k_2)\right)
+%\end{align*}
+
+\paragraph{IF-RK4 (Classic)} This is the classic 4th order explicit Runge-Kutta method.
+\begin{align*}
+k_1 &= f(v_{n-1}, t_{n-1})\\
+k_2 &= f(v_{n-1}+\frac{h}{2}k_1, t_{n-1}+\frac{h}{2})\\
+k_3 &= f(v_{n-1} + \frac{h}{2}k_2, t_{n-1}+\frac{h}{2})\\
+k_4 &= f(v_{n-1}+hk_3, t_{n-1}+h)\\
+v_n &= v_{n-1} + h(\frac{1}{6}k_1+\frac{1}{3}k_2+\frac{1}{3}k_3+\frac{1}{6}k_4)
+\end{align*}
+
+Converting back to original variables:
+\begin{align*}
+k_1 &= f(v_{n-1}, t_{n-1})=N(y_{n-1})\\
+k_2 &= f(v_{n-1}+\frac{h}{2}k_1, t_{n-1}+\frac{h}{2}) = e^{-\frac{1}{2}hL}N\left(e^{\frac{1}{2}hL}(y_{n-1}+\frac{h}{2}k_1)\right)\\
+k_3 &= f(v_{n-1} + \frac{h}{2}k_2, t_{n-1}+\frac{h}{2})= e^{-\frac{1}{2}hL}N\left(e^{\frac{1}{2}hL}(y_{n-1}+\frac{h}{2}k_2)\right)\\
+k_4 &= f(v_{n-1}+hk_3, t_{n-1}+h) = e^{-hL}N\left(e^{hL}(y_{n-1}+hk_3)\right)\\
+y_n &= e^{hL}v_n =e^{hL} \left(y_{n-1} + h(\frac{1}{6}k_1+\frac{1}{3}k_2+\frac{1}{3}k_3+\frac{1}{6}k_4)\right)
+\end{align*}
+
+
+\section{Resonant Triad}
+We study the Resonant Triad system ODEs given by Equations~\ref{eqn:RT1} to \ref{eqn:RT3}, which can be summarized in vector form, Equation~\ref{eqn:RT}.
+\begin{align}
+\ddt z_1 &= i\omega_1 z_1 + \epsilon C_1 z_2^*z_3^*\label{eqn:RT1} \\
+\ddt z_2 &= i\omega_1 z_2 + \epsilon C_2 z_1^*z_3^*\label{eqn:RT2} \\
+\ddt z_3 &= i\omega_1 z_3 + \epsilon C_3 z_1^*z_2^*\label{eqn:RT3} \\
+\ddt \vec{z} &= Lz + N(z) \label{eqn:RT}
+\end{align}
+
+The linear operator for Equations~\ref{eqn:RT} is given below.
+\begin{equation}
+L = \begin{bmatrix}
+i\omega_1 & 0 & 0\\
+0 &i\omega_2 & 0 \\
+0 & 0 & i\omega_3 
+\end{bmatrix}
+\end{equation}
+
+Since $L$ is a diagonal matrix, its exponential is easy to calculate. 
+\begin{equation}
+e^{hL} = \begin{bmatrix}
+e^{ih\omega_1} & 0 & 0\\
+0 &e^{ih\omega_2} & 0 \\
+0 & 0 & e^{ih\omega_3} 
+\end{bmatrix}
+\end{equation}
+
+The nonlinear function is then, 
+\begin{equation}
+N(\vec{z}) = \epsilon \begin{bmatrix}
+C_1 z_2^*z_3^* \\
+C_2 z_1^*z_3^* \\
+C_3 z_1^*z_2^* \\
+\end{bmatrix}
+\end{equation}
+ 
+Let's apply the IF change of variables with $v(t) = e^{(t_{n-1}-t)L}z(t)$.
+Then, the ODE becomes, 
+\begin{equation}
+\ddt \vec{v} = f(\vec{v},t_{n-1}+\tau) = e^{-\tau L} N(e^{\tau L} v).
+\label{eqn:tnIFRT}
+\end{equation}
+
+It turns out that $f(\vec{v}, t_{n-1}+\tau)$ can actually be represented just as a function of $v$. 
+Some algebra to show this:
+\begin{align*}
+f(\vec{v},t_{n-1}+\tau) &= e^{-\tau L} N(e^{\tau L} \vec{v}) \\
+&= e^{-\tau L} N\left(\begin{bmatrix}
+e^{i\tau\omega_1} & 0 & 0\\
+0 &e^{i\tau\omega_2} & 0 \\
+0 & 0 & e^{i\tau\omega_3} 
+\end{bmatrix}\begin{bmatrix}
+v_1 \\
+v_2\\
+v_3\\
+\end{bmatrix}\right) =e^{-\tau L}  N\left(\begin{bmatrix}
+e^{i\tau\omega_1}v_1 \\
+e^{i\tau\omega_2}v_2\\
+e^{i\tau\omega_3}v_3\\
+\end{bmatrix}\right) \\
+&= e^{-\tau L} \epsilon \begin{bmatrix}
+C_1e^{-i\tau(\omega_2+\omega_3)}v_2^*v_3^* \\
+C_2e^{-i\tau(\omega_1+\omega_3)}v_1^*v_3^* \\
+C_1e^{-i\tau(\omega_1+\omega_2)}v_1^*v_2^* \\
+\end{bmatrix} = e^{-\tau L} \epsilon \begin{bmatrix}
+C_1e^{i\tau(\omega_1)}v_2^*v_3^* \\
+C_2e^{i\tau(\omega_2)}v_1^*v_3^* \\
+C_3e^{i\tau(\omega_3)}v_1^*v_2^* \\
+\end{bmatrix} \text{, since }\omega_1+\omega_2+\omega_3 = 0,\\
+&= e^{-\tau L} \begin{bmatrix}
+e^{i\tau\omega_1} & 0 & 0\\
+0 &e^{i\tau\omega_2} & 0 \\
+0 & 0 & e^{i\tau\omega_3} 
+\end{bmatrix} \epsilon\begin{bmatrix}
+C_1v_2^*v_3^* \\
+C_2v_1^*v_3^* \\
+C_3v_1^*v_2^* \\
+\end{bmatrix} = e^{-\tau L} e^{\tau L} N(\vec{v}) = N(\vec{v})
+\end{align*}
+
+So we actually end up with an autonomous system of ODEs in the new variable, $\vec{v}$ as well. 
+Let's re-do the discretizations by using $\ddt{\vec{v}} = f(\vec{v},t)=N(\vec{v})$.
+
+\paragraph{IF-Euler} Applying explicit Euler to Equation~\ref{eqn:tnIF} results in,
+\begin{equation*}
+v_n = v_{n-1} + h f(v_{n-1, t_{n-1}}) = v_{n-1} + h N(v_{n-1}). 
+\end{equation*}
+
+Returning to the original variables gives us the full IF-Euler discretization.
+\begin{equation}
+y_n = e^{hL}v_n =e^{hL} (y_{n-1}+hN(y_{n-1}))
+\end{equation}
+
+\paragraph{IF-RK2 (Heun/Trapezoidal)} This is one of the simplest non-trivial Runge-Kutta method. 
+\begin{align*}
+k_1 &= N(v_{n-1})\\
+k_2 &= N(v_{n-1}+hk_1)\\
+v_n &= v_{n-1} + h\left(\frac{1}{2}k_1 +\frac{1}{2}k_2\right)
+\end{align*}
+
+Converting back to original variables:
+\begin{align*}
+k_1 &= N(y_{n-1})\\
+k_2 &= N(y_{n-1}+hk_1)\\
+y_n &= e^{hL}v_n  = e^{hL}\left(y_{n-1} + h\left(\frac{1}{2}k_1 +\frac{1}{2}k_2\right)\right)\\
+\end{align*}
+%\paragraph{IF-RK2 (Explicit Midpoint Method)} This is one of the simplest non-trivial Runge-Kutta method. 
+%\begin{align*}
+%k_1 &= f(v_{n-1}, t_{n-1})\\
+%k_2 &= f(v_{n-1}+\frac{h}{2}k_1, t_{n-1}+\frac{h}{2})\\
+%v_n &= v_{n-1} + hk_2
+%\end{align*}
+%
+%Converting back to original variables:
+%\begin{align*}
+%k_1 &= f(v_{n-1}, t_{n-1}) = N(y_{n-1})\\
+%k_2 &= f(v_{n-1}+\frac{h}{2}k_1, t_{n-1}+\frac{h}{2})\\
+%&= e^{-\frac{1}{2}hL}N(e^{\frac{1}{2}hL}(y_{n-1}+\frac{h}{2}k_1))\\
+%y_n &= e^{hL}v_n = e^{hL}(y_{n-1} + hk_2)
+%\end{align*}
+%
+%\paragraph{IF-RK2 (Ralston's Method)} This is one of the simplest non-trivial Runge-Kutta method. 
+%\begin{align*}
+%k_1 &= f(v_{n-1}, t_{n-1})\\
+%k_2 &= f(v_{n-1}+\frac{2}{3}hk_1, t_{n-1}+\frac{2}{3}h)\\
+%v_n &= v_{n-1} + h(\frac{1}{4}k_1+\frac{3}{4}k_2)
+%\end{align*}
+%
+%Converting back to original variables:
+%\begin{align*}
+%k_1 &= f(v_{n-1}, t_{n-1}) = y_{n-1}\\
+%k_2 &= f(v_{n-1}+\frac{2}{3}hk_1, t_{n-1}+\frac{2}{3}h)\\
+%&= e^{-\frac{2}{3}hL}N\left(e^{\frac{2}{3}hL}(y_{n-1}+\frac{2}{3}hk_1)\right)\\
+%y_n &= e^{hL}v_n = e^{hL}\left(y_{n-1} + h(\frac{1}{4}k_1+\frac{3}{4}k_2)\right)
+%\end{align*}
+
+\paragraph{IF-RK4 (Classic)} This is the classic 4th order explicit Runge-Kutta method.
+\begin{align*}
+k_1 &= N(v_{n-1})\\
+k_2 &= N(v_{n-1}+\frac{h}{2}k_1)\\
+k_3 &= N(v_{n-1} + \frac{h}{2}k_2)\\
+k_4 &= N(v_{n-1}+hk_3)\\
+v_n &= v_{n-1} + h(\frac{1}{6}k_1+\frac{1}{3}k_2+\frac{1}{3}k_3+\frac{1}{6}k_4)
+\end{align*}
+
+Converting back to original variables:
+\begin{align*}
+k_1 &= N(y_{n-1})\\
+k_2 &= N(y_{n-1}+\frac{h}{2}k_1)\\
+k_3 &= N(y_{n-1} + \frac{h}{2}k_2)\\
+k_4 &= N(y_{n-1}+hk_3)\\
+y_n &= e^{hL} v_n = e^{hL} \left(y_{n-1} + h(\frac{1}{6}k_1+\frac{1}{3}k_2+\frac{1}{3}k_3+\frac{1}{6}k_4)\right)
+\end{align*}
+
+
+\end{document}
