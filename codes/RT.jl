@@ -80,7 +80,7 @@ end
 end
 
 @inline function IFE(h::Float64, z::Array{T,1}, update::Array{T,1};ω, ϵ, C) where T<:ComplexF64
-    return exp.(im*h*ω) .* (z + NLfunc(z, ϵ, C))
+    return exp.(im*h*ω) .* (z + h*NLfunc(z, ϵ, C))
 end
 
 
