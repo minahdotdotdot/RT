@@ -46,15 +46,15 @@ function floatRT(N::Int64)
 end 
 
 @inline function Lfunc(z, ω, h)
-	return exp.(im*h*ω) .* z
+    return exp.(im*h*ω) .* z
 end
 
 @inline function NLfunc(z, ϵ, C)
-	N = deepcopy(z)
-	for i = 1 : 3
-		N[i] = ϵ*C[i]*prod(conj.(z[1:end .!=i]))
-	end
-	return N
+    N = deepcopy(z)
+    for i = 1 : 3
+        N[i] = ϵ*C[i]*prod(conj.(z[1:end .!=i]))
+    end
+    return N
 end
 
 #tendency for a resonant triad with ω = [ω₁, ω₂, ω₃] frequencies and ϵ=slow time scale << 1.
@@ -80,7 +80,7 @@ end
 end
 
 @inline function IFE(h::Float64, z::Array{T,1}, update::Array{T,1};ω, ϵ, C) where T<:ComplexF64
-    return exp.(im*h*ω) * (z + NLfunc(z, ϵ, C))
+    return exp.(im*h*ω) .* (z + NLfunc(z, ϵ, C))
 end
 
 
@@ -89,41 +89,38 @@ end
 end
 
 @inline function ETD1(h::Float64, z::Array{T,1}, update::Array{T,1};ω, ϵ, C) where T<:ComplexF64
-    for i = 1 : 3
-        update[i] = exp(im*ω[i]*h)*z[i] + ϵ*C[i]*h*phi(im*ω[i]*h)*prod(conj.(z[1:end .!=i]))
-    end
-    return update
+    return Lfunc(z, ω, h) + h*NLfunc(z, ϵ, C) .* phi.(im*h*ω)
 end
 
 @inline function EUimex(h::Float64, z::Array{T,1}, RHS::Array{T,1};ω, ϵ, C) where T<:ComplexF64
-	RHS = z + NLfunc(z, ϵ, C)
+    RHS = z + h*NLfunc(z, ϵ, C)
     return RHS ./ ( 1 .- im*h*ω)
 end
 
 @inline function CNimex(h::Float64, z::Array{T,1}, RHS::Array{T,1};ω, ϵ, C) where T<:ComplexF64
-	RHS = (1+im*ω*h/2) .*z + NLfunc(z, ϵ, C)
+    RHS = (1 .+ im*ω*h/2) .*z + h*NLfunc(z, ϵ, C)
     return RHS ./ (1 .- im*h/2*ω)
 end
 
 @inline function IFRK2(h::Float64, z::Array{T,1}, RHS::Array{T,1};ω, ϵ, C) where T<:ComplexF64
-	yn = deepcopy(z)
-	k = NLfunc(z, ϵ, C)                   # k1
-	yn += h/2*k
-	k = NLfunc(z + h*k) # k2
-	return exp.(im*h*ω) .* (yn .+ h/2*k)
+    yn = deepcopy(z)
+    k = NLfunc(z, ϵ, C)       # k1
+    yn += h/2*k
+    k = NLfunc(z + h*k, ϵ, C) # k2
+    return exp.(im*h*ω) .* (yn .+ h/2*k)
 end
 
 
 @inline function IFRK4(h::Float64, z::Array{T,1}, RHS::Array{T,1};ω, ϵ, C) where T<:ComplexF64
-	yn = deepcopy(z)
-	k = NLfunc(z, ϵ, C)   # k1
-	yn += h/6*k
-	k = NLfunc(z + h/2*k) # k2
-	yn += h/3*k
-	k = NLfunc(z + h/2*k) # k3
-	yn += h/3*k
-	k = NLfunc(z + h*k)   # k4
-	return  exp.(im*h*ω) .* (yn + h/6*k)
+    yn = deepcopy(z)
+    k = NLfunc(z, ϵ, C)         # k1
+    yn += h/6*k
+    k = NLfunc(z + h/2*k, ϵ, C) # k2
+    yn += h/3*k
+    k = NLfunc(z + h/2*k, ϵ, C) # k3
+    yn += h/3*k
+    k = NLfunc(z + h*k, ϵ, C)   # k4
+    return  exp.(im*h*ω) .* (yn + h/6*k)
 end
 
 @inline function newtxt!(zAmp::Array{T,1}; name::String="zAmp") where T<:Float64
@@ -151,7 +148,7 @@ end
 end
 
 @inline function readCfile(name::String)
-	return readdlm("../txtfiles/"*name*"_Re.txt") + im * readdlm("../txtfiles/"*name*"_Im.txt")
+    return readdlm("../txtfiles/"*name*"_Re.txt") + im * readdlm("../txtfiles/"*name*"_Im.txt")
 end
 
 function RT_amp(N::Int, h::Float64, every::Int, IC::Array{ComplexF64,1}; 
@@ -181,7 +178,7 @@ function RT(N::Int, h::Float64, every::Int, z::Array{ComplexF64,1};
     newtxt!(z, name=name)
     for i=2:N+1
         z = stepper(h, z, tend, ω=ω, ϵ=ϵ, C=C)
-       	print(z)
+        print(z)
         if rem(i, every) ==1
             addtxt!(z, name=name)
         end
