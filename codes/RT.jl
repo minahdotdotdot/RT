@@ -1,5 +1,8 @@
 using LinearAlgebra, PyPlot, Random, DelimitedFiles, Printf
 
+include("readwrite.jl")
+
+
 #generating IC on unit circle
 function onUnitCircle(n::Int=3)
     z = Array{ComplexF64,1}(undef, n);
@@ -39,7 +42,7 @@ function floatRT(N::Int64)
     x = rand();
     # change the first float  if x <=1/3    to meet C1+C2+C3=0
     # change the second float if 1/3<=x<2/3 to meet C1+C2+C3=0
-    # change the third float  if x>2/3      to meet C1+C2+C3 = 0
+    # change the third float  if x>2/3      to meet C1+C2+C3=0
     x<=1/3 ? C[1] = -(C[2]+C[3]) : #
     x>2/3 ? C[3] = -(C[1] + C[2]) : C[2] = -(C[1] + C[3])
     return C
@@ -47,6 +50,20 @@ end
 
 @inline function Lfunc(z, ω, h)
     return exp.(im*h*ω) .* z
+end
+
+struct NLfuncparams
+    ϵ::Float64
+    C::Array{Float64,1}
+    NLfuncparams(ϵ,C) = new(copy(ϵ), copy(C))
+end
+
+@inline function NLfunc(z::Array{ComplexF64,1}, nlfp::NLfuncparams)
+    N = deepcopy(z)
+    for i = 1 : 3
+        N[i] = prod(conj.(z[1:end .!=i]))
+    end
+    return nlfp.ϵ * nlfp.C .* N
 end
 
 @inline function NLfunc(z, ϵ, C)
@@ -57,6 +74,7 @@ end
     return N
 end
 
+
 #tendency for a resonant triad with ω = [ω₁, ω₂, ω₃] frequencies and ϵ=slow time scale << 1.
 @inline function tendRT(z::Array{T,1}, tend::Array{T,1}; ω, ϵ, C) where T<:ComplexF64
     return im*ω .* z + NLfunc(z, ϵ, C)
@@ -64,19 +82,19 @@ end
 
 #Runge-Kutta 4(explicit)
 @inline function RK4(h::Float64, z::Array{T,1}, tend::Array{T,1};ω, ϵ, C) where T<:ComplexF64
-    yn = deepcopy(z);
+    yn = zeros(ComplexF64,3)
     tendRT(yn, tend, ω=ω, ϵ=ϵ, C=C);
-    k = h * tend; #k1
+    k = tend; #k1
     yn += 1/6*k;
-    tendRT(z + .5*k, tend, ω=ω, ϵ=ϵ, C=C);
-    k = h * tend; #k2
+    tendRT(z + (.5*h*k), tend, ω=ω, ϵ=ϵ, C=C);
+    k = tend; #k2
     yn += 1/3*k;
-    tendRT(z + .5*k, tend, ω=ω, ϵ=ϵ, C=C);
-    k = h * tend; #k3
+    tendRT(z + (.5*h*k), tend, ω=ω, ϵ=ϵ, C=C);
+    k = tend; #k3
     yn += 1/3*k;
-    tendRT(z + k, tend, ω=ω, ϵ=ϵ, C=C);
-    k = h * tend; #k4
-    return yn + (1/6)*k
+    tendRT(z + (h*k), tend, ω=ω, ϵ=ϵ, C=C);
+    k = tend; #k4
+    return z + h*(yn + (1/6)*k)
 end
 
 @inline function IFE(h::Float64, z::Array{T,1}, update::Array{T,1};ω, ϵ, C) where T<:ComplexF64
@@ -103,52 +121,147 @@ end
 end
 
 @inline function IFRK2(h::Float64, z::Array{T,1}, RHS::Array{T,1};ω, ϵ, C) where T<:ComplexF64
-    yn = deepcopy(z)
+    yn = zeros(ComplexF64,3)
     k = NLfunc(z, ϵ, C)       # k1
-    yn += h/2*k
+    yn += .5*k
     k = NLfunc(z + h*k, ϵ, C) # k2
-    return exp.(im*h*ω) .* (yn .+ h/2*k)
+    yn += .5*k
+    return exp.(im*h*ω) .* (z + h*yn)
 end
 
 
-@inline function IFRK4(h::Float64, z::Array{T,1}, RHS::Array{T,1};ω, ϵ, C) where T<:ComplexF64
-    yn = deepcopy(z)
+@inline function IFRK4(h::Float64, z::Array{T,1}, RHS::Array{T,1}; ω, ϵ, C) where T<:ComplexF64
+    yn = zeros(ComplexF64,3)
+    #ks = zeros(ComplexF64, 4, 3)
     k = NLfunc(z, ϵ, C)         # k1
-    yn += h/6*k
-    k = NLfunc(z + h/2*k, ϵ, C) # k2
-    yn += h/3*k
-    k = NLfunc(z + h/2*k, ϵ, C) # k3
-    yn += h/3*k
+    #ks[1,:]=k
+    yn += k/6
+    k = NLfunc(z + .5*h*k, ϵ, C) # k2
+    #ks[2,:]=k
+    yn += k/3
+    k = NLfunc(z + .5*h*k, ϵ, C) # k3
+    #ks[3,:]=k
+    yn += k/3
     k = NLfunc(z + h*k, ϵ, C)   # k4
-    return  exp.(im*h*ω) .* (yn + h/6*k)
+    #ks[4,:]=k
+    yn += k/6
+    #return  ks, yn, exp.(im*h*ω) .* (z + h*yn)
+    return exp.(im*h*ω) .* (z + h*yn)
 end
 
-@inline function newtxt!(zAmp::Array{T,1}; name::String="zAmp") where T<:Float64
-    writedlm("../txtfiles/"*name*".txt", zAmp')
-end
-
-@inline function addtxt!(zAmp::Array{T,1}; name::String="zAmp") where T<:Float64
-    open("../txtfiles/"*name*".txt", "a") do io
-        writedlm(io, zAmp')
+@inline function no0rem(x::Int, y::Int)
+    r = rem(x,y)
+    if r == 0
+        return y
+    else
+        return r
     end
 end
 
-@inline function newtxt!(zAmp::Array{T,1}; name::String="zAmp") where T<:Complex{Float64}
-    writedlm("../txtfiles/"*name*"_Re.txt", real.(zAmp'))
-    writedlm("../txtfiles/"*name*"_Im.txt", imag.(zAmp'))
+@inline function IFab1(state::Array{T,1}, ϵ, C, h, ω,
+    tendlist::Array{Array{T,1},1}, i::Int; init::Bool=false) where T<:ComplexF64
+    update =  state + h * tendlist[1] 
+    ind = 2
+    if init==false
+        ind = no0rem(i,1)
+    end
+    tendlist[ind] = NLfunc(state, ϵ, C)
+    return update, tendlist
 end
 
-@inline function addtxt!(zAmp::Array{T,1}; name::String="zAmp") where T<:Complex{Float64}
-    open("../txtfiles/"*name*"_Re.txt", "a") do io
-        writedlm(io, real.(zAmp'))
+@inline function IFab2(state::Array{T,1}, ϵ, C, h, ω,
+    tendlist::Array{Array{T,1},1}, i::Int,
+    xind::Array{Array{Int,1},1}=[[2,1],[1,2]]; init::Bool=false) where T<:ComplexF64
+    update =  state + h * (
+        3/2 * tendlist[xind[no0rem(i,2)][1]] 
+        -1/2 * tendlist[xind[no0rem(i,2)][2]] 
+        )
+    ind = 3
+    if init==false
+        ind = no0rem(i,2)
     end
-    open("../txtfiles/"*name*"_Im.txt", "a") do io
-        writedlm(io, imag.(zAmp'))
+    tendlist[ind] = NLfunc(state, ϵ, C)
+    return update, tendlist
+end
+
+@inline function IFab3(state::Array{T,1}, ϵ, C, h, ω,
+    tendlist::Array{Array{T,1},1}, i::Int,
+    xind::Array{Array{Int,1},1}=[[3,2,1],[1,3,2],[2,1,3]]; init::Bool=false) where T<:ComplexF64
+    update =  state + h * (
+        23/12 * tendlist[xind[no0rem(i,3)][1]] 
+        -16/12 * tendlist[xind[no0rem(i,3)][2]] 
+        +5/12 * tendlist[xind[no0rem(i,3)][3]]
+        )
+    ind = 4;
+    if init ==false
+        ind = no0rem(i,3)
+    end
+    tendlist[ind] = NLfunc(state, ϵ, C)
+    return update, tendlist
+end
+
+@inline function IFab4(state::Array{T,1}, ϵ, C, h, ω,
+    tendlist::Array{Array{T,1},1}, i::Int,
+    xind::Array{Array{Int,1},1}=[[4,3,2,1],[1,4,3,2],[2,1,4,3],[3,2,1,4]]) where T<:ComplexF64
+    #i>5 is the true index number.
+    #This function will calculate the state at t_i. 
+    #state is the state at t_{i-1}
+    update =  state + h * (
+        55/24 * tendlist[xind[no0rem(i,4)][1]] 
+        -59/24 * tendlist[xind[no0rem(i,4)][2]] 
+        +37/24 * tendlist[xind[no0rem(i,4)][3]] 
+        -9/24 * tendlist[xind[no0rem(i,4)][4]] 
+        )
+    tendlist[no0rem(i,4)] = NLfunc(state, ϵ, C)
+    return update, tendlist
+end
+
+
+function IFab_amp(N::Int, h::Float64, every::Int, IC::Array{T,1}; 
+    ω, ϵ, C, ab::Int, name::String="zAmp",
+    msfunc::Array{Function,1}=[IFab1, IFab2, IFab3, IFab4]) where T<:ComplexF64
+    stepper = msfunc[ab];
+    tendlist = Array{Array{T,1},1}(undef, ab)
+
+    state = deepcopy(IC)
+    newtxt!(abs.(state), name=name)
+    tendlist[1] = NLfunc(state, ϵ, C)
+    for i = 1 : ab-1
+        state, tendlist = msfunc[i](state, ϵ, C, h, ω, tendlist, i, init=true)
+        if rem(i, every) ==1
+            addtxt!(abs.(exp.(im*h*i*ω) .* state), name=name)
+        end
+    end
+    for i = ab: N
+        state, tendlist = stepper(state, ϵ, C, h, ω, tendlist, i)
+        if rem(i, every)==1
+            addtxt!(abs.(exp.(im*h*i*ω) .* state), name=name)
+        end
     end
 end
 
-@inline function readCfile(name::String)
-    return readdlm("../txtfiles/"*name*"_Re.txt") + im * readdlm("../txtfiles/"*name*"_Im.txt")
+
+function IFab(N::Int, h::Float64, every::Int, IC::Array{T,1}; 
+    ω, ϵ, C, ab::Int, name::String="zAmp",
+    msfunc::Array{Function,1}=[IFab1, IFab2, IFab3, IFab4]) where T<:ComplexF64
+    stepper = msfunc[ab];
+    tendlist = Array{Array{T,1},1}(undef, ab)
+
+    state = deepcopy(IC)
+    newtxt!(state, name=name)
+    tendlist[1] = NLfunc(state, ϵ, C)
+    for i = 1 : ab-1
+        state, tendlist = msfunc[i](state, ϵ, C, h, ω, tendlist, i, init=true)
+        if rem(i, every) ==1
+            addtxt!(exp.(im*h*i*ω) .* state, name=name)
+        end
+    end
+    for i = ab: N
+        state, tendlist = stepper(state, ϵ, C, h, ω, tendlist, i)
+        if rem(i, every)==1
+            addtxt!(exp.(im*h*i*ω) .* state, name=name)
+        end
+    end
 end
 
 function RT_amp(N::Int, h::Float64, every::Int, IC::Array{ComplexF64,1}; 
