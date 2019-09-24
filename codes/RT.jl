@@ -84,15 +84,15 @@ end
 @inline function RK4(h::Float64, z::Array{T,1}, tend::Array{T,1};ω, ϵ, C) where T<:ComplexF64
     yn = zeros(ComplexF64,3)
     tendRT(yn, tend, ω=ω, ϵ=ϵ, C=C);
-    k = tend; #k1
+    k = h*tend; #k1
     yn += 1/6*k;
-    tendRT(z + (.5*h*k), tend, ω=ω, ϵ=ϵ, C=C);
-    k = tend; #k2
+    tendRT(z + (.5*k), tend, ω=ω, ϵ=ϵ, C=C);
+    k = h*tend; #k2
     yn += 1/3*k;
-    tendRT(z + (.5*h*k), tend, ω=ω, ϵ=ϵ, C=C);
-    k = tend; #k3
+    tendRT(z + (.5*k), tend, ω=ω, ϵ=ϵ, C=C);
+    k = h*tend; #k3
     yn += 1/3*k;
-    tendRT(z + (h*k), tend, ω=ω, ϵ=ϵ, C=C);
+    tendRT(z + k, h*tend, ω=ω, ϵ=ϵ, C=C);
     k = tend; #k4
     return z + h*(yn + (1/6)*k)
 end
