@@ -76,8 +76,8 @@ end
 
 
 #tendency for a resonant triad with ω = [ω₁, ω₂, ω₃] frequencies and ϵ=slow time scale << 1.
-@inline function tendRT(z::Array{T,1}, tend::Array{T,1}; ω, ϵ, C) where T<:ComplexF64
-    return im*ω .* z + NLfunc(z, ϵ, C)
+@inline function tendRT!(z::Array{T,1}, tend::Array{T,1}; ω, ϵ, C) where T<:ComplexF64
+    tend = im*ω .* z + NLfunc(z, ϵ, C)
 end
 
 #Runge-Kutta 4(explicit)
@@ -92,9 +92,23 @@ end
     tendRT(z + (.5*k), tend, ω=ω, ϵ=ϵ, C=C);
     k = h*tend; #k3
     yn += 1/3*k;
-    tendRT(z + k, h*tend, ω=ω, ϵ=ϵ, C=C); #tend=k4
+    tendRT(z + k, tend, ω=ω, ϵ=ϵ, C=C); #tend=k4
     return yn + (1/6)*h*tend
 end
+
+    yn = deepcopy(z);       yn = deepcopy(z);
+    tendRT(yn, tend, ω=ω, ϵ=ϵ, C=C);        tendRT(yn, tend, ω=ω, ϵ=ϵ, C=C);
+    k = h * tend; #k1       k = h * tend; #k1
+    yn += 1/6*k;        yn += 1/6*k;
+    tendRT(yn + .5*k, tend, ω=ω, ϵ=ϵ, C=C);     tendRT(yn + .5*k, tend, ω=ω, ϵ=ϵ, C=C);
+    k = h * tend; #k2       k = h * tend; #k2
+    yn += 1/3*k;        yn += 1/3*k;
+    tendRT(yn + .5*k, tend, ω=ω, ϵ=ϵ, C=C);     tendRT(yn + .5*k, tend, ω=ω, ϵ=ϵ, C=C);
+    k = h * tend; #k3       k = h * tend; #k3
+    yn += 1/3*k;        yn += 1/3*k;
+    tendRT(yn + k, tend, ω=ω, ϵ=ϵ, C=C);        tendRT(yn + k, tend, ω=ω, ϵ=ϵ, C=C);
+    k = h * tend; #k4       k = h * tend; #k4
+    return yn + (1/6)*k
 
 @inline function IFE(h::Float64, z::Array{T,1}, update::Array{T,1};ω, ϵ, C) where T<:ComplexF64
     return exp.(im*h*ω) .* (z + h*NLfunc(z, ϵ, C))
