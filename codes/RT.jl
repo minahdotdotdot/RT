@@ -92,9 +92,8 @@ end
     tendRT(z + (.5*k), tend, ω=ω, ϵ=ϵ, C=C);
     k = h*tend; #k3
     yn += 1/3*k;
-    tendRT(z + k, h*tend, ω=ω, ϵ=ϵ, C=C);
-    k = tend; #k4
-    return z + h*(yn + (1/6)*k)
+    tendRT(z + k, h*tend, ω=ω, ϵ=ϵ, C=C); #tend=k4
+    return yn + (1/6)*h*tend
 end
 
 @inline function IFE(h::Float64, z::Array{T,1}, update::Array{T,1};ω, ϵ, C) where T<:ComplexF64
