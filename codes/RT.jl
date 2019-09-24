@@ -82,7 +82,7 @@ end
 
 #Runge-Kutta 4(explicit)
 @inline function RK4(h::Float64, z::Array{T,1}, tend::Array{T,1};ω, ϵ, C) where T<:ComplexF64
-    yn = zeros(ComplexF64,3)
+    yn = deepcopy(z)
     tendRT(yn, tend, ω=ω, ϵ=ϵ, C=C);
     k = h*tend; #k1
     yn += 1/6*k;
