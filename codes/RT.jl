@@ -76,24 +76,23 @@ end
 
 
 #tendency for a resonant triad with ω = [ω₁, ω₂, ω₃] frequencies and ϵ=slow time scale << 1.
-@inline function tendRT!(z::Array{T,1}, tend::Array{T,1}; ω, ϵ, C) where T<:ComplexF64
-    tend = im*ω .* z + NLfunc(z, ϵ, C)
+@inline function tendRT!(z::Array{T,1}; ω, ϵ, C) where T<:ComplexF64
+    return im*ω .* z + NLfunc(z, ϵ, C)
 end
 
 #Runge-Kutta 4(explicit)
 @inline function RK4(h::Float64, z::Array{T,1}, tend::Array{T,1}; ω, ϵ, C) where T<:ComplexF64
     yn = deepcopy(z)
-    tend = deepcopy(z)
-    tendRT!(yn, tend, ω=ω, ϵ=ϵ, C=C);
+    tend = tendRT(yn, ω=ω, ϵ=ϵ, C=C);
     k = h*tend; #k1
     yn += 1/6*k;
-    tendRT!(z + (.5*k), tend, ω=ω, ϵ=ϵ, C=C);
+    tend = tendRT(z + (.5*k), ω=ω, ϵ=ϵ, C=C);
     k = h*tend; #k2
     yn += 1/3*k;
-    tendRT!(z + (.5*k), tend, ω=ω, ϵ=ϵ, C=C);
+    tend = tendRT(z + (.5*k), ω=ω, ϵ=ϵ, C=C);
     k = h*tend; #k3
     yn += 1/3*k;
-    tendRT!(z + k, tend, ω=ω, ϵ=ϵ, C=C); #tend=k4
+    tend = tendRT(z + k, ω=ω, ϵ=ϵ, C=C); #tend=k4
     return yn + (1/6)*h*tend
 end
 
