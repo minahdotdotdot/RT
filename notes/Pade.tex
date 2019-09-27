@@ -1,0 +1,143 @@
+\documentclass{article}
+%Packages
+\usepackage[utf8]{inputenc}
+\usepackage{geometry, graphicx,wrapfig}
+\usepackage{enumerate}
+\usepackage{amsmath,amssymb,amsfonts,amsthm, bm}
+\usepackage{xcolor} %just for visible comments.
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage[toc,page]{appendix}
+\usepackage{makecell}
+
+% New theorems and commands
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{assump}[theorem]{Assumption}
+\newcommand\mycommfont[1]{\ttfamily\textcolor{orange}{#1}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\dd}{\delta}
+\newcommand{\tth}{\theta}
+\newcommand{\bb}[1]{\mathbf{#1}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\ddt}{\frac{\mathrm{d}}{\mathrm{d}t}}
+\SetCommentSty{mycommfont}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newcommand\comment[1]{\color{blue}#1}
+% Document
+\title{Pad\`{e} Approximation of Taylor Expansion of functions}
+\author{asdf}
+%\date{\today}
+
+\begin{document}
+\maketitle
+These notes show in detail Example 1 of Bengt Fornberg's notes on Pad\'{e} approximations of polynomials.
+A Pad\'{e} approximation of order (M,N),
+\begin{equation}
+P_M^N(x) = \frac{\sum_{n=0}^N a_nx^n}{1+\sum_{m=1}^M b_nx^n},
+\end{equation}
+generalizes a Taylor expansion of degree $M+N$.
+
+Suppose that we have available to us an $M+N$ degree Taylor expansion of a function, 
+\begin{equation}
+T_{N+M}(x) = \sum_{j=0}^{N+M}c_jx^n,
+\end{equation}
+but want to approximate it with a rational function where the numerator has degree $N$ and denominator has degree $M$.
+
+We set $T_{N+M}(x)$ and $P_M^N(x)$ equal, but multiply both sides by $1+\sum_{m=1}^M b_nx^n$.
+\begin{align}
+\sum_{n=0}^N a_nx^n = \left(1+\sum_{m=1}^M b_nx^n\right) \sum_{j=0}^{N+M}c_jx^n
+\end{align}
+\section{Case 1: $N\leq M$}
+We match the LHS coefficients to the coefficients of the product of sums.
+\begin{align*}
+a_0 &= c_0\\
+a_1 &= c_1 + b_1c_0\\
+\vdots &= \quad\vdots\\
+a_N &=c_N + b_1c_{N-1} + \cdots + b_Nc_0
+\end{align*}
+
+Since the numerator is only an $N$-degree polynomial, the remaining  $M$ equations are formed as,
+\begin{align*}
+0 &= c_{N+1} + b_1 c_{N} + \cdots + b_{N+1} c_0\\
+\vdots &= \quad\vdots\\
+0 &= c_{M} + b_1 c_{M-1} + \cdots + b_{M}c_0\\
+0 &= c_{M+1} + b_1 c_{M} + \cdots + b_{M}c_1\\
+\vdots &= \quad\vdots\\
+0 &= c_{M+N} + b_1 c_{M+N-1} + \cdots + b_{M}c_N
+\end{align*}
+
+This system of $M$ equations can be formulated as an inverse problem, since all the $c$'s are known. 
+\[\begin{bmatrix}
+c_{N} & c_{N-1} & \cdots & c_{0} & 0 & \cdots & 0\\
+c_{N+1} & c_{N} & \cdots & c_{1} & c_0 & \cdots & 0\\
+\vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots\\
+c_{M-1} & c_{M-2} & \cdots & c_{M-N-1} & c_{M-N-2} & \cdots & c_0 \\
+c_{M} & c_{M-1} & \cdots & c_{M-N} & c_{M-N-1} & \cdots & c_1 \\
+\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\
+c_{M+N-1} & c_{M+N-2} & \cdots & c_{M} & c_{M-1} & \cdots & c_{N-1}
+\end{bmatrix}\begin{bmatrix}
+b_1\\
+b_2\\
+\vdots \\
+b_{N+1}\\
+b_{N+2}\\
+\vdots\\
+b_M
+\end{bmatrix} = \begin{bmatrix}
+-c_{N+1}\\
+-c_{N+2}\\
+\vdots \\
+-c_{M}\\
+-c_{M+1}\\
+\vdots \\
+-c_{M+N}
+\end{bmatrix}\]
+
+Once we have solved for $b$'s, we can easily solve for all the $a$ coefficients. 
+
+\section{Case 1: $N> M$}
+We match the LHS coefficients to the coefficients of the product of sums.
+\begin{align*}
+a_0 &= c_0\\
+a_1 &= c_1 + b_1c_0\\
+\vdots &= \quad\vdots\\
+a_M &=c_M + b_1c_{M-1} + \cdots + b_Mc_0 \\
+a_{M+1}&= c_{M+1} + b_1 c_M + \cdots b_Mc_1 \\
+a_{N}&= c_N + b_1c_{N-1} + \cdots b_M c_{N-M}
+\end{align*}
+
+Since the numerator is only an $N$-degree polynomial, the remaining $M$ equations are formed as,
+\begin{align*}
+0 &= c_{N+1} + b_1 c_{N} + \cdots + b_{M} c_{N+1-M}\\
+0 &= c_{N+2} + b_1 c_{N+1}+ \cdots + b_{M} c_{N+2-M}\\
+\vdots &= \quad\vdots\\
+0 &= c_{M} + b_1 c_{M-1} + \cdots + b_{M}c_0\\
+0 &= c_{M+1} + b_1 c_{M} + \cdots + b_{M}c_1\\
+\vdots &= \quad\vdots\\
+0 &= c_{M+N} + b_1 c_{M+N-1} + \cdots + b_{M}c_N
+\end{align*}
+
+This system of $M$ equations can be formulated as an inverse problem, since all the $c$'s are known. 
+\[\begin{bmatrix}
+c_{N} & c_{N-1} & \cdots & c_{N-(M-1)}\\
+c_{N+1} & c_{N} & \cdots & c_{N-(M-2)}\\
+\vdots & \vdots & \vdots & \vdots \\
+c_{N+M-1} & c_{M+N-2} & \cdots & c_N
+\end{bmatrix}\begin{bmatrix}
+b_1\\
+b_2\\
+\vdots \\
+b_M
+\end{bmatrix} = \begin{bmatrix}
+-c_{N+1}\\
+-c_{N+2}\\
+\vdots \\
+-c_{M+N}
+\end{bmatrix}\]
+
+Once we have solved for $b$'s, we can easily solve for all the $a$ coefficients. 
+
+\end{document}
