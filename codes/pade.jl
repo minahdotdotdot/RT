@@ -48,6 +48,51 @@ using PyPlot, LaTeXStrings
 
 x = range(0, pi/2, length=1001)
 
+x = range(0, 2*pi, length=501)
+
+ω0s  = Array{Float64, 1}(pi/4*range(0, stop=7, length=7))
+expimω0s = ([1; 1/sqrt(2); 0; -1/sqrt(2); -1; -1/sqrt(2); 0; 1/sqrt(2)] 
+	+ im * [0; 1/sqrt(2); 1; 1/sqrt(2); 0; -1/sqrt(2); -1; -1/sqrt(2)])
+
+function padeexpim(x::T, a, b; 
+	ω0s=Array{Float64, 1}(pi/4*range(0, stop=7, length=7)),
+	expimω0s=([1; 1/sqrt(2); 0; -1/sqrt(2); -1; -1/sqrt(2); 0; 1/sqrt(2)] 
+	+ im * [0; 1/sqrt(2); 1; 1/sqrt(2); 0; -1/sqrt(2); -1; -1/sqrt(2)])) where T<:AbstractFloat
+	ωind = ceil(Int, 4*rem(x + pi/8, 2*pi)/pi)
+	eiz = 1
+	for i = 1 : length(a)
+		eiz += a[i]*(im*(x-ω0s[ωind]))^i
+	end
+	denom = 1
+	for i = 1 : length(b)
+		denom += b[i]*(im*(x-ω0s[ωind]))^i
+	end
+	return expimω0s[ωind]*eiz/denom
+end
+
+
+function padeexpim(x::Array{T,1}, a, b; 
+	ω0s=Array{Float64, 1}(pi/4*range(0, stop=7, length=8)),
+	expimω0s=([1; 1/sqrt(2); 0; -1/sqrt(2); -1; -1/sqrt(2); 0; 1/sqrt(2)] 
+	+ im * [0; 1/sqrt(2); 1; 1/sqrt(2); 0; -1/sqrt(2); -1; -1/sqrt(2)])) where T<:AbstractFloat
+	ω = rem.(x .+ pi/8, 2*pi)
+	ωind = ceil.(Int, 4*ω/pi)
+	eiz = ones(ComplexF64, length(x))
+	ω = ω .- pi/8
+	for i = 1 : length(a)
+		eiz .+= a[i]*(im*(ω .- ω0s[ωind])) .^i
+	end
+	denom = ones(ComplexF64, length(x))
+	for i = 1 : length(b)
+		denom .+= b[i]*(im*(ω .- ω0s[ωind])) .^i
+	end
+	return expimω0s[ωind] .* eiz ./ denom
+end
+
+#ωind = floor.(4*rem.(x, 2*pi)/pi .+ .5)
+#scatter(x, floor.(4*rem.(x, 2*pi)/pi .+ .5))
+
+
 function plotPade!(c, n, m, x)
 	a, b = Pade(c, n, m)
 	xx = im*x
@@ -58,6 +103,83 @@ function plotPade!(c, n, m, x)
 	EEE = exp.(im*x)
 	semilogy(x, abs.(angle.(p)-angle.(EEE)), label="Pade "*string(n)*"-"*string(m))
 end
+
+#####
+x = collect(range(0, 2*pi, length=501))
+#####
+
+n = 2; m = 2
+c = expω(n+m)
+a, b = Pade(c, n, m)
+
+p = padeexpim(x, a, b)
+EEE = exp.(im*x)
+semilogy(x, abs.(angle.(p)-angle.(EEE)), label="Pade* "*string(n)*"-"*string(m))
+c = expω(n+m)
+plotPade!(c, n, m, x)
+##################
+
+n = 3; m = 3
+c = expω(n+m)
+a, b = Pade(c, n, m)
+
+p = padeexpim(x, a, b)
+EEE = exp.(im*x)
+semilogy(x, abs.(angle.(p)-angle.(EEE)), label="Pade* "*string(n)*"-"*string(m))
+c = expω(n+m)
+plotPade!(c, n, m, x)
+##################
+n = 4; m = 4
+c = expω(n+m)
+a, b = Pade(c, n, m)
+
+p = padeexpim(x, a, b)
+EEE = exp.(im*x)
+semilogy(x, abs.(angle.(p)-angle.(EEE)), label="Pade* "*string(n)*"-"*string(m))
+c = expω(n+m)
+plotPade!(c, n, m, x)
+###################
+
+#=
+n = 5; m = 5
+c = expω(n+m)
+a, b = Pade(c, n, m)
+
+p = padeexpim(x, a, b)
+EEE = exp.(im*x)
+semilogy(x, abs.(angle.(p)-angle.(EEE)), label="Pade* "*string(n)*"-"*string(m))
+c = expω(n+m)
+plotPade!(c, n, m, x)
+###################
+n = 6; m = 6
+c = expω(n+m)
+a, b = Pade(c, n, m)
+
+p = padeexpim(x, a, b)
+EEE = exp.(im*x)
+semilogy(x, abs.(angle.(p)-angle.(EEE)), label="Pade* "*string(n)*"-"*string(m))
+c = expω(n+m)
+plotPade!(c, n, m, x)
+###################
+n = 7; m = 7
+c = expω(n+m)
+a, b = Pade(c, n, m)
+
+p = padeexpim(x, a, b)
+EEE = exp.(im*x)
+semilogy(x, abs.(angle.(p)-angle.(EEE)), label="Pade* "*string(n)*"-"*string(m))
+c = expω(n+m)
+plotPade!(c, n, m, x)
+###################
+=#
+
+xt = [0, pi/2, pi, 3/2*pi, 2*pi]
+axvline.(xt[2:end], color="k")
+xlabels = ("0", L"\frac{\pi}{2}", L"\pi", L"\frac{3\pi}{2}", L"2\pi")
+xticks(xt, xlabels)
+legend()
+title("Pade approx errors of exp(ix)")
+
 #=sum to 8
 n = 2; m = 6
 c = expω(n+m)
