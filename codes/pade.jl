@@ -79,8 +79,25 @@ function padeexpim(x::T, a, b;
 	return expimω0s[ωind]*eiz/denom
 end
 
+function horner1(x::Array{T,1}, coef) where T<:AbstractFloat
+	y = coef[end] *x
+	for i = length(coef)-1 : -1 : 1
+		y = coef[i] .+ (y .* x)
+	end
+	return 1 .+ y
+end
 
 function padeexpim(x::Array{T,1}, a, b; 
+	ω0s=Array{Float64, 1}(pi/4*range(0, stop=7, length=8)),
+	expimω0s=([1; 1/sqrt(2); 0; -1/sqrt(2); -1; -1/sqrt(2); 0; 1/sqrt(2)] 
+	+ im * [0; 1/sqrt(2); 1; 1/sqrt(2); 0; -1/sqrt(2); -1; -1/sqrt(2)])) where T<:AbstractFloat
+	ωdiff = rem.(x .+ pi/8, 2*pi)
+	ωind = ceil.(Int, 4*ωdiff/pi)
+	ωdiff = ωdiff - ω0s[ωind] .- pi/8
+	return expimω0s[ωind] .* (horner1(ωdiff, a))./(horner1(ωdiff, b))
+end
+
+function padeexpim2(x::Array{T,1}, a, b; 
 	ω0s=Array{Float64, 1}(pi/4*range(0, stop=7, length=8)),
 	expimω0s=([1; 1/sqrt(2); 0; -1/sqrt(2); -1; -1/sqrt(2); 0; 1/sqrt(2)] 
 	+ im * [0; 1/sqrt(2); 1; 1/sqrt(2); 0; -1/sqrt(2); -1; -1/sqrt(2)])) where T<:AbstractFloat
@@ -94,8 +111,7 @@ function padeexpim(x::Array{T,1}, a, b;
 	return expimω0s[ωind] .* (1 .+ ωns[:,1:length(a)]*a)./(1 .+ ωns[:,1:length(b)]*b)
 end
 
-
-function padeexpim2(x::Array{T,1}, a, b; 
+function padeexpim3(x::Array{T,1}, a, b; 
 	ω0s=Array{Float64, 1}(pi/4*range(0, stop=7, length=8)),
 	expimω0s=([1; 1/sqrt(2); 0; -1/sqrt(2); -1; -1/sqrt(2); 0; 1/sqrt(2)] 
 	+ im * [0; 1/sqrt(2); 1; 1/sqrt(2); 0; -1/sqrt(2); -1; -1/sqrt(2)])) where T<:AbstractFloat
