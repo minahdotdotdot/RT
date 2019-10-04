@@ -31,9 +31,9 @@ end
 
 function IFRK_step(z::Array{ComplexF64,1}, h::Float64, 
 	L, NLfunc::Function, nlfP::funcparams, 
-	RKT::eRKTableau, ks, k, F, D)
+	RKT::eRKTableau, ks, k, FD)
 	#k = zeros(eltype(z), length(RKT.b), length(z))
-	ks[1,:] = NLfunc(z, nlfP, k)
+	ks[1,:] = NLfunc(z, nlfP, k, FD)
 	for i = 2 :length(RKT.b)
 		PP=h*Transpose(ks[1:i-1,:])*RKT.A[i,1:i-1]
 		ks[i,:] = exp.(-h*RKT.c[i]*L) .* NLfunc(exp.(h*RKT.c[i]*L) .*(z + PP), nlfP, k, FD)
