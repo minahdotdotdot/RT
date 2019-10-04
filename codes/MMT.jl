@@ -22,7 +22,7 @@ end
 
 	if fp.β != 0
 		zr = ifft(abs.(k) .^(β/4) .* zhat)
-    	return -im* fp.λ * abs.(k) .^(β/4) .* fft(abs.(zr).^2 .* zr)
+    	return -im* fp.λ * abs.(k) .^(β/4) .* fft(abs.(zr).^2 .* zr) + (F+D) .* zhat
     else
     	zr = ifft(zhat)
     	return -im* fp.λ*fft(abs.(zr).^2 .*zr) + (F+D) .* zhat
@@ -31,9 +31,10 @@ end
 #add dissipitation & forcing in NLfunc
 
 struct eRKTableau
-	A
-	b
-	eRKTableau(A,b) = new(copy(A),copy(b))
+	A # matrix
+	b # stage weights
+	c # t increments
+	eRKTableau(A, b, c) = new(copy(A),copy(b), copy(c))
 end
 
 function IFRK_step(z::Array{ComplexF64,1}, h::Float64, 
@@ -43,11 +44,11 @@ function IFRK_step(z::Array{ComplexF64,1}, h::Float64,
 	ks[1,:] = NLfunc(z, nlfP, k)
 	for i = 2 :length(RKT.b)
 		PP=h*Transpose(ks[1:i-1,:])*RKT.A[i,1:i-1]
-		ks[i,:] = NLfunc(z + PP, nlfP, k)
+		ks[i,:] = exp.(-h*RKT.c[i]*L) .* NLfunc(exp.(h*RKT.c[i]*L) .*(z + PP), nlfP, k)
 	end
 	vb = Transpose(ks)*b
 	#return k, vb, L * (z+ (h*vb))
-	return L .* (z+ (h*vb))
+	return exp.(h*L) .* (z+ (h*vb))
 end
 
 function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64, 
@@ -57,7 +58,7 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
 	zhat = fft(IC)#/sqrtN
 	newtxt!(zhat, name=name)
 	ks = zeros(eltype(zhat), length(RKT.b), length(IC)) #RK stages (allocate memory)
-	L = exp.(h*L) #IF(L)
+	#L = exp.(h*L) #IF(L)
 	for t = 1 : M
 		zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k)
 		if rem(t,every)==1
@@ -80,17 +81,16 @@ fP = funcparams(α, β, λ);
 k = vcat(collect(0:N/2), collect(-N/2+1:-1))
 L = -im*abs.(k).^α
 
-#A = hcat([0; .5])
-#b = [0;1]
 A = hcat([0; .5; 0; 0], [0; 0; .5; 0], [0; 0; 0; 1.0])
 b = [1/6; 1/3; 1/3; 1/6]
-RKT = eRKTableau(A, b)
+c = [0; 1/2; 1/2; 1]
+RKT = eRKTableau(A, b, c)
 h = 0.005;
 T = 10000
 M = Int(T/h);
-every = Int(M/1000)
+every = Int(M/1000) # save solution at only 1001 time locations.
 
-name = "FDadded"
+name = "FDaddedRKfixed"
 IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name)
 solhat = readCfile(name) / sqrt(N)
 sol = ifft(solhat, 2)
