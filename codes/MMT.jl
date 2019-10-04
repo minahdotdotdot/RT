@@ -12,14 +12,7 @@ end
 	return abs.(k).^fp.α .*zhat
 end
 
-@inline function NLfunc(zhat::Array{ComplexF64,1}, fp::funcparams, k)
-	#forcing term
-	N = length(zhat)
-	F = zeros(length(k)); 
-	F[[7,8,9,-7+N,-8+N,-9+N]] .= 0.2
-	#damping term
-	D = -196.61 * (abs.(k).^(-8)) - 5.39* (abs.(0.001 * k) .^ 16); D[1] = 1
-
+@inline function NLfunc(zhat::Array{ComplexF64,1}, fp::funcparams, k, F, D)
 	if fp.β != 0
 		zr = ifft(abs.(k) .^(β/4) .* zhat)
     	return -im* fp.λ * abs.(k) .^(β/4) .* fft(abs.(zr).^2 .* zr) + (F+D) .* zhat
@@ -39,12 +32,12 @@ end
 
 function IFRK_step(z::Array{ComplexF64,1}, h::Float64, 
 	L, NLfunc::Function, nlfP::funcparams, 
-	RKT::eRKTableau, ks, k)
+	RKT::eRKTableau, ks, k, F, D)
 	#k = zeros(eltype(z), length(RKT.b), length(z))
 	ks[1,:] = NLfunc(z, nlfP, k)
 	for i = 2 :length(RKT.b)
 		PP=h*Transpose(ks[1:i-1,:])*RKT.A[i,1:i-1]
-		ks[i,:] = exp.(-h*RKT.c[i]*L) .* NLfunc(exp.(h*RKT.c[i]*L) .*(z + PP), nlfP, k)
+		ks[i,:] = exp.(-h*RKT.c[i]*L) .* NLfunc(exp.(h*RKT.c[i]*L) .*(z + PP), nlfP, k, F, D)
 	end
 	vb = Transpose(ks)*b
 	#return k, vb, L * (z+ (h*vb))
@@ -59,8 +52,14 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
 	newtxt!(zhat, name=name)
 	ks = zeros(eltype(zhat), length(RKT.b), length(IC)) #RK stages (allocate memory)
 	#L = exp.(h*L) #IF(L)
+	#forcing term
+	N = length(zhat)
+	F = zeros(length(k)); 
+	F[[7,8,9,-7+N,-8+N,-9+N]] .= 0.2
+	#damping term
+	D = -196.61 * (abs.(k).^(-8)) - 5.39* (abs.(0.001 * k) .^ 16); D[1] = 1
 	for t = 1 : M
-		zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k)
+		zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k, F, D)
 		if rem(t,every)==1
 			addtxt!(zhat, name=name)
 		end
