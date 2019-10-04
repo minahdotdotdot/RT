@@ -106,6 +106,8 @@ xlabel("Wave Number")
 ylabel("n(k)")
 legend()
 title("Energy spectrum?")
+savefig(name*"ES.png")
+close(fig)
 
 #=plot(x, abs.(sol[1,:]).^2, label="IC")
 plot(x, abs.(sol[60000,:]).^2, label="middle")
