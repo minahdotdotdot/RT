@@ -38,7 +38,7 @@ end
 
 function IFRK_step(z::Array{ComplexF64,1}, h::Float64, 
 	L, NLfunc::Function, nlfP::funcparams, 
-	RKT::eRKTableau, ks)
+	RKT::eRKTableau, ks, k)
 	#k = zeros(eltype(z), length(RKT.b), length(z))
 	ks[1,:] = NLfunc(z, nlfP, k)
 	for i = 2 :length(RKT.b)
@@ -51,16 +51,15 @@ function IFRK_step(z::Array{ComplexF64,1}, h::Float64,
 end
 
 function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64, 
-	L, NLfunc::Function, fP::funcparams, RKT::eRKTableau; name::String)
+	L, NLfunc::Function, fP::funcparams, RKT::eRKTableau, k; name::String)
 	# FFT into Fourier space
 	#sqrtN = sqrt(length(IC))
 	zhat = fft(IC)#/sqrtN
 	newtxt!(zhat, name=name)
 	ks = zeros(eltype(zhat), length(RKT.b), length(IC)) #RK stages (allocate memory)
-	k = range(0, length(IC)-1, length=length(IC)) #wave numbers
 	L = exp.(h*L) #IF(L)
 	for t = 1 : M
-		zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks)
+		zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k)
 		if rem(t,every)==1
 			addtxt!(zhat, name=name)
 		end
@@ -92,7 +91,7 @@ M = Int(T/h);
 every = Int(M/1000)
 
 name = "FDadded"
-#IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, name=name)
+IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name)
 solhat = readCfile(name) / sqrt(N)
 sol = ifft(solhat, 2)
 
