@@ -31,7 +31,7 @@ end
 
 function IFRK_step(z::Array{ComplexF64,1}, h::Float64, 
 	L, NLfunc::Function, nlfP::funcparams, 
-	RKT::eRKTableau, ks, k, F, D)
+	RKT::eRKTableau, ks, k, FD)
 	#k = zeros(eltype(z), length(RKT.b), length(z))
 	ks[1,:] = NLfunc(z, nlfP, k)
 	for i = 2 :length(RKT.b)
