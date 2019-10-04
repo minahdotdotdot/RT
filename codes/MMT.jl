@@ -19,12 +19,13 @@ end
 	F[[7,8,9,-7+N,-8+N,-9+N]] .= 0.2
 	#damping term
 	D = -196.61 * (abs.(k).^(-8)) - 5.39* (abs.(0.001 * k) .^ 16); D[1] = 1
+
 	if fp.β != 0
 		zr = ifft(abs.(k) .^(β/4) .* zhat)
     	return -im* fp.λ * abs.(k) .^(β/4) .* fft(abs.(zr).^2 .* zr)
     else
     	zr = ifft(zhat)
-    	return -im* (fp.λ*fft(abs.(zr).^2 .*zr) + (F+D) .* zhat)
+    	return -im* fp.λ*fft(abs.(zr).^2 .*zr) + (F+D) .* zhat
     end
 end
 #add dissipitation & forcing in NLfunc
@@ -101,7 +102,7 @@ E = transpose(sum(abs.(solhat).^2, dims = 1)/size(solhat)[1])
 using PyPlot, LaTeXStrings
 kind = vcat(collect(Int(N/2)+1:N-1), collect(1:Int(N/2)))
 loglog(k[1:Int(end/2)], E[1:Int(end/2)], label="computed")
-loglog(k, 0.24 ./k, label="weak turbulence spectrum")
+loglog(k[1:Int(end/2)], 0.24 ./k[1:Int(end/2)], label="weak turbulence spectrum")
 xlabel("Wave Number")
 ylabel("n(k)")
 legend()
