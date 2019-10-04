@@ -91,7 +91,7 @@ M = Int(T/h);
 every = Int(M/1000)
 
 name = "FDadded"
-IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, name=name)
+#IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, name=name)
 solhat = readCfile(name) / sqrt(N)
 sol = ifft(solhat, 2)
 
@@ -99,7 +99,7 @@ E = transpose(sum(abs.(solhat).^2, dims = 1)/size(solhat)[1])
 
 
 using PyPlot, LaTeXStrings
-
+kind = vcat(collect(Int(N/2)+1:N-1), collect(1:Int(N/2)))
 loglog(k[1:Int(end/2)], E[1:Int(end/2)], label="computed")
 loglog(k, 0.24 ./k, label="weak turbulence spectrum")
 xlabel("Wave Number")
