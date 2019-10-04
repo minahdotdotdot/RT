@@ -74,7 +74,7 @@ end
 β = 0
 
 N = 2^11
-x = range(0,2*pi, length=Int(N));
+x = range(0,stop=2*pi-1/N, length=Int(N));
 IC = ifft(randn(ComplexF64, N)); #Array{ComplexF64,1}(sin.(x))
 
 fP = funcparams(α, β, λ);
