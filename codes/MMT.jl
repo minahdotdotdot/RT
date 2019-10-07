@@ -66,46 +66,55 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
 	end
 end
 
-#Parameters
+# Problem Parameters
 λ = 1   #Defocusing MMT model
 α = 1/2
 β = 0
+fP = funcparams(α, β, λ);
 
+# Numerical Simulation Parameters
 N = 2^11
 x = range(0,stop=2*pi-1/N, length=Int(N));
 IC = ifft(randn(ComplexF64, N)); #Array{ComplexF64,1}(sin.(x))
-
-fP = funcparams(α, β, λ);
-k = vcat(collect(0:N/2), collect(-N/2+1:-1))
+k = vcat(collect(0:N/2-1), collect(-N/2:-1))
 L = -im*abs.(k).^α
 
+# Set-up IFRK
 A = hcat([0; .5; 0; 0], [0; 0; .5; 0], [0; 0; 0; 1.0])
 b = [1/6; 1/3; 1/3; 1/6]
 c = [0; 1/2; 1/2; 1]
 RKT = eRKTableau(A, b, c)
+
+# time-step, ND final time, save "every"
 h = 0.005;
 T = 10000
 M = Int(T/h);
 every = Int(M/1000) # save solution at only 1001 time locations.
 
 name = "FDaddedRKfixed"
-IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name)
-solhat = readCfile(name) / sqrt(N)
-sol = ifft(solhat, 2)
+#IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
+#solhat = readCfile(name)[11:end,:]
+#sol = ifft(solhat, 2)
 
-E = transpose(sum(abs.(solhat).^2, dims = 1)/size(solhat)[1])
+#E = transpose(sum(abs.(solhat).^2, dims = 1)/size(solhat)[1])
 
 
 using PyPlot, LaTeXStrings
 kind = vcat(collect(Int(N/2)+1:N-1), collect(1:Int(N/2)))
-loglog(k[1:Int(end/2)], E[1:Int(end/2)], label="computed")
-loglog(k[1:Int(end/2)], 0.24 ./k[1:Int(end/2)], label="weak turbulence spectrum")
+kindnz = vcat(collect(Int(N/2)+1:N-1), collect(2:Int(N/2)))
+fig, ax = subplots()
+#semilogy(k[kindnz], E[kindnz], label="computed")
+#semilogy(k[2:Int(end/2)], 1e-24 *(k[2:Int(end/2)]).^(-1/3), label=L"Ck^{-1/3}")
+#semilogy(k[2:Int(end/2)], 1e-24 *(k[2:Int(end/2)]).^(-1/2), label=L"Ck^{-1/2}")
+loglog(k[2:Int(end/2)], E[2:Int(end/2)], label="computed")
+loglog(k[2:Int(end/2)], 1e-24 *(k[2:Int(end/2)]).^(-1/3), label=L"Ck^{-1/3}")
+loglog(k[2:Int(end/2)], 1e-24 *(k[2:Int(end/2)]).^(-1/2), label=L"Ck^{-1/2}")
 xlabel("Wave Number")
 ylabel("n(k)")
 legend()
-title("Energy spectrum?")
-savefig(name*"ES.png")
-close(fig)
+title(L"t\in[110, 10000]")
+#savefig(name*"ES.png")
+#close(fig)
 
 #=plot(x, abs.(sol[1,:]).^2, label="IC")
 plot(x, abs.(sol[60000,:]).^2, label="middle")
