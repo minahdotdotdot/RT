@@ -75,14 +75,20 @@ fP = funcparams(α, β, λ);
 # Numerical Simulation Parameters
 N = 2^11
 x = range(0,stop=2*pi-1/N, length=Int(N));
-IC = ifft(randn(ComplexF64, N)); #Array{ComplexF64,1}(sin.(x))
+IC = randn(ComplexF64, N)*1e-04; IC[1]=0.0; 
+IC = ifft(IC); #Array{ComplexF64,1}(sin.(x))
 k = vcat(collect(0:N/2-1), collect(-N/2:-1))
 L = -im*abs.(k).^α
 
 # Set-up IFRK
-A = hcat([0; .5; 0; 0], [0; 0; .5; 0], [0; 0; 0; 1.0])
-b = [1/6; 1/3; 1/3; 1/6]
-c = [0; 1/2; 1/2; 1]
+#A = hcat([0; .5; 0; 0], [0; 0; .5; 0], [0; 0; 0; 1.0])
+#b = [1/6; 1/3; 1/3; 1/6]
+#c = [0; 1/2; 1/2; 1]
+A = hcat([0; .5; -1],[0; 0; 2])
+b = [1/6; 2/3; 1/6]
+c = [0; 1/2; 1]
+
+
 RKT = eRKTableau(A, b, c)
 
 # time-step, ND final time, save "every"
@@ -91,12 +97,12 @@ T = 10000
 M = Int(T/h);
 every = Int(M/1000) # save solution at only 1001 time locations.
 
-name = "FDaddedRKfixed"
-#IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
-#solhat = readCfile(name)[11:end,:]
+name = "smallICtrap"
+IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
+solhat = readCfile(name)[11:end,:]
 #sol = ifft(solhat, 2)
 
-#E = transpose(sum(abs.(solhat).^2, dims = 1)/size(solhat)[1])
+E = transpose(sum(abs.(solhat).^2, dims = 1)/size(solhat)[1])
 
 
 using PyPlot, LaTeXStrings
