@@ -9,6 +9,9 @@ k = vcat(collect(0:N/2), collect(-N/2+1:-1)) # implies domain length is 2π
 kind = vcat(collect(Int(N/2)+2:N), collect(1:Int(N/2)+1))
 kindnz = vcat(collect(Int(N/2)+2:N), collect(2:Int(N/2))) # indexing w/o zero mode
 
+# Linear operator (depends on k)
+L = -im*abs.(k).^fP.α
+
 # Set-up IFRK
 #= A = hcat([0; .5; 0; 0], [0; 0; .5; 0], [0; 0; 0; 1.0])
 b = [1/6; 1/3; 1/3; 1/6]

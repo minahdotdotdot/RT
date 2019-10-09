@@ -70,5 +70,3 @@ end
 α = 1/2
 β = 0
 fP = funcparams(α, β, λ)
-
-L = -im*abs.(k).^fP.α
