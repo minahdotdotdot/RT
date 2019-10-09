@@ -33,10 +33,10 @@ function IFRK_step(z::Array{ComplexF64,1}, h::Float64,
     L, NLfunc::Function, nlfP::funcparams, 
     RKT::eRKTableau, ks, k, F, D)
     #k = zeros(eltype(z), length(RKT.b), length(z))
-    ks[1,:] = NLfunc(z, nlfP, k, FD)
+    ks[1,:] = NLfunc(z, nlfP, k, F, D)
     for i = 2 :length(RKT.b)
         PP=h*Transpose(ks[1:i-1,:])*RKT.A[i,1:i-1]
-        ks[i,:] = exp.(-h*RKT.c[i]*L) .* NLfunc(exp.(h*RKT.c[i]*L) .*(z + PP), nlfP, k, FD)
+        ks[i,:] = exp.(-h*RKT.c[i]*L) .* NLfunc(exp.(h*RKT.c[i]*L) .*(z + PP), nlfP, k, F, D)
     end
     vb = Transpose(ks)*b
     #return k, vb, L * (z+ (h*vb))
@@ -57,7 +57,7 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
     D = -196.61 * (abs.(k[2:end]).^(-8)) - 5.39* (abs.(0.001 * k[2:end]) .^ 16); 
     pushfirst!(D, -200.0)
     for t = 1 : M
-        zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k, FD)
+        zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k, F, D)
         if rem(t,every)==1
             addtxt!(zhat, name=name)
         end
