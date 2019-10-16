@@ -27,27 +27,27 @@ T = 10000
 M = Int(T/h);
 every = Int(M/1000) # save solution at only 1001 time locations.
 
-name = "randIC"
+name = "test"
 IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
 solhat = readCfile(name)[11:end,:]
 #sol = ifft(solhat, 2)
-E = transpose(sum(abs.(solhat).^2, dims = 1)/size(solhat)[1])
+E = transpose(sum(abs.(solhat).^2, dims = 1)/size(solhat)[1])/N^2
 
-#=
+
 using PyPlot, LaTeXStrings
 fig, ax = subplots()
-semilogy(k[kindnz], E[kindnz], label="computed")
-semilogy(k[2:Int(end/2)], 1e-24 *(k[2:Int(end/2)]).^(-1/3), label=L"Ck^{-1/3}")
-semilogy(k[2:Int(end/2)], 1e-24 *(k[2:Int(end/2)]).^(-1/2), label=L"Ck^{-1/2}")
+#semilogy(k[kindnz], E[kindnz], label="computed")
+#semilogy(k[2:Int(end/2)], 1e-24 *(k[2:Int(end/2)]).^(-1/3), label=L"Ck^{-1/3}")
+#semilogy(k[2:Int(end/2)], 1e-24 *(k[2:Int(end/2)]).^(-1/2), label=L"Ck^{-1/2}")
 loglog(k[2:Int(end/2)], E[2:Int(end/2)], label="computed")
-loglog(k[2:Int(end/2)], .0024 *(k[2:Int(end/2)]).^(-2), label=L"Ck^{-2}")
-loglog(k[2:Int(end/2)], 1e-3 *(k[2:Int(end/2)]).^(-1/2), label=L"Ck^{-1/2}")
+loglog(k[2:Int(end/2)], .24 *(k[2:Int(end/2)]).^(-2), label=L"Ck^{-2}")
+loglog(k[2:Int(end/2)], .24 *(k[2:Int(end/2)]).^(-1), label=L"Ck^{-1}")
 xlabel("Wave Number")
 ylabel("n(k)")
 legend()
 title(L"t\in[11, 1000]")
 savefig(name*"ES.png")
-close(fig)=#
+close(fig)
 
 
 
