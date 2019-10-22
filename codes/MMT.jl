@@ -18,7 +18,9 @@ end
         return -im* fp.λ * abs.(k) .^(β/4) .* fft(abs.(zr).^2 .* zr) + D .* zhat + F
     else
         zr = ifft(zhat)
-        return -im* fp.λ*fft(abs.(zr).^2 .*zr) + FD .* zhat
+        tmp = -im* fp.λ*fft(abs.(zr).^2 .*zr)
+        tmp[(N/4+2):(3*N/4)] .= 0
+        return  tmp + FD .* zhat
     end
 end
 
