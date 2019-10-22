@@ -59,6 +59,9 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
     for t = 1 : M
         zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k, FD)
         if rem(t,every)==1
+            if isnan(abs(zhat))==true || isinf(abs(zhat))==true
+                break
+            end
             addtxt!(zhat, name=name)
         end
     end
