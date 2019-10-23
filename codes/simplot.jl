@@ -1,7 +1,7 @@
 include("MMT.jl")
 
 # Numerical Simulation Parameters
-N = 2^11
+N = 2^12
 x = range(0,stop=2*pi-1/N, length=Int(N));
 IC = randn(ComplexF64, N)*sqrt(N)/1000; IC[1]=0.0; IC = ifft(IC); 
 #IC = cos.(x) + im*sin.(x)
@@ -10,7 +10,7 @@ kind = vcat(collect(Int(N/2)+2:N), collect(1:Int(N/2)+1))
 kindnz = vcat(collect(Int(N/2)+2:N), collect(2:Int(N/2))) # indexing w/o zero mode
 
 # Linear operator (depends on k)
-L = -im*abs.(k).^fP.α
+L = -im*abs.(k).^fP.α; L[Int(N/4+2):Int(3*N/4)].=0
 
 # Set-up IFRK
 #= A = hcat([0; .5; 0; 0], [0; 0; .5; 0], [0; 0; 0; 1.0])
