@@ -19,7 +19,7 @@ end
     else
         zr = ifft(zhat)
         tmp = -im* fp.λ*fft(abs.(zr).^2 .*zr)
-        tmp[(N/4+2):(3*N/4)] .= 0
+        tmp[Int(N/4+2):Int(3*N/4)] .= 0
         return  tmp + FD .* zhat
     end
 end
@@ -48,7 +48,7 @@ end
 function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64, 
     L, NLfunc::Function, fP::funcparams, RKT::eRKTableau, k; name::String)
     # FFT into Fourier space
-    zhat = fft(IC)*0.001
+    zhat = fft(IC)*0.0001
     newtxt!(zhat, name=name)
     ks = zeros(eltype(zhat), length(RKT.b), length(IC)) #RK stages (allocate memory)
     #forcing term
@@ -62,7 +62,7 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
         zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k, FD)
         if rem(t,every)==1
             if any(isnan,zhat)  || any(isinf,x)
-                break
+                error("Blowup!!!")#break
             end
             addtxt!(zhat, name=name)
         end
