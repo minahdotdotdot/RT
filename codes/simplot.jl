@@ -27,7 +27,7 @@ T = 10000
 M = Int(T/h);
 every = Int(M/1000) # save solution at only 1001 time locations.
 
-name = "test"
+name = "f025"
 IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
 solhat = readCfile(name)[11:end,:]
 #sol = ifft(solhat, 2)

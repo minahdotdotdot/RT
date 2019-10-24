@@ -17,11 +17,11 @@ for i = 1 : 5: T
 	close(fig)
 end=#
 
-f200 = readdlm("../txtfiles/f200.txt"); semilogy(f200, label="0.2");
-f100 = readdlm("../txtfiles/f100.txt"); semilogy(f100, label="0.1");
-f050 = readdlm("../txtfiles/f050.txt"); semilogy(f050, label="0.05");
-f025 = readdlm("../txtfiles/f025.txt"); semilogy(f025, label="0.025");
-f010 = readdlm("../txtfiles/f010.txt"); semilogy(f010, label="0.010")
+f200 = readdlm("../txtfiles/f200.txt"); plot(f200, label="0.2");
+f100 = readdlm("../txtfiles/f100.txt"); plot(f100, label="0.1");
+f050 = readdlm("../txtfiles/f050.txt"); plot(f050, label="0.05");
+f025 = readdlm("../txtfiles/f025.txt"); plot(f025, label="0.025");
+f010 = readdlm("../txtfiles/f010.txt"); plot(f010, label="0.010")
 legend()
 xlabel("Time/10")
 title("Varying Forcing")
