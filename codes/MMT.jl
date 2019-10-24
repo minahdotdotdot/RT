@@ -54,15 +54,18 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
     L, NLfunc::Function, fP::funcparams, RKT::eRKTableau, k; name::String)
     # FFT into Fourier space
     zhat = fft(IC)*0.001; N = length(zhat); zhat[Int(N/4+2):Int(3*N/4)].= 0.0;
-    newtxt!(zhat, name=name);
+    newtxt!(zhat, name=name); kmax = sqrt(maximum(abs.(k)));
     ks = zeros(eltype(zhat), length(RKT.b), length(IC)); #RK stages (allocate memory)
     #forcing term
     N = length(zhat);
     FD = zeros(length(k)); 
-    FD[[6+1, 7+1, 8+1, 9+1, -6+(N+1), -7+(N+1), -8+(N+1), -9+(N+1)]] .= 0.2;
+    FD[[6+1, 7+1, 8+1, 9+1, -6+(N+1), -7+(N+1), -8+(N+1), -9+(N+1)]] .= 0.01;
+    fname="f"*string(Int(FD[7]*1000), pad=3)
+    newtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
     #add damping term
-    FD[2:end] += -196.61 * (abs.(k[2:end]).^(-8)) - 53.9* (abs.(0.001 * k[2:end]) .^ 16); 
+    FD[2:end] += -196.61 * (abs.(k[2:end]).^(-8)) - 5.39* (abs.(0.001 * k[2:end]) .^ 16); 
     FD[1]= -200.0;
+    #print("√1049/|ψ|^2\n")
     for t = 1 : M
         zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k, FD)
         if rem(t,every)==1
@@ -70,7 +73,8 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
                 error("Blowup!!!")#break
             end
             addtxt!(zhat, name=name)
-            @printf("√1049/|ψ|^2: %f\n", sqrt(1049)/maximum(abs.(ifft(zhat)).^2))
+            addtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
+            #@printf("%d: %f\n", t, maximum(abs.(ifft(zhat)))^2/sqrt(1049))
         end
     end
 end
