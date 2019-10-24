@@ -1,5 +1,5 @@
 include("readwrite.jl")
-using FFTW, LinearAlgebra
+using FFTW, LinearAlgebra, Printf
 
 struct funcparams
     α:: Float64
@@ -12,13 +12,13 @@ end
     return abs.(k).^fp.α .*zhat
 end
 
-@inline function NLfunc(zhat::Array{ComplexF64,1}, fp::funcparams, k, FD)
-    if fp.β != 0
-        zr = ifft(abs.(k) .^(β/4) .* zhat)
-        return -im* fp.λ * abs.(k) .^(β/4) .* fft(abs.(zr).^2 .* zr) + D .* zhat + F
+@inline function NLfunc(zhat::Array{ComplexF64,1}, fP::funcparams, k, FD)
+    if fP.β != 0
+        zr = ifft(abs.(k) .^(fP.β/4) .* zhat)
+        return -im* fP.λ * abs.(k) .^(fP.β/4) .* fft(abs.(zr).^2 .* zr) + D .* zhat + F
     else
-        zr = ifft(zhat)
-        tmp = -im* fp.λ*fft(abs.(zr).^2 .*zr)
+        zr = ifft(zhat);
+        tmp = -im* fP.λ*fft(abs.(zr).^2 .*zr)
         tmp[Int(N/4+2):Int(3*N/4)] .= 0
         return  tmp + FD .* zhat
     end
@@ -36,24 +36,24 @@ end
      return z
  end
 
-function IFRK_step(z::Array{ComplexF64,1}, h::Float64, 
+function IFRK_step(zhat::Array{ComplexF64,1}, h::Float64, 
     L, NLfunc::Function, fP::funcparams, 
     RKT::eRKTableau, ks, k, FD)
     #k = zeros(eltype(z), length(RKT.b), length(z))
-    ks[1,:] = NLfunc(z, fP, k, FD)
+    ks[1,:] = NLfunc(zhat, fP, k, FD)
     for i = 2 :length(RKT.b)
         PP=h*Transpose(ks[1:i-1,:])*RKT.A[i,1:i-1]
-        ks[i,:] = expnz(-h*RKT.c[i]*L) .* NLfunc(expnz(h*RKT.c[i]*L) .*(z + PP), fP, k, FD)
+        ks[i,:] = expnz(-h*RKT.c[i]*L) .* NLfunc(expnz(h*RKT.c[i]*L) .*(zhat + PP), fP, k, FD)
     end
     vb = Transpose(ks)*b
     #return k, vb, L * (z+ (h*vb))
-    return expnz(h*L) .* (z+ (h*vb))
+    return expnz(h*L) .* (zhat+ (h*vb))
 end
 
 function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64, 
     L, NLfunc::Function, fP::funcparams, RKT::eRKTableau, k; name::String)
     # FFT into Fourier space
-    zhat = fft(IC)*0.001;
+    zhat = fft(IC)*0.001; N = length(zhat); zhat[Int(N/4+2):Int(3*N/4)].= 0.0;
     newtxt!(zhat, name=name);
     ks = zeros(eltype(zhat), length(RKT.b), length(IC)); #RK stages (allocate memory)
     #forcing term
@@ -70,6 +70,7 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
                 error("Blowup!!!")#break
             end
             addtxt!(zhat, name=name)
+            @printf("√1049/|ψ|^2: %f\n", sqrt(1049)/maximum(abs.(ifft(zhat)).^2))
         end
     end
 end
