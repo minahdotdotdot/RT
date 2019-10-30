@@ -5,7 +5,7 @@ end
 
 @inline function addtxt!(zAmp::Array{T,1}; name::String="zAmp") where T<:Float64
     open("../txtfiles/"*name*".txt", "a") do io
-        writedlm(io, trasnpose(zAmp))
+        writedlm(io, transpose(zAmp))
     end
 end
 
@@ -20,16 +20,16 @@ end
 end
 
 @inline function newtxt!(zAmp::Array{T,1}; name::String="zAmp") where T<:Complex{Float64}
-    writedlm("../txtfiles/"*name*"_Re.txt", real.(transpose(zAmp)))
-    writedlm("../txtfiles/"*name*"_Im.txt", imag.(transpose(zAmp)))
+    writedlm("../txtfiles/"*name*"_Re.txt", transpose(real.(zAmp)))
+    writedlm("../txtfiles/"*name*"_Im.txt", transpose(imag.(zAmp)))
 end
 
 @inline function addtxt!(zAmp::Array{T,1}; name::String="zAmp") where T<:Complex{Float64}
     open("../txtfiles/"*name*"_Re.txt", "a") do io
-        writedlm(io, real.(transpose(zAmp)))
+        writedlm(io, transpose(real.(zAmp)))
     end
     open("../txtfiles/"*name*"_Im.txt", "a") do io
-        writedlm(io, imag.(transpose(zAmp)))
+        writedlm(io, transpose(imag.(zAmp)))
     end
 end
 

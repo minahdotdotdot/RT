@@ -22,12 +22,12 @@ c = [0; 1/2; 1]
 RKT = eRKTableau(A, b, c)
 
 # time-step, ND final time, save "every"
-h = 0.005;
-T = 10000
+h = 0.01;
+T = 10
 M = Int(T/h);
 every = Int(M/1000) # save solution at only 1001 time locations.
 
-name = "f025"
+name = "f010"
 IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
 solhat = readCfile(name)[11:end,:]
 #sol = ifft(solhat, 2)
