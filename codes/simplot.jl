@@ -1,4 +1,11 @@
 include("MMT.jl")
+# Problem Parameters
+λ = 1   #Defocusing MMT model
+α = 1/2
+β = 0
+F = 0.01
+D = [5.39 * 1e-48, 16]
+fP = funcparams(α, β, λ, F, D)
 
 # Numerical Simulation Parameters
 N = 2^12

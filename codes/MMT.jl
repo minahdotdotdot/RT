@@ -5,17 +5,19 @@ struct funcparams
     α:: Float64
     β:: Float64
     λ:: Complex{Float64}
-    funcparams(α, β, λ) = new(copy(α), copy(β), copy(λ))
+    F:: Float64
+    D:: Array{Float64,1}
+    funcparams(α, β, λ, F, D) = new(copy(α), copy(β), copy(λ), copy(F), copy(D))
 end
 
-@inline function Lfunc(zhat::Array{ComplexF64,1}, fp::funcparams)
-    return abs.(k).^fp.α .*zhat
+@inline function Lfunc(zhat::Array{ComplexF64,1}, fP::funcparams)
+    return abs.(k).^fP.α .*zhat
 end
 
 @inline function NLfunc(zhat::Array{ComplexF64,1}, fP::funcparams, k, FD)
     if fP.β != 0
         zr = ifft(abs.(k) .^(fP.β/4) .* zhat)
-        return -im* fP.λ * abs.(k) .^(fP.β/4) .* fft(abs.(zr).^2 .* zr) + D .* zhat + F
+        return -im* fP.λ * abs.(k) .^(fP.β/4) .* fft(abs.(zr).^2 .* zr) + FD .* zhat
     else
         zr = ifft(zhat);
         tmp = -im* fP.λ*fft(abs.(zr).^2 .*zr)
@@ -59,11 +61,11 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
     #forcing term
     N = length(zhat);
     FD = zeros(length(k)); 
-    FD[[6+1, 7+1, 8+1, 9+1, -6+(N+1), -7+(N+1), -8+(N+1), -9+(N+1)]] .= 0.025;
+    FD[[6+1, 7+1, 8+1, 9+1, -6+(N+1), -7+(N+1), -8+(N+1), -9+(N+1)]] .= fP.F;
     fname="f"*string(Int(FD[7]*1000), pad=3)
     newtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
     #add damping term
-    FD[2:end] += -196.61 * (abs.(k[2:end]).^(-8)) - 5.39* (abs.(0.001 * k[2:end]) .^ 16); 
+    FD[2:end] += -196.61 * (abs.(k[2:end]).^(-8)) - fP.D[1]* (abs.(k[2:end]) .^ fP.D[2]); 
     FD[1]= -200.0;
     #print("√1049/|ψ|^2\n")
     for t = 1 : M
@@ -78,9 +80,3 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
         end
     end
 end
-
-# Problem Parameters
-λ = 1   #Defocusing MMT model
-α = 1/2
-β = 0
-fP = funcparams(α, β, λ)
