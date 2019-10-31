@@ -21,7 +21,7 @@ end
     else
         zr = ifft(zhat);
         tmp = -im* fP.λ*fft(abs.(zr).^2 .*zr)
-        tmp[Int(N/4+2):Int(3*N/4)] .= 0
+        #tmp[Int(N/4+2):Int(3*N/4)] .= 0
         return  tmp + FD .* zhat
     end
 end
@@ -55,7 +55,7 @@ end
 function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64, 
     L, NLfunc::Function, fP::funcparams, RKT::eRKTableau, k; name::String)
     # FFT into Fourier space
-    zhat = fft(IC)*0.001; N = length(zhat); zhat[Int(N/4+2):Int(3*N/4)].= 0.0;
+    zhat = fft(IC)*0.001; N = length(zhat); #zhat[Int(N/4+2):Int(3*N/4)].= 0.0;
     newtxt!(zhat, name=name); kmax = sqrt(maximum(abs.(k)));
     ks = zeros(eltype(zhat), length(RKT.b), length(IC)); #RK stages (allocate memory)
     #forcing term

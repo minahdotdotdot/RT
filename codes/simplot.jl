@@ -17,7 +17,7 @@ kind = vcat(collect(Int(N/2)+2:N), collect(1:Int(N/2)+1))
 kindnz = vcat(collect(Int(N/2)+2:N), collect(2:Int(N/2))) # indexing w/o zero mode
 
 # Linear operator (depends on k)
-L = -im*abs.(k).^fP.α; L[Int(N/4+2):Int(3*N/4)].=0
+L = -im*abs.(k).^fP.α; #L[Int(N/4+2):Int(3*N/4)].=0
 
 # Set-up IFRK
 #= A = hcat([0; .5; 0; 0], [0; 0; .5; 0], [0; 0; 0; 1.0])
@@ -36,7 +36,7 @@ every = Int(M/1000) # save solution at only 1001 time locations.
 
 name = "f010"
 IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
-solhat = readCfile(name)[11:end,:]
+solhat = readCfile(name)#[11:end,:]
 #sol = ifft(solhat, 2)
 E = transpose(sum(abs.(solhat).^2, dims = 1)/size(solhat)[1])/N^2
 
