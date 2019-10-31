@@ -62,7 +62,7 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
     N = length(zhat);
     FD = zeros(length(k)); 
     FD[[6+1, 7+1, 8+1, 9+1, -6+(N+1), -7+(N+1), -8+(N+1), -9+(N+1)]] .= fP.F;
-    fname="f"*string(Int(FD[7]*1000), pad=3)
+    fname=name*"f"*string(Int(fP.F*1000), pad=3)
     newtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
     #add damping term
     FD[2:end] += -196.61 * (abs.(k[2:end]).^(-8)) - fP.D[1]* (abs.(k[2:end]) .^ fP.D[2]); 

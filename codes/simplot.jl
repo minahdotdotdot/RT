@@ -3,12 +3,12 @@ include("MMT.jl")
 λ = 1   #Defocusing MMT model
 α = 1/2
 β = 0
-F = 0.01
-D = [5.39 * 1e-48, 16]
+F = 0.2
+D = [7.51e-37, 10]
 fP = funcparams(α, β, λ, F, D)
 
 # Numerical Simulation Parameters
-N = 2^12
+N = 2^13
 x = range(0,stop=2*pi-1/N, length=Int(N));
 IC = randn(ComplexF64, N)*sqrt(N)/1000; IC[1]=0.0; IC = ifft(IC); 
 #IC = cos.(x) + im*sin.(x)
@@ -20,21 +20,23 @@ kindnz = vcat(collect(Int(N/2)+2:N), collect(2:Int(N/2))) # indexing w/o zero mo
 L = -im*abs.(k).^fP.α; #L[Int(N/4+2):Int(3*N/4)].=0
 
 # Set-up IFRK
-#= A = hcat([0; .5; 0; 0], [0; 0; .5; 0], [0; 0; 0; 1.0])
+A = hcat([0; .5; 0; 0], [0; 0; .5; 0], [0; 0; 0; 1.0])
 b = [1/6; 1/3; 1/3; 1/6]
-c = [0; 1/2; 1/2; 1] =#
+c = [0; 1/2; 1/2; 1];
+RK4 = eRKTableau(A, b, c);
 A = hcat([0; .5; -1],[0; 0; 2])
 b = [1/6; 2/3; 1/6]
-c = [0; 1/2; 1]
-RKT = eRKTableau(A, b, c)
+c = [0; 1/2; 1];
+RK3 = eRKTableau(A, b, c)
+RKT = RK4
 
 # time-step, ND final time, save "every"
-h = 0.01;
-T = 10
+h = 0.015;
+T = 150
 M = Int(T/h);
-every = Int(M/1000) # save solution at only 1001 time locations.
+every = 100# Int(M/1000) # save solution at only 1001 time locations.
 
-name = "f010"
+name = "A"
 IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
 solhat = readCfile(name)#[11:end,:]
 #sol = ifft(solhat, 2)

@@ -36,3 +36,6 @@ end
 @inline function readCfile(name::String)
     return readdlm("../txtfiles/"*name*"_Re.txt") + im * readdlm("../txtfiles/"*name*"_Im.txt")
 end
+
+
+using FFTW, PyPlot
