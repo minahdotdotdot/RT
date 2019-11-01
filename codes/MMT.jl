@@ -22,7 +22,7 @@ end
         zr = ifft(zhat);
         tmp = -im* fP.λ*fft(abs.(zr).^2 .*zr)
         #tmp[Int(N/4+2):Int(3*N/4)] .= 0
-        return  tmp + FD .* zhat
+        return  tmp #+ FD .* zhat
     end
 end
 
@@ -47,7 +47,7 @@ function IFRK_step(zhat::Array{ComplexF64,1}, h::Float64,
         PP=h*Transpose(ks[1:i-1,:])*RKT.A[i,1:i-1]
         ks[i,:] = expnz(-h*RKT.c[i]*L) .* NLfunc(expnz(h*RKT.c[i]*L) .*(zhat + PP), fP, k, FD)
     end
-    vb = Transpose(ks)*b
+    vb = Transpose(ks)*RKT.b
     #return k, vb, L * (z+ (h*vb))
     return expnz(h*L) .* (zhat+ (h*vb))
 end
@@ -72,7 +72,7 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
         zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k, FD)
         if rem(t,every)==1
             if any(isnan,zhat)  || any(isinf,zhat)
-                error("Blowup!!!")#break
+                error("Blowup!!! at ND time="*string(t*h))#break
             end
             addtxt!(zhat, name=name)
             addtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)

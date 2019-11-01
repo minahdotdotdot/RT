@@ -4,7 +4,7 @@ include("MMT.jl")
 α = 1/2
 β = 0
 F = 0.2
-D = [7.51e-37, 10]
+D = [7.51e-25, 7]
 fP = funcparams(α, β, λ, F, D)
 
 # Numerical Simulation Parameters
@@ -18,6 +18,9 @@ kindnz = vcat(collect(Int(N/2)+2:N), collect(2:Int(N/2))) # indexing w/o zero mo
 
 # Linear operator (depends on k)
 L = -im*abs.(k).^fP.α; #L[Int(N/4+2):Int(3*N/4)].=0
+L[[6+1, 7+1, 8+1, 9+1, -6+(N+1), -7+(N+1), -8+(N+1), -9+(N+1)]] .= fP.F;
+L[2:end] += -196.61 * (abs.(k[2:end]).^(-8)) - fP.D[1]* (abs.(k[2:end]) .^ fP.D[2]); 
+L[1]= -200.0;
 
 # Set-up IFRK
 A = hcat([0; .5; 0; 0], [0; 0; .5; 0], [0; 0; 0; 1.0])
@@ -34,7 +37,7 @@ RKT = RK4
 h = 0.015;
 T = 150
 M = Int(T/h);
-every = 100# Int(M/1000) # save solution at only 1001 time locations.
+every = 5# Int(M/1000) # save solution at only 1001 time locations.
 
 name = "A"
 IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
