@@ -70,7 +70,7 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
     #print("√1049/|ψ|^2\n")
     for t = 1 : M
         zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k, FD)
-        if rem(t,every)==1
+        if rem(t,every)==1 || every==1
             if any(isnan,zhat)  || any(isinf,zhat)
                 error("Blowup!!! at ND time="*string(t*h))#break
             end
