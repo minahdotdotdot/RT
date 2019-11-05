@@ -76,7 +76,31 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
             end
             addtxt!(zhat, name=name)
             addtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
-            #@printf("%d: %f\n", t, maximum(abs.(ifft(zhat)))^2/sqrt(1049))
         end
     end
 end
+
+function ETD1_step(zhat::Array{ComplexF64,1}, h::Float64, 
+    L, NLfunc::Function, fP::funcparams, hphi)
+    FD = 0
+    return expnz(h*L).*zhat + hphi.*NLfunc(zhat, fP, k, FD)
+end
+
+function ETD!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64, 
+    L, NLfunc::Function, fP::funcparams; name::String)
+    # FFT into Fourier space
+    zhat = fft(IC)*0.001; 
+    N = length(zhat); #zhat[Int(N/4+2):Int(3*N/4)].= 0.0;
+    newtxt!(zhat, name=name); 
+    hphi = (expnz(h*L) .-1) ./ L
+    for t = 1 : M
+        zhat = ETD1_step(zhat, h, L, NLfunc, fP, hphi)
+        if rem(t,every)==1 || every==1
+            if any(isnan,zhat)  || any(isinf,zhat)
+                error("Blowup!!! at ND time="*string(t*h))#break
+            end
+            addtxt!(zhat, name=name)
+        end
+    end
+end
+
