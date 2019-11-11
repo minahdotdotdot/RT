@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name f025
+#SBATCH --job-name C:RK3
 #SBATCH --qos=blanca-igg
 #SBATCH --nodes 1
 #SBATCH --ntasks 1

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name plot0125
+#SBATCH --job-name B
 #SBATCH --qos=blanca-igg
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
@@ -10,6 +10,6 @@ cd /projects/luya7574/RT/codes
 julia ./plotimages.jl
 
 ffmpeg="/projects/luya7574/ffmpeg/ffmpeg-3.3.4-64bit-static/ffmpeg"
-name="test"
-$ffmpeg -framerate 6 -i /projects/luya7574/RT/plots/${name}%04d.png -vb 20M ./Dh0125.avi
+name="B"
+$ffmpeg -framerate 6 -i /projects/luya7574/RT/plots/${name}%03d.png -vb 20M ./${name}.avi
 
