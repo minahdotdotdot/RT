@@ -38,6 +38,7 @@ function readCfile(name::String)
 end
 
 function plotcomplex!(z::Array{Complex{T},1}) where T <: AbstractFloat
+    import ColorSchemes.rainbow
     J = length(z);
     fig, ax = subplots()
     for j = 2 : J
