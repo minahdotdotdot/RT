@@ -3,7 +3,7 @@ include("MMT.jl")
 λ = 1   #Defocusing MMT model
 α = 1/2
 β = 0
-F = 0.2
+F = 0.1
 D = [7.51e-25, 7]
 fP = funcparams(α, β, λ, F, D)
 
@@ -23,15 +23,15 @@ L[2:end] += -196.61 * (abs.(k[2:end]).^(-8)) - fP.D[1]* (abs.(k[2:end]) .^ fP.D[
 L[1]= -200.0;
 
 # time-step, ND final time, save "every"
-h = 0.1;
+h = 0.0625;
 T = 10000
-M = Int(T/h);
+M = 250000#Int(T/h);
 every = Int(M/1000) # save solution at only 1001 time locations.
 
-name = "B"
-ETD!(M, every, IC, h, L, NLfunc, fP, name=name)
+name = "C"
+#ETD!(M, every, IC, h, L, NLfunc, fP, name=name)
 
-#=
+
 # Set-up IFRK
 A = hcat([0; .5; 0; 0], [0; 0; .5; 0], [0; 0; 0; 1.0])
 b = [1/6; 1/3; 1/3; 1/6]
@@ -41,14 +41,13 @@ A = hcat([0; .5; -1],[0; 0; 2])
 b = [1/6; 2/3; 1/6]
 c = [0; 1/2; 1];
 RK3 = eRKTableau(A, b, c)
-RKT = RK4
+RKT = RK3
 # run IKRK
+#IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
 
-IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
-=#
 solhat = readCfile(name)#[11:end,:]
 #sol = ifft(solhat, 2)
-E = transpose(sum(abs.(solhat).^2, dims = 1)/size(solhat)[1])/N^2;
+E = k .* transpose(sum(abs.(solhat).^2, dims = 1)/size(solhat)[1])/N^2;
 
 
 using PyPlot, LaTeXStrings
@@ -56,9 +55,10 @@ fig, ax = subplots()
 #semilogy(k[kindnz], E[kindnz], label="computed")
 #semilogy(k[2:Int(end/2)], 1e-24 *(k[2:Int(end/2)]).^(-1/3), label=L"Ck^{-1/3}")
 #semilogy(k[2:Int(end/2)], 1e-24 *(k[2:Int(end/2)]).^(-1/2), label=L"Ck^{-1/2}")
-loglog(k[2:Int(end/2)], E[2:Int(end/2)], label="computed")
-loglog(k[2:Int(end/2)], .24 *(k[2:Int(end/2)]).^(-2), label=L"Ck^{-2}")
-loglog(k[2:Int(end/2)], .24 *(k[2:Int(end/2)]).^(-1), label=L"Ck^{-1}")
+loglog(k[2:Int(end/2)], E[2:Int(end/2)], label=L"k\times"*"computed")
+axhline(0.1, color=:black, label="0.1")
+#loglog(k[2:Int(end/2)], .24 *(k[2:Int(end/2)]).^(-2), label=L"Ck^{-2}")
+#loglog(k[2:Int(end/2)], .24 *(k[2:Int(end/2)]).^(-1), label=L"Ck^{-1}")
 xlabel("Wave Number")
 ylabel("n(k)")
 legend()
