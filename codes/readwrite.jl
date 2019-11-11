@@ -33,9 +33,20 @@ end
     end
 end
 
-@inline function readCfile(name::String)
+function readCfile(name::String)
     return readdlm("../txtfiles/"*name*"_Re.txt") + im * readdlm("../txtfiles/"*name*"_Im.txt")
 end
+
+function plotcomplex!(z::Array{Complex{T},1}) where T <: AbstractFloat
+    J = length(z);
+    fig, ax = subplots()
+    for j = 2 : J
+        crgb = get(rainbow, j/J)
+        plot(real.(z[j-1:j]), imag.(z[j-1:j]), 
+            c=(crgb.r, crgb.g, crgb.b))
+    end
+end
+
 
 
 using FFTW, PyPlot
