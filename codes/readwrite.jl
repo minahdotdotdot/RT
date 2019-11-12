@@ -1,4 +1,5 @@
 using DelimitedFiles
+import ColorSchemes.rainbow
 @inline function newtxt!(zAmp::Array{T,1}; name::String="zAmp") where T<:Float64
     writedlm("../txtfiles/"*name*".txt", transpose(zAmp))
 end
@@ -38,14 +39,16 @@ function readCfile(name::String)
 end
 
 function plotcomplex!(z::Array{Complex{T},1}) where T <: AbstractFloat
-    import ColorSchemes.rainbow
-    J = length(z);
+    plot(real.(z), label="real part")
+    plot(imag.(z), label="imag part")
+    #=J = length(z);
     fig, ax = subplots()
     for j = 2 : J
         crgb = get(rainbow, j/J)
         plot(real.(z[j-1:j]), imag.(z[j-1:j]), 
             c=(crgb.r, crgb.g, crgb.b))
     end
+    =#
 end
 
 
