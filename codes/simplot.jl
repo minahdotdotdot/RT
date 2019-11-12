@@ -4,7 +4,7 @@ include("MMT.jl")
 α = 1/2
 β = 0
 F = 0.1
-D = [7.51e-25, 7]
+D = [2.51e-57, 16]
 fP = funcparams(α, β, λ, F, D)
 
 # Numerical Simulation Parameters
@@ -25,10 +25,11 @@ L[1]= -200.0;
 # time-step, ND final time, save "every"
 h = 0.0625;
 T = 10000
-M = 250000#Int(T/h);
+M = 134000#Int(T/h);
+T = floor(Int,M*h)
 every = Int(M/1000) # save solution at only 1001 time locations.
 
-name = "C"
+name = "A"
 #ETD!(M, every, IC, h, L, NLfunc, fP, name=name)
 
 
@@ -41,7 +42,7 @@ A = hcat([0; .5; -1],[0; 0; 2])
 b = [1/6; 2/3; 1/6]
 c = [0; 1/2; 1];
 RK3 = eRKTableau(A, b, c)
-RKT = RK3
+RKT = RK4
 # run IKRK
 #IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
 
@@ -62,7 +63,7 @@ axhline(0.1, color=:black, label="0.1")
 xlabel("Wave Number")
 ylabel("n(k)")
 legend()
-title(L"t\in[11, 1000]")
+title(L"t\in["*string(0.011*T)*", "*string(T)*"]")
 savefig(name*"ES.png")
 close(fig)
 
