@@ -3,7 +3,7 @@ include("MMT.jl")
 λ = 1   #Defocusing MMT model
 α = 1/2
 β = 0
-F = 0.1
+F = 0.05
 D = [2.51e-57, 16]
 fP = funcparams(α, β, λ, F, D)
 
