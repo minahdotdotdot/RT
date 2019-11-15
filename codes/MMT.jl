@@ -1,6 +1,7 @@
 include("readwrite.jl")
 using FFTW, LinearAlgebra, Printf
 
+####### MMT Problem Set-up #######
 struct funcparams
     α:: Float64
     β:: Float64
@@ -14,23 +15,26 @@ end
     return abs.(k).^fP.α .*zhat
 end
 
-@inline function NLfunc(zhat::Array{ComplexF64,1}, fP::funcparams, k, FD)
+@inline function NLfunc(zhat::Array{ComplexF64,1}, fP::funcparams, k)
     if fP.β != 0
         zr = ifft(abs.(k) .^(fP.β/4) .* zhat)
-        return -im* fP.λ * abs.(k) .^(fP.β/4) .* fft(abs.(zr).^2 .* zr) + FD .* zhat
+        return -im* fP.λ * abs.(k) .^(fP.β/4) .* fft(abs.(zr).^2 .* zr)
     else
         zr = ifft(zhat);
-        tmp = -im* fP.λ*fft(abs.(zr).^2 .*zr)
-        #tmp[Int(N/4+2):Int(3*N/4)] .= 0
-        return  tmp #+ FD .* zhat
+        tmp = -im* fP.λ*fft(abs.(zr).^2 .*zr) #tmp[Int(N/4+2):Int(3*N/4)] .= 0
+        return  tmp
     end
 end
 
-struct eRKTableau
-    A # matrix
-    b # stage weights
-    c # t increments
-    eRKTableau(A, b, c) = new(copy(A),copy(b), copy(c))
+@inline function NLfunc(zhat::Array{ComplexF64,2}, fP::funcparams, k)
+    if fP.β != 0
+        zr = ifft(abs.(k) .^(fP.β/4) .* zhat, 2)
+        return -im* fP.λ * abs.(k) .^(fP.β/4) .* fft(abs.(zr).^2 .* zr, 2)
+    else
+        zr = ifft(zhat, 2);
+        tmp = -im* fP.λ*fft(abs.(zr).^2 .*zr, 2) #tmp[Int(N/4+2):Int(3*N/4)] .= 0
+        return  tmp
+    end
 end
 
 @inline function expnz(z::Array{Complex{T},1}) where T<: AbstractFloat
@@ -38,17 +42,23 @@ end
      return z
  end
 
+####### IFRK Set-up #######
+struct eRKTableau
+    A # matrix        :: (s-1)-by-s matrix
+    b # stage weights :: s-length vector
+    c # t increments  :: s-length vector
+    eRKTableau(A, b, c) = new(copy(A),copy(b), copy(c))
+end
+
 function IFRK_step(zhat::Array{ComplexF64,1}, h::Float64, 
     L, NLfunc::Function, fP::funcparams, 
-    RKT::eRKTableau, ks, k, FD)
-    #k = zeros(eltype(z), length(RKT.b), length(z))
-    ks[1,:] = NLfunc(zhat, fP, k, FD)
+    RKT::eRKTableau, ks, k)
+    ks[1,:] = NLfunc(zhat, fP, k)
     for i = 2 :length(RKT.b)
         PP=h*Transpose(ks[1:i-1,:])*RKT.A[i,1:i-1]
-        ks[i,:] = expnz(-h*RKT.c[i]*L) .* NLfunc(expnz(h*RKT.c[i]*L) .*(zhat + PP), fP, k, FD)
+        ks[i,:] = expnz(-h*RKT.c[i]*L) .* NLfunc(expnz(h*RKT.c[i]*L) .*(zhat + PP), fP, k)
     end
     vb = Transpose(ks)*RKT.b
-    #return k, vb, L * (z+ (h*vb))
     return expnz(h*L) .* (zhat+ (h*vb))
 end
 
@@ -60,16 +70,10 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
     ks = zeros(eltype(zhat), length(RKT.b), length(IC)); #RK stages (allocate memory)
     #forcing term
     N = length(zhat);
-    FD = zeros(length(k)); 
-    FD[[6+1, 7+1, 8+1, 9+1, -6+(N+1), -7+(N+1), -8+(N+1), -9+(N+1)]] .= fP.F;
     fname=name*"f"*string(Int(fP.F*1000), pad=3)
     newtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
-    #add damping term
-    FD[2:end] += -196.61 * (abs.(k[2:end]).^(-8)) - fP.D[1]* (abs.(k[2:end]) .^ fP.D[2]); 
-    FD[1]= -200.0;
-    #print("√1049/|ψ|^2\n")
     for t = 1 : M
-        zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k, FD)
+        zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k)
         if rem(t,every)==1 || every==1
             if any(isnan,zhat)  || any(isinf,zhat)
                 error("Blowup!!! at ND time="*string(t*h))#break
@@ -80,26 +84,68 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
     end
 end
 
-function ETD1_step(zhat::Array{ComplexF64,1}, h::Float64, 
-    L, NLfunc::Function, fP::funcparams, hphi)
-    FD = 0
-    return expnz(h*L).*zhat + hphi.*NLfunc(zhat, fP, k, FD)
+
+####### ETDRK Problem Set-up #######
+using ExponentialUtilities
+struct ETDRKTableau
+    A #matrix :: (s-1)-by-s matrix
+    b #stages :: s-length vector
+    c #times  :: s-length vector
+    ETDRKTableau(A, b, c) = new(copy(A),copy(b), copy(c))
 end
 
-function ETD!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64, 
-    L, NLfunc::Function, fP::funcparams; name::String)
+function buildAandb(A, b, c, h, L)
+    s = size(A)[2]
+    L = Diagonal(L)
+    for i = 1 : size(A)[1]
+        phis = phi(c[i]*h*L, s)[2:end]
+        for j = 1 : s
+            A[i,j] = sum(A[i,j].*phis)
+        end
+    end
+    phis = phi(h*L,s)[2:end]
+    for j = 1 : length(b)
+        b[j] = sum(b[j].*phis)
+    end
+    return Array{typeof(A[1,1]),2}(A), Array{typeof(b[1,1]),1}(b)
+end
+
+@inline function lincom(A, ks)
+    tmp = A[1]*ks[1,:]
+    for i = 2 : length(A)
+        tmp += A[i] * ks[i,:]
+    end
+    return tmp
+end
+
+function ETDRK_step(zhat::Array{ComplexF64,1}, h::Float64, 
+    L, NLfunc::Function, fP::funcparams, RKT::ETDRKTableau, ks, k)
+    ks[1,:] = NLfunc(zhat, fP, k); #first stage
+    for i = 2 :length(RKT.b)
+        ks[i,:] = (expnz(c[i-1]*h*L) .* zhat) + h*lincom(RKT.A[i-1,1:i-1], NLfunc(ks[1:i-1,:], fP, k))
+    end
+    #vb = Transpose(ks)*RKT.b
+    return (expnz(h*L).*zhat) + h*lincom(RKT.b, ks)
+end
+
+function ETDRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64, 
+    L, NLfunc::Function, fP::funcparams, RKT::ETDRKTableau, k; name::String)
     # FFT into Fourier space
-    zhat = fft(IC)*0.001; 
-    N = length(zhat); #zhat[Int(N/4+2):Int(3*N/4)].= 0.0;
-    newtxt!(zhat, name=name); 
-    hphi = (expnz(h*L) .-1) ./ L
+    zhat = fft(IC)*0.001; N = length(zhat); #zhat[Int(N/4+2):Int(3*N/4)].= 0.0;
+    newtxt!(zhat, name=name); kmax = sqrt(maximum(abs.(k)));
+    ks = zeros(eltype(zhat), length(RKT.b), length(IC)); #RK stages (allocate memory)
+    #forcing term
+    N = length(zhat);
+    fname=name*"f"*string(Int(fP.F*1000), pad=3)
+    newtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
     for t = 1 : M
-        zhat = ETD1_step(zhat, h, L, NLfunc, fP, hphi)
+        zhat = ETDRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k)
         if rem(t,every)==1 || every==1
             if any(isnan,zhat)  || any(isinf,zhat)
                 error("Blowup!!! at ND time="*string(t*h))#break
             end
             addtxt!(zhat, name=name)
+            addtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
         end
     end
 end
