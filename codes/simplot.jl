@@ -23,9 +23,9 @@ L[2:end] += -196.61 * (abs.(k[2:end]).^(-8)) - fP.D[1]* (abs.(k[2:end]) .^ fP.D[
 L[1]= -200.0;
 
 # time-step, ND final time, save "every"
-h = 0.0625;
-T = 10000
-M = 134000#Int(T/h);
+h = 0.0025;
+T = 10#000
+M = Int(T/h);
 T = floor(Int,M*h)
 every = Int(M/1000) # save solution at only 1001 time locations.
 
@@ -34,7 +34,7 @@ name = "A"
 # Set-up ETDRK
 include("ETD_methods.jl")
 RKT = ETDRK3
-#ETDRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name)
+ETDRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name)
 
 # Set-up IFRK
 #include("IF_methods.jl")
@@ -42,7 +42,7 @@ RKT = ETDRK3
 #IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
 
 function plotEnergy!(k, N, T, name::String)
-	solhat = readCfile(name)#[11:end,:]
+	solhat = readCfile(name)[11:end,:]
 	#sol = ifft(solhat, 2)
 	E = k .* transpose(sum(abs.(solhat).^2, dims = 1)/size(solhat)[1])/N^2;
 	fig, ax = subplots()
@@ -62,6 +62,6 @@ function plotEnergy!(k, N, T, name::String)
 end
 
 using PyPlot, LaTeXStrings
-#plotEnergy!(k, N, T, name)
+plotEnergy!(k, N, T, name)
 
 
