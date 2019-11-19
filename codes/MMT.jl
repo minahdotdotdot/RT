@@ -121,13 +121,13 @@ end
 end
 
 function ETDRK_step(zhat::Array{ComplexF64,1}, h::Float64, 
-    L, NLfunc::Function, fP::funcparams, RKT::ETDRKTableau, ks, k)
+    L, NLfunc::Function, fP::funcparams, RKT::ETDRKTableau, ks, k, exphL)
     ks[1,:] = NLfunc(zhat, fP, k); #first stage
     for i = 2 :length(RKT.b)
         ks[i,:] = (expnz(c[i-1]*h*L) .* zhat) + h*lincom(RKT.A[i-1,1:i-1], NLfunc(ks[1:i-1,:], fP, k))
     end
     #vb = Transpose(ks)*RKT.b
-    return (expnz(h*L).*zhat) + h*lincom(RKT.b, ks)
+    return (.*zhat) + h*lincom(RKT.b, ks)
 end
 
 function ETDRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64, 
@@ -140,8 +140,9 @@ function ETDRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
     N = length(zhat);
     fname=name*"f"*string(Int(fP.F*1000), pad=3)
     newtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
+    exphL = expnz(h*L)
     for t = 1 : M
-        zhat = ETDRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k)
+        zhat = ETDRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k, exphL)
         if rem(t,every)==1 || every==1
             if any(isnan,zhat)  || any(isinf,zhat)
                 error("Blowup!!! at ND time="*string(t*h))#break
