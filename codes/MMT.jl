@@ -48,13 +48,15 @@ function IFRK_step(zhat::Array{ComplexF64,1}, h::Float64,
     RKT::eRKTableau, ks, k)
     ks[1,:] = NLfunc(zhat, fP, k)
     for i = 2 :length(RKT.b)
-        PP=h*Transpose(ks[1:i-1,:])*RKT.A[i,1:i-1]
+        #PP=h*Transpose(ks[1:i-1,:])*RKT.A[i,1:i-1]
         #ks[i,:] = expnz(-h*RKT.c[i]*L) .* NLfunc(expnz(h*RKT.c[i]*L) .*(zhat + PP), fP, k)
+        PP = h* lincom(RKT.A[i,1:i-1], ks[1:i-1,:])
         ks[i,:] = RKT.c[2*(i-2)+1] .* NLfunc(RKT.c[2*(i-2)+2].*(zhat+PP), fP, k)
     end
-    vb = Transpose(ks)*RKT.b
+    #vb = Transpose(ks)*RKT.b
     #return expnz(h*L) .* (zhat+ (h*vb))
-    return RKT.c[end].* (zhat+ (h*vb))
+    #return RKT.c[end].* (zhat+ (h*vb))
+    return RKT.c[end] .* (zhat + h*lincom(RKT.b, ks))
 end
 
 function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64, 
