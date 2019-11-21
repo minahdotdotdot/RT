@@ -140,7 +140,7 @@ function ETDRK_step(zhat::Array{ComplexF64,1}, h::Float64,
     L, NLfunc::Function, fP::funcparams, RKT::ETDRKTableau, ks, k, exphL)
     ks[1,:] = NLfunc(zhat, fP, k); #first stage
     for i = 2 :length(RKT.b)
-        ks[i,:] = NLfunc(c[i-1]*zhat) + h*lincom(RKT.A[i-1,1:i-1], NLfunc(ks[1:i-1,:], fP, k),fp,k)
+        ks[i,:] = NLfunc(c[i-1]*zhat+h*lincom(RKT.A[i-1,1:i-1], ks[1:i-1,:]), fP,k)
     end
     #vb = Transpose(ks)*RKT.b
     return (exphL.*zhat) + h*lincom(RKT.b, ks)
