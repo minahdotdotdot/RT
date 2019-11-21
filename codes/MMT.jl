@@ -10,11 +10,7 @@ struct funcparams
     D:: Array{Float64,1}
     funcparams(α, β, λ, F, D) = new(copy(α), copy(β), copy(λ), copy(F), copy(D))
 end
-
-@inline function Lfunc(zhat::Array{ComplexF64,1}, fP::funcparams)
-    return abs.(k).^fP.α .*zhat
-end
-
+#=
 @inline function NLfunc(zhat::Array{ComplexF64,1}, fP::funcparams, k)
     if fP.β != 0
         zr = ifft(abs.(k) .^(fP.β/4) .* zhat)
@@ -27,6 +23,7 @@ end
 end
 
 @inline function NLfunc(zhat::Array{ComplexF64,2}, fP::funcparams, k)
+    tmp = copy(zhat)
     if fP.β != 0
         zr = ifft(abs.(k) .^(fP.β/4) .* zhat, 2)
         return -im* fP.λ * abs.(k) .^(fP.β/4) .* fft(abs.(zr).^2 .* zr, 2)
@@ -36,10 +33,26 @@ end
         return  tmp
     end
 end
+=#
+function NLfunc(zhat::Array{ComplexF64,1}, fP::funcparams, k)
+    return 0*zhat#3*im*zhat#
+end
+
+function NLfunc(zhat::Array{ComplexF64,2}, fP::funcparams, k)
+    return 0*zhat#3*im*zhat
+end
+
 
 @inline function expnz(z::Array{Complex{T},1}) where T<: AbstractFloat
      z[z.!=0] = exp.(z[z.!=0])
      return z
+     #return exp.(z)
+ end
+
+ @inline function expnz(z::Array{T,1}) where T<: AbstractFloat
+     z[z.!=0] = exp.(z[z.!=0])
+     return z
+     #return exp.(z)
  end
 
 ####### IFRK Set-up #######
@@ -96,7 +109,7 @@ struct ETDRKTableau
     ETDRKTableau(A, b, c) = new(copy(A),copy(b), copy(c))
 end
 
-function buildAandb(A, b, c, h, L)
+function buildAbc(A, b, c, h, L)
     s = size(A)[2]
     L = Diagonal(L)
     for i = 1 : size(A)[1]
@@ -109,7 +122,10 @@ function buildAandb(A, b, c, h, L)
     for j = 1 : length(b)
         b[j] = sum(b[j].*phis)
     end
-    return Array{typeof(A[1,1]),2}(A), Array{typeof(b[1,1]),1}(b)
+    for j = 1 : length(c)
+        c[j] = exp(c[j]*h*L)
+    end
+    return Array{typeof(A[1,1]),2}(A), Array{typeof(b[1,1]),1}(b), Array{typeof(c[1]),1}(c)
 end
 
 @inline function lincom(A, ks)
@@ -124,10 +140,10 @@ function ETDRK_step(zhat::Array{ComplexF64,1}, h::Float64,
     L, NLfunc::Function, fP::funcparams, RKT::ETDRKTableau, ks, k, exphL)
     ks[1,:] = NLfunc(zhat, fP, k); #first stage
     for i = 2 :length(RKT.b)
-        ks[i,:] = (expnz(c[i-1]*h*L) .* zhat) + h*lincom(RKT.A[i-1,1:i-1], NLfunc(ks[1:i-1,:], fP, k))
+        ks[i,:] = (c[i-1]*zhat) + h*lincom(RKT.A[i-1,1:i-1], NLfunc(ks[1:i-1,:], fP, k))
     end
     #vb = Transpose(ks)*RKT.b
-    return (.*zhat) + h*lincom(RKT.b, ks)
+    return (exphL.*zhat) + h*lincom(RKT.b, ks)
 end
 
 function ETDRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64, 
