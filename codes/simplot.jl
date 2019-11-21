@@ -1,5 +1,5 @@
 include("MMT.jl")
-
+name="A"
 # Problem Parameters
 λ = 1;  #Defocusing MMT model
 α = 1/2;

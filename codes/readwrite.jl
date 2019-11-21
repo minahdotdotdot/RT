@@ -51,6 +51,4 @@ function plotcomplex!(z::Array{Complex{T},1}) where T <: AbstractFloat
     =#
 end
 
-
-
 using FFTW, PyPlot

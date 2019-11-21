@@ -10,7 +10,7 @@ struct funcparams
     D:: Array{Float64,1}
     funcparams(α, β, λ, F, D) = new(copy(α), copy(β), copy(λ), copy(F), copy(D))
 end
-#=
+
 @inline function NLfunc(zhat::Array{ComplexF64,1}, fP::funcparams, k)
     if fP.β != 0
         zr = ifft(abs.(k) .^(fP.β/4) .* zhat)
@@ -33,27 +33,7 @@ end
         return  tmp
     end
 end
-=#
-function NLfunc(zhat::Array{ComplexF64,1}, fP::funcparams, k)
-    return 0*zhat#3*im*zhat#
-end
 
-function NLfunc(zhat::Array{ComplexF64,2}, fP::funcparams, k)
-    return 0*zhat#3*im*zhat
-end
-
-
-@inline function expnz(z::Array{Complex{T},1}) where T<: AbstractFloat
-     z[z.!=0] = exp.(z[z.!=0])
-     return z
-     #return exp.(z)
- end
-
- @inline function expnz(z::Array{T,1}) where T<: AbstractFloat
-     z[z.!=0] = exp.(z[z.!=0])
-     return z
-     #return exp.(z)
- end
 
 ####### IFRK Set-up #######
 struct eRKTableau
@@ -142,7 +122,6 @@ function ETDRK_step(zhat::Array{ComplexF64,1}, h::Float64,
     for i = 2 :length(RKT.b)
         ks[i,:] = NLfunc(c[i-1]*zhat+h*lincom(RKT.A[i-1,1:i-1], ks[1:i-1,:]), fP,k)
     end
-    #vb = Transpose(ks)*RKT.b
     return (exphL.*zhat) + h*lincom(RKT.b, ks)
 end
 
@@ -156,7 +135,7 @@ function ETDRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
     N = length(zhat);
     fname=name*"f"*string(Int(fP.F*1000), pad=3)
     newtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
-    exphL = expnz(h*L)
+    exphL = exp.(h*L)
     for t = 1 : M
         zhat = ETDRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k, exphL)
         if rem(t,every)==1 || every==1
