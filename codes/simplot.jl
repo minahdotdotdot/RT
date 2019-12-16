@@ -1,5 +1,6 @@
 include("MMT.jl")
-name="A"
+name="B";
+scheme="IFRK3"
 # Problem Parameters
 λ = 1;  #Defocusing MMT model
 α = 1/2;
@@ -27,19 +28,20 @@ L[1]= -200.0;
 # time-step, ND final time, save "every"
 h = 0.05;
 T = 10000
-M = Int(T/h);
+M = ceil(Int, T/h);
 #T = floor(Int,M*h)
-every = Int(M/1000) # save solution at only 101 time locations.
+every = floor(Int, M/2000) # save solution at only 10 time locations.
 
 # Set-up ETDRK
-include("ETD_methods.jl")
-RKT = ETDRK3
+#include("ETD_methods.jl")
+#RKT = ETDRK3
 #ETDRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name)
 
 # Set-up IFRK
-#include("IF_methods.jl")
-#RKT = RK4;
-#IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
+include("IF_methods.jl")
+RKT = RK3;
+IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
+
 
 function plotEnergy!(k, N, T, name::String)
 	solhat = readCfile(name)[11:end,:]
@@ -50,14 +52,14 @@ function plotEnergy!(k, N, T, name::String)
 	#semilogy(k[2:Int(end/2)], 1e-24 *(k[2:Int(end/2)]).^(-1/3), label=L"Ck^{-1/3}")
 	#semilogy(k[2:Int(end/2)], 1e-24 *(k[2:Int(end/2)]).^(-1/2), label=L"Ck^{-1/2}")
 	loglog(k[2:Int(end/2)], E[2:Int(end/2)], label=L"k\times"*"computed")
-	axhline(0.1, color=:black, label="0.1")
+#	axhline(0.1, color=:black, label="0.1")
 	#loglog(k[2:Int(end/2)], .24 *(k[2:Int(end/2)]).^(-2), label=L"Ck^{-2}")
 	#loglog(k[2:Int(end/2)], .24 *(k[2:Int(end/2)]).^(-1), label=L"Ck^{-1}")
 	xlabel("Wave Number")
 	ylabel("n(k)")
 	legend()
-	title(L"t\in["*string(0.011*T)*", "*string(T)*"]")
-	savefig(name*"ES.png")
+	title("h="*string(h)*", "*scheme)
+	savefig(scheme*"-"*string(Int(h*1000),pad=3)*"ES.png")
 	close(fig)
 end
 
