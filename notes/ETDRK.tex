@@ -1,0 +1,304 @@
+\documentclass{article}
+%Packages
+\usepackage[utf8]{inputenc}
+\usepackage{geometry, graphicx,wrapfig}
+\usepackage{enumerate}
+\usepackage{amsmath,amssymb,amsfonts,amsthm, bm}
+\usepackage{xcolor} %just for visible comments.
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage[toc,page]{appendix}
+\usepackage{makecell}
+% New theorems and commands
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{assump}[theorem]{Assumption}
+\newcommand\mycommfont[1]{\ttfamily\textcolor{orange}{#1}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\dd}{\delta}
+\newcommand{\eps}{\epsilon}
+\newcommand{\tth}{\theta}
+\newcommand{\bb}[1]{\mathbf{#1}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\ddt}{\frac{\mathrm{d}}{\mathrm{d}t}}
+\newcommand{\imag}{\text{i}}
+\SetCommentSty{mycommfont}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newcommand\comment[1]{\color{blue}#1}
+% Document
+\title{Exponential Time Differencing Explicit Runge-Kutta Methods}
+%\date{\today}
+
+\begin{document}
+\maketitle
+We study ODEs of type
+\begin{equation}
+	\ddt y(t) = \bb{Ly}(t) + \bb{N}(y(t),t),
+	\label{eqn:ODE}
+\end{equation}
+where $y$ may be a vector, $L$ is a linear operator, and $N$ is a nonlinear operator. 
+If $L$ has a wide range of eigenvalues, the above ODE is \emph{stiff}. 
+Exponential time differencing methods were designed to treat stiff ODEs. 
+\section{Exponential Time Differencing (ETD) Methods}
+We make the same change of variable as we do in the Integrating Factor (IF) methods. 
+We can rewrite Equation~\ref{eqn:ODE} as the following.
+\begin{equation}
+	\ddt\left(\exp(-t\bb{L}) y \right) = \exp(-t\bb{L})\bb{N}(\bb{y},t) \label{eqn:ETDcov}\\
+\end{equation}
+
+Given a state $\bb{y}_n:=y(t_n)$, we can employ this change of variables at that time to move forward in time by $h$. 
+\begin{equation}
+\bb{y}_{n+1}= \exp(h\bb{L})\left(\bb{y}_n + \int_{0}^{h} \exp(-\tau \bb{L}) \bb{N}(y(t_n+\tau), t_n+\tau) \mathrm{d}\tau \right)
+\label{eqn:ETDeq}
+\end{equation}
+
+This equation is exact. 
+All ETD methods derive from approximating the integral. 
+
+\subsection{Multi-step Explicit ETD methods}
+Some basic ETD methods work by approximating the nonlinear function in the integrand in Equation~\ref{eqn:ETDeq} using previous steps. 
+Here, the task is to approximate $\bb{N}(\bb{y},t)=\bb{N}(y(t),t)$ only for values of $t$ in $[t_n, t_{n}+h]$. 
+A constant approximation of $\bb{N}(y)$ by using $\bb{N}(\bb{y}_n))$ yields ETD1, and a linear approximation using $\bb{N}(\bb{y}_n)$ and $\bb{N}(\bb{y}_{n-1})$ yields ETD2.
+
+\begin{align*}
+\text{ETD1}&: \bb{N}(y(t),t) \approx \bb{N}(\bb{y}_n)\\
+\text{ETD2}&: \bb{N}(y(t),t) \approx \bb{N}(\bb{y}_n) + \tau\frac{\bb{N}(\bb{y}_n)-\bb{N}(\bb{y}_{n-1})}{h}
+\end{align*}
+We solve the integral exactly with these constant and linear approximations to get the full schemes, which are shown below.
+\begin{align*}
+\text{ETD1}&: \bb{y}_{n+1} = \exp(h\bb{L})\bb{y}_n + \bb{N}(\bb{y}_n) \frac{\exp(h\bb{L})-1}{L}\\
+\text{ETD2}&: \bb{y}_{n+1} = \exp(h\bb{L})\bb{y}_n + \bb{N}(\bb{y}_n) \frac{(1+h\bb{L})\exp(h\bb{L})-2h\bb{L}-1}{h\bb{L}^2} + \bb{N}(\bb{y}_{n-1})\frac{-\exp{h\bb{L}}+1+h\bb{L}}{h\bb{L}^2}
+\end{align*}
+
+If $L$ is a scalar linear operator, the above equations make sense, an if it is not, then $1$'s should be replaced by identity matrices. 
+
+\subsection{Multi-stage methods: Runge-Kutta}
+Runge-Kutta methods with $s$-stages work by approximating the state, $y$, and its time-derivative, $\ddt y$, in various stages,$\{t_n + c_i h\}_{i=1}^s$, where $ c_i\in [0,h]$  within a single time-step, $h$.
+Instead, ETD-RK methods only approximate the nonlinear function in the integrand of Equation~\ref{eqn:ETDeq} (instead of the whole RHS).
+
+\subsubsection{ETD-RK2}
+Consider Heun's second order scheme shown by Butcher tableau below.
+\[
+\renewcommand\arraystretch{1.2}
+\begin{array}
+{c|cccc}
+0& &\\
+1& 1 &\\
+\hline
+& \frac{1}{2} &\frac{1}{2} 
+\end{array}
+\]
+This scheme has two stages which both approximate $\bb{y}_{n+1}$
+\begin{align}
+\bb{y}_n &= \bb{k}_1:=\bb{y}_n\\ 
+\bb{y}_{n+1}&\approx \bb{k}_2 := \exp(h\bb{L})\bb{y}_n + \bb{N}(\bb{y}_n) \frac{\exp(h\bb{L})-1}{L} \quad\text{(same as ETD1)}\\
+\bb{N}(\bb{y},t) &\approx N_{RK2}(\bb{k}_1, \bb{k}_2):= \bb{N}(\bb{y}_n,t_n)+ \tau \frac{\bb{N}(\bb{k}_2) - \bb{N}(\bb{k}_1)}{h} \label{eqn:ETDRK2}
+\end{align}
+
+Integrating exactly with this linear approximation yields ETD-RK2. 
+\begin{equation}
+\bb{y}_{n+1} = \bb{k}_2 + (\bb{N}(\bb{k}_2)-\bb{N}(\bb{y}_n))\frac{\exp(h\bb{L})-h\bb{L}-1}{h\bb{L}^2}
+\end{equation}
+
+So the name of the game is to find approximations of the nonlinear term in the integrand.
+If we stick to polynomial approximations with interpolating nodes within a time-step, we can make the generalization that the resulting ETD-RK schemes all involve integrating $\exp(h\bb{L})\tau^i$. 
+
+Suppose that the RK scheme yields some polynomial approximant, $$\bb{N}(y) = \bb{N}(y(t_n+\tau)) \approx \bb{N}_{RK}(\tau) = p_0 + p_1\tau + \cdots p_s \tau^s.$$
+
+Then the exact integral we must solve can now be separated by each term in the polynomial. 
+\begin{equation}
+\int_{0}^h \exp(-\tau \bb{L}) \bb{N}(y(t_n+\tau), t_n+\tau) \mathrm{d}\tau \approx \sum_{i=0}^s p_i \int_0^h \exp(-\tau \bb{L}) \tau^i \mathrm{d}\tau
+\end{equation}
+
+Substituting this approximation into the general ETD scheme yields, 
+\begin{equation}
+\bb{y}_{n+1}= \exp(h\bb{L})\left(\bb{y}_n + \sum_{i=0}^s p_i\int_{0}^{h} \exp(-\tau \bb{L}) \tau^i \mathrm{d}\tau \right)
+\label{eqn:ETDRKeq}
+\end{equation}
+\paragraph{$\phi$ functions:}
+Here we introduce a family of functions that deal with these sorts of integrals. 
+We have $\phi_0(h\bb{L}):= \exp{h\bb{L}}$, and for $l\geq 1$, 
+\begin{equation}
+\phi_l(h\bb{L}) = \frac{\exp(h\bb{L})}{h^l(l-1)!}\int_0^h \exp(-\tau \bb{L}) \tau^{l-1}\mathrm{d}\tau.
+\end{equation}
+Let's define new coefficients $q_l$'s, so that we can write the scheme in terms of the $\phi_l$ functions. 
+The indexing is off, so think $l=i+1$.
+We have to require $q_l = (l-1)!h^{l} p_{l-1}$ for $l\geq1$.
+\begin{equation}
+\bb{y}_{n+1}= \exp(h\bb{L}) \bb{y}_n + \sum_{l=1}^{s+1} q_l\phi_l(h\bb{L}) 
+\label{eqn:ETDRKphi}
+\end{equation}
+
+\paragraph{ETDRK2 represented by $\phi$ functions:}
+Equation~\ref{eqn:ETDRK2} is simply a linear approximation with $p_0= \bb{N}(\bb{y}_n)$ and $p_1 = \frac{\bb{N}(\bb{k}_2)-\bb{N}(\bb{y}_n)}{h}$.
+This gives us $s=1$, $q_1 = h\bb{N}(\bb{y}_n)$, and $q_2 = h^2 \frac{\bb{N}(\bb{k}_2)-\bb{N}(\bb{y}_n)}{h}$.
+Using this, we can construct a Butcher tableau like before. 
+
+\[
+\renewcommand\arraystretch{1.2}
+\begin{array}
+{c|ccc}
+0& 0&\\
+1& \phi_1(h\bb{L}) & 0\\
+\hline
+& \phi_1(h\bb{L})-\phi_2(h\bb{L}) &\phi_2(h\bb{L}) 
+\end{array} = \begin{array}
+{c|ccc}
+0& 0&\\
+c_2& a_{21} &0\\
+\hline
+& b_1 &b_2
+\end{array}
+\]
+
+\section{Tableau}
+How to interpret these ETD-RK tableaus as is implied in Equation 5.4 of \cite{MinchevWright}:
+\begin{align}
+\bb{k}_i &= \exp(c_ih\bb{L})\bb{y}_n + h\sum_{j=1}^{i-1}a_{ij}\bb{N}(\bb{k}_j) \label{eqn:eRK1}\\
+\bb{y}_{n+1} &= \exp(h\bb{L})\bb{y}_n + h\sum_{j=1}^s b_j\bb{N}(\bb{k}_j) \label{eqn:eRK3}\
+\end{align}
+
+Furthermore, the $a_{ij}$'s and $b_j$'s are defined via $\phi$ functions in the following way, (Equation 5.5 of \cite{MinchevWright}), which was originally published in \cite{Friedli1978}.
+\begin{align*}
+a_{ij} &= \sum_{k=1}^{i-1} \alpha_{ijk}\phi_k(c_ih\bb{L}) \\
+b_{i} &= \sum_{k=1}^s \beta_{ik} \phi_k(h\bb{L})
+\end{align*}
+
+
+\paragraph{ETDRK3}
+\[
+\renewcommand\arraystretch{1.2}
+\begin{array}
+{c|cccc}
+0& &  & \\
+\frac{1}{2}& \frac{1}{2}\phi_1(\frac{h}{2}\bb{L}) &  &\\
+1 & -\phi_1(h\bb{L}) & 2\phi_1(h\bb{L})&\\ \hline
+& \phi_1(h\bb{L})-3\phi_2(h\bb{L})+4\phi_3(h\bb{L}) &4\phi_2(h\bb{L}) -8\phi_3(h\bb{L}) & -\phi_2(h\bb{L}) + 4\phi_3(h\bb{L}) 
+\end{array}
+\]
+
+\paragraph{ETDRK4}
+\[
+\renewcommand\arraystretch{1.2}
+\begin{array}
+{c||c|c|c|c|c}
+0& & & & \\
+\frac{1}{2}& \frac{1}{2}\phi_1(\frac{h}{2}\bb{L}) &  & & \\
+\frac{1}{2} & 0 & \frac{1}{2}\phi_1(\frac{h}{2}\bb{L})& &\\ 
+1 &  \frac{1}{2}\phi_1(\frac{h}{2}\bb{L}) (\phi_0(\frac{h}{2}\bb{L})-1)= \frac{h}{4}L[ \phi_1(\frac{h}{2}\bb{L})]^2 & 0 & \phi_1(\frac{h}{2}\bb{L}) & \\\hline
+& \phi_1(h\bb{L})-3\phi_2(h\bb{L})+4\phi_3(h\bb{L})  &2\phi_2(h\bb{L}) -4\phi_3(h\bb{L})&2\phi_2(h\bb{L}) -4\phi_3(h\bb{L}) & -\phi_2(h\bb{L}) + 4\phi_3(h\bb{L}) 
+\end{array}
+\]
+
+\paragraph{ETDRK4-B}:What's printed on (51) of \cite{Krogstad2005}.
+\[
+\renewcommand\arraystretch{1.2}
+\begin{array}
+{c||c|c|c|c|c}
+0& & & & \\
+\frac{1}{2}& \frac{1}{2}\phi_1 &  & & \\
+\frac{1}{2} &  \frac{1}{2}\phi_1 - \phi_2  & \phi_2& &\\ 
+1 &  \phi_1 - 2\phi_2 & 0 & 2\phi_2 & \\\hline
+& \phi_1-3\phi_2+4\phi_3 &2\phi_2 -4\phi_3 &2\phi_2 -4\phi_3 & -\phi_2 + 4\phi_3
+\end{array}
+\]
+
+
+\paragraph{ETDRK4-B}:What Ian's matlab code suggests.
+\[
+\renewcommand\arraystretch{1.2}
+\begin{array}
+{c||c|c|c|c|c}
+0& & & & \\
+\frac{1}{2}& \frac{1}{2}\phi_1(\frac{h}{2}\bb{L}) &  & & \\
+\frac{1}{2} & \frac{1}{2}\phi_1(\frac{h}{2}\bb{L})-\phi_2(\frac{h}{2}\bb{L})  &\phi_2(\frac{h}{2}\bb{L}) & &\\ 
+1 &  \phi_1(h\bb{L})-2\phi_2(h\bb{L}) & 0 & 2\phi_2(h\bb{L}) & \\\hline
+& \phi_1(h\bb{L})-3\phi_2(h\bb{L})+4\phi_3(h\bb{L})  &2\phi_2(h\bb{L}) -4\phi_3(h\bb{L})&2\phi_2(h\bb{L}) -4\phi_3(h\bb{L}) & -\phi_2(h\bb{L}) + 4\phi_3(h\bb{L})
+\end{array}
+\]
+
+\section{Resonant Triad Analysis: ETD-Explicit RTD methods}
+
+We can write the resonant triad equations in the form of Equation~\ref{eqn:ODE}, 
+\[
+\ddt \bb{z} = \begin{bmatrix}
+\imag\omega_1 & 0 & 0\\
+0 & \imag\omega_2 & 0\\
+0 & 0 & \imag\omega_3
+\end{bmatrix}\bb{z} + \eps\begin{bmatrix}
+C_1 z_2^*z_3^*\\
+C_{2}z_1^*z_3^*\\
+C_{3}z_1^*z_2^*
+\end{bmatrix} =\bb{Lz} + \bb{N}(\bb{z})\label{eqn:RTvec},
+\]
+where $\bb{z}=[z_1,z_2,z_3]^{\top}$.
+
+\subsection{Order $\eps$ perturbation to argument of nonlinear function.}
+First, we show what happens when we add an order $\epsilon$ perturbation to the argument of $\bb{N}(\cdot)$. 
+Let $\bb{z} = \bb{z}^{0} + \eps \bb{z}^{(1)}$, where $\bb{z}^{(0)}, \bb{z}^{(1)} = \mathcal{O}(1)$.
+Then, \[
+\bb{N}(\bb{z}^{0} + \eps \bb{z}^{(1)}) = \eps \begin{bmatrix}
+C_1 (z_2^{(0)} + \eps z_2^{(1)})^*(z_3^{(0)}+ \eps z_3^{(1)})^*\\
+C_2 (z_1^{(0)} + \eps z_1^{(1)})^*(z_3^{(0)}+ \eps z_3^{(1)})^*\\
+C_3 (z_1^{(0)} + \eps z_1^{(1)})^*(z_2^{(0)}+ \eps z_2^{(1)})^*
+\end{bmatrix} \]
+\[
+=\eps \begin{bmatrix}
+C_1 z_2^{(0)*}z_3^{(0)*}\\
+C_2 z_1^{(0)*}z_3^{(0)*}\\
+C_3 z_1^{(0)*}z_2^{(0)*}
+\end{bmatrix} + \eps^2 \begin{bmatrix}
+C_1 \left(z_2^{(0)*}z_3^{(1)*} + z_2^{(1)*}z_3^{(0)*}\right)\\
+C_2 \left(z_1^{(0)*}z_3^{(1)*} + z_1^{(1)*}z_3^{(0)*}\right)\\
+C_3 \left(z_1^{(0)*}z_2^{(1)*} + z_1^{(1)*}z_2^{(0)*}\right)\\
+\end{bmatrix} + \eps^3 \begin{bmatrix}
+C_1 z_2^{(1)*}z_3^{(1)*}\\
+C_2 z_1^{(1)*}z_3^{(1)*}\\
+C_3 z_1^{(1)*}z_2^{(1)*}
+\end{bmatrix}
+= \bb{N}(\bb{z}^{(0)}) +\mathcal{O}(\eps^2)\]
+
+\subsection{Apply to ETD explicit RK methods on the resonant triad}
+We apply the above result to RK methods described by Equations~\ref{eqn:eRK1} through \ref{eqn:eRK3}.
+\textbf{Claim: }For the resonant triad equations, $\bb{N}(\bb{k}_i) =  \exp(-c_ih\bb{L})\bb{N}(\bb{y}_{n-1})+\mathcal{O}(\eps^2)$.
+\begin{proof}
+	We prove this via induction. \\
+	\textbf{i = 1:}\\
+	 Recall that  $\bb{k_1} = \exp(c_1h\bb{L})\bb{y}_{n-1}$. 
+	Then, \[\bb{N}(\bb{k}_1) = \bb{N}(\exp(c_1h\bb{L})\bb{y}_{n-1}) = \eps \begin{bmatrix}
+	C_1\exp(c_1h\omega_1)y_{n-1,2}^*y_{n-1,3}^* \\
+	C_2\exp(c_1h\omega_2)y_{n-1,1}^*y_{n-1,3}^*\\
+	C_3\exp(c_1h\omega_3)y_{n-1,1}^*y_{n-1,2}^*
+	\end{bmatrix} = \exp(c_1h\bb{L})\bb{N}(\bb{y}_{n-1}).\]
+	\textbf{Induction step: }Suppose that $\bb{N}(\bb{k}_{j}) = \exp(c_{j}h\bb{L})\bb{N}(\bb{y}_{n-1})+\mathcal{O}(\eps^2)$ for all $j = 1, \cdots, i-1$.
+	Then, 
+	\begin{align*}
+	\bb{k}_i &= \exp(c_i h \bb{L})\bb{y}_{n-1} + h\sum_{j = 1}^{i-1}a_{ij}(h\bb{L})\bb{N}(\bb{k}_j) \\ 
+	&= \exp(c_i h \bb{L})\bb{y}_{n-1} + h\sum_{j = 1}^{i-1}a_{ij}(h\bb{L})\left[\exp(c_jh\bb{L})\bb{N}(\bb{y}_{n-1}) + \mathcal{O}(\eps^2)\right]
+	\end{align*}
+	We know that $\bb{N}(\bb{y}_{n-1}) = \mathcal{O}(\eps)$, so we also know that the leading term in the summand, $a_{ij}(h\bb{L})\exp(c_jh\bb{L})\bb{N}(\bb{y}_{n-1})$, is order $\eps$ as well.
+	Using this, we can add further simplify the asymptotic ordering.
+	\begin{align*}
+	\bb{N}(\bb{k}_i) &= \bb{N}\bigg(\exp(c_i h \bb{L})\bb{y}_{n-1} + h\sum_{j = 1}^{i-1}a_{ij}(h\bb{L})\left[\exp(c_jh\bb{L})\bb{N}(\bb{y}_{n-1}) + \mathcal{O}(\eps^2)\right]\bigg) \\
+	&= \bb{N}\bigg(\exp(c_i h \bb{L})\bb{y}_{n-1} + h\sum_{j = 1}^{i-1}a_{ij}(h\bb{L})\exp(c_jh\bb{L})\bb{N}(\bb{y}_{n-1}) +\mathcal{O}(h(i-1)\eps^2)\bigg) \\
+	&= \bb{N}(\exp(c_ih\bb{L})\bb{y}_{n-1}) + \mathcal{O}(\eps^2)\\
+	&= \exp(c_ih\bb{L})\bb{N}(\bb{y}_{n-1}).
+	\end{align*}
+	Note that this last step is specific to the resonant triad. 
+\end{proof}
+
+Plugging in this result into Equation~\ref{eqn:eRK3}:
+\begin{align*}
+\bb{y}_n &= \exp(h\bb{L})\bb{y}_{n-1} + h\sum_{j=1}^s b_j\bb{N}(\bb{k}_j) \\
+&= \exp(h\bb{L})\bb{y}_{n-1} + h\sum_{j=1}^s b_j(h\bb{L})[\exp(c_jh\bb{L})\bb{N}(\bb{y}_{n-1}) + \mathcal{O}(\eps^2)]\\
+&= \exp(h\bb{L})\bb{y}_{n-1} + h\sum_{j=1}^s b_j(h\bb{L})\exp(c_jh\bb{L})\bb{N}(\bb{y}_{n-1}) + \mathcal{O}(\eps^2)\\
+\end{align*}
+
+
+\bibliography{../../../../library.bib}
+\bibliographystyle{apalike}
+
+
+\end{document}
