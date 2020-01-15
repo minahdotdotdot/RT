@@ -1,6 +1,6 @@
 include("MMT.jl")
-name="B";
-scheme="IFRK3"
+name="A";
+scheme="ARK3"
 # Problem Parameters
 λ = 1;  #Defocusing MMT model
 α = 1/2;
@@ -30,7 +30,7 @@ h = 0.05;
 T = 10000
 M = ceil(Int, T/h);
 #T = floor(Int,M*h)
-every = floor(Int, M/2000) # save solution at only 10 time locations.
+every = floor(Int, M/1000) # save solution at only 10 time locations.
 
 # Set-up ETDRK
 #include("ETD_methods.jl")
@@ -38,9 +38,15 @@ every = floor(Int, M/2000) # save solution at only 10 time locations.
 #ETDRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name)
 
 # Set-up IFRK
-include("IF_methods.jl")
-RKT = RK3;
-IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
+#include("IF_methods.jl")
+#RKT = RK3;
+#IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
+
+# Set-up IMEX
+include("IMEX_methods.jl")
+RKT = ARK3;
+IMEXRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
+
 
 
 function plotEnergy!(k, N, T, name::String)
@@ -59,7 +65,7 @@ function plotEnergy!(k, N, T, name::String)
 	ylabel("n(k)")
 	legend()
 	title("h="*string(h)*", "*scheme)
-	savefig(scheme*"-"*string(Int(h*1000),pad=3)*"ES.png")
+	savefig(scheme*"-"*string(Int(h*100000),pad=5)*"ES.png")
 	close(fig)
 end
 

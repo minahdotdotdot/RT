@@ -67,8 +67,8 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
     ks = zeros(eltype(zhat), length(RKT.b), length(IC)); #RK stages (allocate memory)
     #forcing term
     N = length(zhat);
-    fname=name*"f"*string(Int(fP.F*1000), pad=3)
-    newtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
+    #fname=name*"f"*string(Int(fP.F*1000), pad=3)
+    #newtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
     for t = 1 : M
         zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k)
         if rem(t,every)==1 || every==1
@@ -76,7 +76,7 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
                 error("Blowup!!! at ND time="*string(t*h))#break
             end
             addtxt!(zhat, name=name)
-            addtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
+            #addtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
         end
     end
 end
@@ -135,8 +135,8 @@ function ETDRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
     ks = zeros(eltype(zhat), length(RKT.b), length(IC)); #RK stages (allocate memory)
     #forcing term
     N = length(zhat);
-    fname=name*"f"*string(Int(fP.F*1000), pad=3)
-    newtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
+    #fname=name*"f"*string(Int(fP.F*1000), pad=3)
+    #newtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
     exphL = exp.(h*L)
     for t = 1 : M
         zhat = ETDRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k, exphL)
@@ -145,8 +145,66 @@ function ETDRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
                 error("Blowup!!! at ND time="*string(t*h))#break
             end
             addtxt!(zhat, name=name)
-            addtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
+            #addtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
         end
     end
 end
 
+####### IMEX Problem Set-up #######
+struct IMEXTableau
+    Ae #:: s-by-s matrix (explicit)
+    Ai #:: s-by-s matrix (implicit)
+    b #stages :: s-length vector
+    c #times  :: s-length vector
+    d #diagonal entry of A^(implicit)
+    IMEXTableau(Ae, Ai, b, c, d) = new(copy(Ae), copy(Ai), copy(b), copy(c), d)
+end
+@inline function lincomN(A, ks, fp, k, nlfunc::Function=NLfunc)
+    tmp = A[1]*nlfunc(ks[1,:], fp, k)
+    for i = 2 : length(A)
+        tmp += A[i] * nlfunc(ks[i,:], fp, k)
+    end
+    return tmp
+end
+
+@inline function lincomL(A, L, ks)
+    tmp = A[1]*(L .*ks[1,:])
+    for i = 2 : length(A)
+        tmp += A[i] * (L .* ks[i,:])
+    end
+    return tmp
+end
+
+function IMEXRK_step(zhat::Array{ComplexF64,1}, h::Float64, 
+    L, NLfunc::Function, fP::funcparams, RKT::IMEXTableau, ks, k)
+    ks[1,:] = copy(zhat)
+    #L.* zhat + NLfunc(zhat, fP, k); #first stage
+    invd = 1/(1-h*d)
+    for i = 2 :length(RKT.b)
+        ks[i,:] = invd * (zhat + h*(
+            lincomL(RKT.Ae[i-1,1:i-1], L, ks[1:i-1,:])
+            + lincomN(RKT.Ai[i-1,1:i-1], ks[1:i-1,:], fP, k, NLfunc)
+            )
+        )
+    end
+    return zhat + h*(lincomL(b, L, ks) + lincomN(b, ks, fP, k, NLfunc))
+end
+
+function IMEXRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64, 
+    L, NLfunc::Function, fP::funcparams, RKT::IMEXTableau, k; name::String)
+    # FFT into Fourier space
+    zhat = fft(IC)*0.001; N = length(zhat); #zhat[Int(N/4+2):Int(3*N/4)].= 0.0;
+    newtxt!(zhat, name=name); kmax = sqrt(maximum(abs.(k)));
+    ks = zeros(eltype(zhat), length(RKT.b), length(IC)); #RK stages (allocate memory)
+    #forcing term
+    N = length(zhat);
+    for t = 1 : M
+        zhat = IMEXRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k)
+        if rem(t,every)==1 || every==1
+            if any(isnan,zhat)  || any(isinf,zhat)
+                error("Blowup!!! at ND time="*string(t*h))#break
+            end
+            addtxt!(zhat, name=name)
+        end
+    end
+end
