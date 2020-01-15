@@ -167,27 +167,19 @@ end
     return tmp
 end
 
-@inline function lincomL(A, L, ks)
-    tmp = A[1]*(L .*ks[1,:])
-    for i = 2 : length(A)
-        tmp += A[i] * (L .* ks[i,:])
-    end
-    return tmp
-end
-
 function IMEXRK_step(zhat::Array{ComplexF64,1}, h::Float64, 
     L, NLfunc::Function, fP::funcparams, RKT::IMEXTableau, ks, k)
     ks[1,:] = copy(zhat)
     #L.* zhat + NLfunc(zhat, fP, k); #first stage
-    invd = 1/(1-h*d)
+    invd = 1 ./(1 .- h*d*L)
     for i = 2 :length(RKT.b)
-        ks[i,:] = invd * (zhat + h*(
-            lincomL(RKT.Ae[i-1,1:i-1], L, ks[1:i-1,:])
+        ks[i,:] = invd .* (zhat + h*(
+            L .* lincom(RKT.Ae[i-1,1:i-1], ks[1:i-1,:])
             + lincomN(RKT.Ai[i-1,1:i-1], ks[1:i-1,:], fP, k, NLfunc)
             )
         )
     end
-    return zhat + h*(lincomL(b, L, ks) + lincomN(b, ks, fP, k, NLfunc))
+    return zhat + h*( L .* lincom(RKT.b, ks) + lincomN(RKT.b, ks, fP, k, NLfunc))
 end
 
 function IMEXRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64, 
