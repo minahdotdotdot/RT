@@ -168,10 +168,9 @@ end
 end
 
 function IMEXRK_step(zhat::Array{ComplexF64,1}, h::Float64, 
-    L, NLfunc::Function, fP::funcparams, RKT::IMEXTableau, ks, k)
+    L, NLfunc::Function, fP::funcparams, RKT::IMEXTableau, ks, k, invd)
     ks[1,:] = copy(zhat)
     #L.* zhat + NLfunc(zhat, fP, k); #first stage
-    invd = 1 ./(1 .- h*d*L)
     for i = 2 :length(RKT.b)
         ks[i,:] = invd .* (zhat + h*(
             L .* lincom(RKT.Ae[i-1,1:i-1], ks[1:i-1,:])
@@ -190,8 +189,9 @@ function IMEXRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
     ks = zeros(eltype(zhat), length(RKT.b), length(IC)); #RK stages (allocate memory)
     #forcing term
     N = length(zhat);
+    invd = 1 ./(1 .- h*RKT.d*L)
     for t = 1 : M
-        zhat = IMEXRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k)
+        zhat = IMEXRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k, invd)
         if rem(t,every)==1 || every==1
             if any(isnan,zhat)  || any(isinf,zhat)
                 error("Blowup!!! at ND time="*string(t*h))#break
