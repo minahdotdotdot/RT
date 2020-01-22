@@ -1,5 +1,5 @@
 include("MMT.jl")
-name="A";
+name="E";
 scheme="ARK3"
 # Problem Parameters
 λ = 1;  #Defocusing MMT model
@@ -17,7 +17,7 @@ kindnz = vcat(collect(Int(N/2)+2:N), collect(2:Int(N/2))); # indexing w/o zero m
 
 #IC
 #IC = cos.(range(0,2*pi,length=N)) + im*sin.(range(0,2*pi,length=N))
-IC = randn(ComplexF64, N)*sqrt(N)/1000; IC[1]=0.0; IC = ifft(IC);
+#IC = randn(ComplexF64, N)*sqrt(N)/1000; IC[1]=0.0; IC = ifft(IC);
 
 # Linear operator (depends on k)
 L = -im*abs.(k).^fP.α; #L[Int(N/4+2):Int(3*N/4)].=0
@@ -26,11 +26,11 @@ L[2:end] += -196.61 * (abs.(k[2:end]).^(-8)) - fP.D[1]* (abs.(k[2:end]) .^ fP.D[
 L[1]= -200.0;
 
 # time-step, ND final time, save "every"
-h = 0.05;
-T = 10000
+h = 0.000250;
+T = 1
 M = ceil(Int, T/h);
 #T = floor(Int,M*h)
-every = floor(Int, M/1000) # save solution at only 10 time locations.
+every = 2#floor(Int, M/1000) # save solution at only 10 time locations.
 
 # Set-up ETDRK
 #include("ETD_methods.jl")
@@ -38,6 +38,7 @@ every = floor(Int, M/1000) # save solution at only 10 time locations.
 #ETDRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name)
 
 # Set-up IFRK
+#deg = 7
 #include("IF_methods.jl")
 #RKT = RK3;
 #IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
@@ -45,7 +46,8 @@ every = floor(Int, M/1000) # save solution at only 10 time locations.
 # Set-up IMEX
 include("IMEX_methods.jl")
 RKT = ARK3;
-IMEXRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name) 
+IC = ifft(readCfile(name)[end,:],2)*1000;
+IMEXRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name, cont=true) 
 
 
 
@@ -70,4 +72,4 @@ function plotEnergy!(k, N, T, name::String)
 end
 
 using PyPlot, LaTeXStrings
-plotEnergy!(k, N, T, name)
+#plotEnergy!(k, N, T, name)

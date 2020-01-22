@@ -182,10 +182,12 @@ function IMEXRK_step(zhat::Array{ComplexF64,1}, h::Float64,
 end
 
 function IMEXRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64, 
-    L, NLfunc::Function, fP::funcparams, RKT::IMEXTableau, k; name::String)
+    L, NLfunc::Function, fP::funcparams, RKT::IMEXTableau, k; name::String, cont::Bool=false)
     # FFT into Fourier space
     zhat = fft(IC)*0.001; N = length(zhat); #zhat[Int(N/4+2):Int(3*N/4)].= 0.0;
-    newtxt!(zhat, name=name); kmax = sqrt(maximum(abs.(k)));
+    if cont==false
+        newtxt!(zhat, name=name); kmax = sqrt(maximum(abs.(k)));
+    end
     ks = zeros(eltype(zhat), length(RKT.b), length(IC)); #RK stages (allocate memory)
     #forcing term
     N = length(zhat);
