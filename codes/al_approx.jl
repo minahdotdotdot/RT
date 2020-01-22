@@ -7,9 +7,10 @@ for i = 4 : 8
 	Zeros[i-3] = file["zer"]
 end=#
 
-function evalbary(z::Array{Complex{T}}, name::String) where T<:AbstractFloat
+function evalbary(z::Vector{Complex{T}}, name::String) where T<:AbstractFloat
 	info = matread(name*".mat")
-	fj = exp.(info["zj"])
+	#fj = exp.(info["zj"])
+	fj = info["fj"];
 	CC = 1 ./ broadcast(-, z, transpose(info["zj"]))
 	r = (CC*(info["wj"].*fj))./(CC*info["wj"])
 	#=for i = 1 : length(r)
@@ -26,13 +27,12 @@ function evalbary(z::Array{Complex{T}}, name::String) where T<:AbstractFloat
 	return r
 end
 
-function evalrat(z::Array{Complex{T}}, name::String) where T<:AbstractFloat
+function evalrat(z::Vector{Complex{T}}, name::String) where T<:AbstractFloat
 	info = matread(name*".mat")
 	D = info["pol"]
 	N = info["zer"]
 	denom = (z .-D[1])
 	for i = 2 : length(D)
-		
 		denom .*= (z .-D[i])
 	end
 	num = (z .-N[1])
@@ -40,10 +40,20 @@ function evalrat(z::Array{Complex{T}}, name::String) where T<:AbstractFloat
 		num .*= (z .-N[i])
 	end
 	r = num ./denom
-	return r/r[1]
+	nr, n = evalnormal(name)
+	return r*nr + (1-n)
 end
 
-function evalrat(L::Array{Complex{T},2}, name::String) where T<:AbstractFloat
+function evalnormal(name::String)
+	info = matread(name*".mat")
+	D = info["pol"]
+	N = info["zer"]
+	n = evalbary(zeros(ComplexF64,2),name)[1]
+	r = prod(-N)/prod(-D)
+	return n/r, n
+end
+
+function evalrat(L::Matrix{Complex{T}}, name::String) where T<:AbstractFloat
 	info = matread(name*".mat")
 	D = info["pol"]
 	N = info["zer"]
@@ -55,26 +65,17 @@ function evalrat(L::Array{Complex{T},2}, name::String) where T<:AbstractFloat
 	for i = 2 : length(N)
 		num *= (L -N[i]*I)
 	end
-	expL = num*inv(denom)
-	return expL#/(prod(-N)/prod(-D))
+	#expL = num*inv(denom)
+	expL = (D'\N')'
+	nr, n = evalnormal(name)
+	return expL*nr +(1-n)*I 
 end
 
 function evalrat(L::Diagonal{Complex{T}}, name::String) where T<:AbstractFloat
-	info = matread(name*".mat")
-	D = info["pol"]
-	N = info["zer"]
-	denom = (L -D[1]*I)
-	for i = 2 : length(D)
-		denom *= (L -D[i]*I)
-	end
-	num = (L -N[1]*I)
-	for i = 2 : length(N)
-		num *= (L -N[i]*I)
-	end
-	expL = num*inv(denom)
-	return expL/(prod(-N)/prod(-D))
+	return Diagonal(evalrat(diag(L), name))
 end
 
+#=
 function plotcomplex!(errexpL::Array{Complex{T},1}, 
 	i::Int, name::String="Matrix ") where T <: AbstractFloat
 	#approxexpL = evalrat(h*L, "../codes/polzer"*string(i))
@@ -132,7 +133,6 @@ function semilogyseparate!(errexpL, i::Int, J::Int)
 	legend()
 end
 
-#=
 
 z = collect(im*range(0, stop = 2*pi, length = 2001));
 #truesol = exp.(z);
