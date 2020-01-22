@@ -41,7 +41,7 @@ function evalrat(z::Vector{Complex{T}}, name::String) where T<:AbstractFloat
 	end
 	r = num ./denom
 	nr, n = evalnormal(name)
-	return r*nr + (1-n)
+	return r*nr .+ (1-n)
 end
 
 function evalnormal(name::String)
