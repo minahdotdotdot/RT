@@ -69,6 +69,9 @@ b = [82889/524892;
 c = [1/2; 83/250; 31/50; 17/20; 1];
 ARK4 = IMEXTableau(Ae, Ai, b, c, d);
 
-
+IMEXdict= Dict( 
+	"ARK3" => ARK3, 
+	"ARK4" => ARK4
+	);
 
 

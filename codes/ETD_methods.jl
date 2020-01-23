@@ -51,3 +51,10 @@ c=[1/2,1/2,1];c=Array{Any,1}(c)
 b=[[1.0,-3,4,0],[0,2,-4,0],[0,2,-4,0],[0,-1,4,0]];b=Array{Any,1}(b);
 A,b,c=buildAbc(A,b,c,h,L);
 ETDRK4B=ETDRKTableau(A,b,c)
+
+ETDdict = Dict(
+	"ETDRK2"=> ETDRK2, 
+	"ETDRK3" => ETDRK3, 
+	"ETDRK4" => ETDRK4, 
+	"ETDRK4B" => ETDRK4B
+	);

@@ -42,41 +42,46 @@ struct eRKTableau
     c # t increments  :: s-length vector
     eRKTableau(A, b, c) = new(copy(A),copy(b), copy(c))
 end
+@inline function lincomIF(A, ks)
+    tmp = A[1] .* ks[1,:]
+    for i = 2 : length(A)
+        tmp += A[i] .* ks[i,:]
+    end
+    return tmp
+end
 
 function IFRK_step(zhat::Array{ComplexF64,1}, h::Float64, 
     L, NLfunc::Function, fP::funcparams, 
     RKT::eRKTableau, ks, k)
-    ks[1,:] = NLfunc(zhat, fP, k)
+    ks[1,:] = c[1,1] .* NLfunc(zhat, fP, k); #c[1,1] should be just ones.
     for i = 2 :length(RKT.b)
-        #PP=h*Transpose(ks[1:i-1,:])*RKT.A[i,1:i-1]
-        #ks[i,:] = expnz(-h*RKT.c[i]*L) .* NLfunc(expnz(h*RKT.c[i]*L) .*(zhat + PP), fP, k)
-        PP = h* lincom(RKT.A[i,1:i-1], ks[1:i-1,:])
-        ks[i,:] = RKT.c[2*(i-2)+1] .* NLfunc(RKT.c[2*(i-2)+2].*(zhat+PP), fP, k)
+        PP = h* lincomIF(RKT.A[i,1:i-1] .* RKT.c[i,1:i-1], ks[1:i-1,:]); # sum
+        ks[i,:] = NLfunc(PP+RKT.c[i,i].*zhat, fP, k)
+        #PP = h* lincom(RKT.A[i,1:i-1], ks[1:i-1,:])
+        #ks[i,:] = RKT.c[2*(i-2)+1] .* NLfunc(RKT.c[2*(i-2)+2].*(zhat+PP), fP, k)
     end
-    #vb = Transpose(ks)*RKT.b
-    #return expnz(h*L) .* (zhat+ (h*vb))
-    #return RKT.c[end].* (zhat+ (h*vb))
-    return RKT.c[end] .* (zhat + h*lincom(RKT.b, ks))
+    PP = h* lincomIF(RKT.b .* RKT.c[end,:], ks)
+    return PP + RKT.c[end-1,end].*zhat
+    #return RKT.c[end] .* (zhat + h*lincom(RKT.b, ks))
 end
 
 function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64, 
-    L, NLfunc::Function, fP::funcparams, RKT::eRKTableau, k; name::String)
+    L, NLfunc::Function, fP::funcparams, RKT::eRKTableau, k; name::String, cont::Bool=false)
     # FFT into Fourier space
     zhat = fft(IC)*0.001; N = length(zhat); #zhat[Int(N/4+2):Int(3*N/4)].= 0.0;
-    newtxt!(zhat, name=name); kmax = sqrt(maximum(abs.(k)));
+    if cont==false
+        newtxt!(zhat, name=name); kmax = sqrt(maximum(abs.(k)));
+    end
     ks = zeros(eltype(zhat), length(RKT.b), length(IC)); #RK stages (allocate memory)
     #forcing term
     N = length(zhat);
-    #fname=name*"f"*string(Int(fP.F*1000), pad=3)
-    #newtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
     for t = 1 : M
         zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k)
         if rem(t,every)==1 || every==1
             if any(isnan,zhat)  || any(isinf,zhat)
-                error("Blowup!!! at ND time="*string(t*h))#break
+                error("Blowup!!! at ND time="*string(t*h))
             end
             addtxt!(zhat, name=name)
-            #addtxt!(maximum(abs.(ifft(zhat)))^2/kmax, name=fname)
         end
     end
 end
@@ -111,7 +116,7 @@ function buildAbc(A, b, c, h, L)
 end
 
 @inline function lincom(A, ks)
-    tmp = A[1]*ks[1,:]
+    tmp = A[1] * ks[1,:]
     for i = 2 : length(A)
         tmp += A[i] * ks[i,:]
     end
@@ -128,10 +133,12 @@ function ETDRK_step(zhat::Array{ComplexF64,1}, h::Float64,
 end
 
 function ETDRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64, 
-    L, NLfunc::Function, fP::funcparams, RKT::ETDRKTableau, k; name::String)
+    L, NLfunc::Function, fP::funcparams, RKT::ETDRKTableau, k; name::String, cont::Bool=false)
     # FFT into Fourier space
     zhat = fft(IC)*0.001; N = length(zhat); #zhat[Int(N/4+2):Int(3*N/4)].= 0.0;
-    newtxt!(zhat, name=name); kmax = sqrt(maximum(abs.(k)));
+    if cont==false
+        newtxt!(zhat, name=name); kmax = sqrt(maximum(abs.(k)));
+    end
     ks = zeros(eltype(zhat), length(RKT.b), length(IC)); #RK stages (allocate memory)
     #forcing term
     N = length(zhat);
