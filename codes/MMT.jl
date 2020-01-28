@@ -40,7 +40,8 @@ struct eRKTableau
     A # matrix        :: (s-1)-by-s matrix
     b # stage weights :: s-length vector
     c # t increments  :: s-length vector
-    eRKTableau(A, b, c) = new(copy(A),copy(b), copy(c))
+    x # 
+    eRKTableau(A, b, c, x) = new(copy(A),copy(b), copy(c), copy(x))
 end
 @inline function lincomIF(A, ks)
     tmp = A[1] .* ks[1,:]
@@ -76,7 +77,7 @@ function IFRK!(M::Int, every::Int, IC::Array{ComplexF64,1}, h::Float64,
     #forcing term
     N = length(zhat);
     for t = 1 : M
-        zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k)
+        zhat = IFRK_step(zhat, h, L, NLfunc, fP, RKT, ks, k)[:,1]
         if rem(t,every)==1 || every==1
             if any(isnan,zhat)  || any(isinf,zhat)
                 error("Blowup!!! at ND time="*string(t*h))

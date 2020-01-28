@@ -1,13 +1,13 @@
 include("MMT.jl")
 name="A";
-scheme="ARK3"
+scheme="IFRK3_rat"
 
 # time-step, ND final time, save "every"
 h = 0.025;
-T =10000
+T =10
 M = ceil(Int, T/h);
 #T = floor(Int,M*h)
-every = floor(Int, M/1000) # save solution at only 10 time locations.
+every = 40#floor(Int, M/1000) # save solution at only 10 time locations.
 
 # Problem Parameters
 λ = 1;  #Defocusing MMT model
@@ -33,12 +33,36 @@ L[[6+1, 7+1, 8+1, 9+1, -6+(N+1), -7+(N+1), -8+(N+1), -9+(N+1)]] .+= fP.F;
 L[2:end] += -196.61 * (abs.(k[2:end]).^(-8)) - fP.D[1]* (abs.(k[2:end]) .^ fP.D[2]); 
 L[1]= -200.0;
 
+if scheme ∈ ["IFRK3_rat", "IFRK4_rat"]
+	using MAT
+	include("IF_methods.jl")
+	file = matopen("../data/Lhc_"*name*".mat","w")
+	write(file, "scheme", scheme)
+	write(file, "h", h)
+	close(file)
+	if scheme == "IFRK3_rat"
+		file = matopen("../data/"*scheme*"h="*string(h)*".mat", "w")
+		write(file, "L", L)
+		write(file, "x", IFRK3.x)
+		write(file, "crat", IFRK3.c)
+		close(file)
+	else
+		file = matopen("../data/Lhc.mat", "w")
+		write(file, "L", L)
+		write(file, "h", h)
+		write(file, "x", IFRK4.x)
+		write(file, "crat", IFRK4.c)
+		close(file)
+	end
+
+end
+
 function runMMT(method::String, 
 	M::Int, every::Int, IC, h, L, NLfunc, fP, k, name, cont::Bool=false)
 	if method ∈ ["ETDRK2", "ETDRK3", "ETDRK4", "ETDRK4B"]
 		include("ETD_methods.jl")
 		ETDRK!(M, every, IC, h, L, NLfunc, fP, ETDdict[method], k, name=name, cont=cont)
-	elseif method ∈ ["IFRK3", "IFRK3_rat", "IFRK4", "IFRK4_rat"]
+	elseif method ∈ ["IFRK3", "IFRK4"]
 		include("IF_methods.jl")
 		IFRK!(M, every, IC, h, L, NLfunc, fP, IFdict[method], k, name=name, cont=cont)
 	elseif method ∈ ["ARK3", "ARK4"]
@@ -47,6 +71,11 @@ function runMMT(method::String,
 	else
 		error("method must be ETD, IF, or IMEX.")
 	end
+end
+
+function runMMT(method::eRKTableau, 
+	M::Int, every::Int, IC, h, L, NLfunc, fP, k, name, cont::Bool=false)
+	IFRK!(M, every, IC, h, L, NLfunc, fP, method, k; name=name, cont=cont)
 end
 
 function plotEnergy!(k, N, T, name::String)
@@ -58,7 +87,7 @@ function plotEnergy!(k, N, T, name::String)
 	#semilogy(k[2:Int(end/2)], 1e-24 *(k[2:Int(end/2)]).^(-1/3), label=L"Ck^{-1/3}")
 	#semilogy(k[2:Int(end/2)], 1e-24 *(k[2:Int(end/2)]).^(-1/2), label=L"Ck^{-1/2}")
 	loglog(k[2:Int(end/2)], E[2:Int(end/2)], label=L"k\times"*"computed")
-	axhline(0.1, color=:black, label="0.1")
+	#axhline(0.1, color=:black, label="0.1")
 	#loglog(k[2:Int(end/2)], .24 *(k[2:Int(end/2)]).^(-2), label=L"Ck^{-2}")
 	#loglog(k[2:Int(end/2)], .24 *(k[2:Int(end/2)]).^(-1), label=L"Ck^{-1}")
 	xlabel("Wave Number")

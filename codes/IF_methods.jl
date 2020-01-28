@@ -43,20 +43,20 @@ end
 A = hcat([0; .5; -1],[0; 0; 2]);
 b = [1/6; 2/3; 1/6];
 x = [1/2; 1]; 
-c = cfromx(x)
-c=fillc(c,h,L);
+x = cfromx(x)
+c =fillc(x,h,L);
 #crat = fillc_rat(x, h, L, 6);
-IFRK3 = eRKTableau(A, b, c);
+IFRK3 = eRKTableau(A, b, c, x);
 #IFRK3_rat = eRKTableau(A, b, crat)
 
 #RK4
 A = hcat([0; .5; 0; 0], [0; 0; .5; 0], [0; 0; 0; 1.0]); #3by4
 b = [1/6; 1/3; 1/3; 1/6];
 x = [1/2; 1/2; 1]; 
-c = cfromx(x)
-c =fillc(c,h,L);
+x = cfromx(x)
+c =fillc(x,h,L);
 #crat = fillc_rat(x, h, L, 6);
-IFRK4 = eRKTableau(A, b, c); 
+IFRK4 = eRKTableau(A, b, c, x); 
 #IFRK4_rat = eRKTableau(A, b, crat);  =#
 
 IFdict = Dict( 
