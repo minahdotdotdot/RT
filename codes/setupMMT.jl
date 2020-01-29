@@ -1,13 +1,14 @@
 include("MMT.jl")
 name="A";
-scheme="IFRK3_rat"
+scheme="ARK3"
 
 # time-step, ND final time, save "every"
-h = 0.025;
-T =10
+h = 0.0001;
+T =10000
 M = ceil(Int, T/h);
 #T = floor(Int,M*h)
-every = 40#floor(Int, M/1000) # save solution at only 10 time locations.
+every = floor(Int, M/1000) # save solution at only 10 time locations.
+
 
 # Problem Parameters
 λ = 1;  #Defocusing MMT model
