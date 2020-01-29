@@ -12,6 +12,6 @@ julia ./setupMMT.jl
 
 module purge
 module load matlab
-matlab -nodesktop -nodisplay -r "genRationalApprox('A');exit"
+matlab -nodesktop -nodisplay -r "addpath(fullfile(cd,'chebfun'));genRationalApprox('A');exit"
 
 julia ./simplot.jl
