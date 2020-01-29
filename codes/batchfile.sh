@@ -7,10 +7,11 @@
 #SBATCH --mail-type=all
 #SBATCH --mail-user=luya7574@colorado.edu
 
-#cd /projects/luya7574/RT/codes
+cd /projects/luya7574/RT/codes
+julia ./setupMMT.jl
 
-julia=/Users/luciaminahyang/julia/julia
-matlab=/Applications/MATLAB_R2019a.app/bin/matlab
-$julia ./setupMMT.jl
-$matlab -nodesktop -nosplash -r "genRationalApprox('A');exit"
-$julia ./simplot.jl
+module purge
+module load matlab
+matlab -nodesktop -nodisplay -r "genRationalApprox('A');exit"
+
+julia ./simplot.jl
