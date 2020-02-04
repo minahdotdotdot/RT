@@ -1,13 +1,12 @@
 include("MMT.jl")
-name="A";
-scheme="IFRK3_rat"
-
+scheme="IFRK3"
 # time-step, ND final time, save "every"
 h = 0.025;
-T =10
+name=scheme*"-"*string(Int(h*1000000),pad=6)
+T =10000
 M = ceil(Int, T/h);
 #T = floor(Int,M*h)
-every = 40#floor(Int, M/1000) # save solution at only 10 time locations.
+every = floor(Int, M/1000) # save solution at only 10 time locations.
 
 # Problem Parameters
 λ = 1;  #Defocusing MMT model
@@ -78,22 +77,20 @@ function runMMT(method::eRKTableau,
 	IFRK!(M, every, IC, h, L, NLfunc, fP, method, k; name=name, cont=cont)
 end
 
-function plotEnergy!(k, N, T, name::String)
+function saveEnergy!(k, N, T, name::String; scheme::String, h, ES::Bool=true)
 	solhat = readCfile(name)[11:end,:]
 	#sol = ifft(solhat, 2)
 	E = k .* transpose(sum(abs.(solhat).^2, dims = 1)/size(solhat)[1])/N^2;
-	fig, ax = subplots()
-	#semilogy(k[kindnz], E[kindnz], label="computed")
-	#semilogy(k[2:Int(end/2)], 1e-24 *(k[2:Int(end/2)]).^(-1/3), label=L"Ck^{-1/3}")
-	#semilogy(k[2:Int(end/2)], 1e-24 *(k[2:Int(end/2)]).^(-1/2), label=L"Ck^{-1/2}")
-	loglog(k[2:Int(end/2)], E[2:Int(end/2)], label=L"k\times"*"computed")
-	#axhline(0.1, color=:black, label="0.1")
-	#loglog(k[2:Int(end/2)], .24 *(k[2:Int(end/2)]).^(-2), label=L"Ck^{-2}")
-	#loglog(k[2:Int(end/2)], .24 *(k[2:Int(end/2)]).^(-1), label=L"Ck^{-1}")
-	xlabel("Wave Number")
-	ylabel("n(k)")
-	legend()
-	title("h="*string(h)*", "*scheme)
-	savefig(scheme*"-"*string(Int(h*1000000),pad=6)*"ES.png")
-	close(fig)
+	if ES == false
+		fig, ax = subplots()
+		loglog(k[2:Int(end/2)], E[2:Int(end/2)], label=L"k\times"*"computed")
+		xlabel("Wave Number")
+		ylabel("n(k)")
+		legend()
+		title("h="*string(h)*", "*scheme)
+		savefig(scheme*"-"*string(Int(h*1000000),pad=6)*"ES.png")
+		close(fig)
+	else
+		newtxt!(E[2:Int(end/2)], name)
+	end
 end

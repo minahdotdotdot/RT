@@ -10,10 +10,10 @@ if scheme  ∈ ["IFRK3_rat", "IFRK4_rat"]
 		RKT = eRKTableau(IFRK4.A, IFRK4.b, crat, IFRK4.x)
 	end
 	runMMT(RKT, M, every, IC, h, L, NLfunc, fP, k, name)
-else
+else 
 	runMMT(scheme, M, every, IC, h, L, NLfunc, fP, k, name)
 end
 
 using PyPlot, LaTeXStrings
-plotEnergy!(k, N, T, name)
+saveEnergy!(k, N, T, name, scheme=scheme, h=h, ES=true)
 
