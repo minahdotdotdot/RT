@@ -1,5 +1,5 @@
 include("MMT.jl")
-scheme="IFRK3"
+scheme="IFRK3"; deg = 6
 # time-step, ND final time, save "every"
 h=0.06
 name=scheme*"-"*string(Int(h*1000000),pad=6)
@@ -38,6 +38,7 @@ if scheme ∈ ["IFRK3_rat", "IFRK4_rat"]
     file = matopen("../data/Lhc_"*name*".mat","w")
     write(file, "scheme", scheme)
     write(file, "h", h)
+    write(file, "deg", deg)
     close(file)
     if scheme == "IFRK3_rat"
         file = matopen("../data/"*scheme*"h="*string(h)*".mat", "w")
@@ -112,11 +113,12 @@ end
 listn= ["IFRK3-060000", "IFRK3-050000","IFRK3-025000",
 "IFRK3-010000","IFRK3-005000","IFRK3-002500", "IFRK3-001000",
 "IFRK3-000500","IFRK3-000250", "IFRK3-000100",
-"ETDRK3-002500","ETDRK3-001000","ETDRK3-000100", 
+"ETDRK3-002500","ETDRK3-001000","ETDRK3-000500", "ETDRK3-000100", 
 "ARK3-025000", "ARK3-010000","ARK3-005000","ARK3-002500", 
 "ARK3-001000", "ARK3-001000","ARK3-000500", "ARK3-000250",
 "ARK3-000100", "ARK3-000075","ARK3-000050",
-"ARK4-060000", "ARK4-050000", "ARK4-025000"];
+"ARK4-060000", "ARK4-050000", "ARK4-025000",
+"ARK4-010000", "ARK4-005000"];
 
 function plotEnergy!(k, name::Vector{String}, m,n,hdict, mdict;#, m::Int, n::Int
     tru::String="IFRK3-025000")
@@ -144,8 +146,7 @@ function plotEnergy!(k, name::Vector{String}, m,n,hdict, mdict;#, m::Int, n::Int
 end
 
 function plotErrvH!(k, name::Vector{String}, hdict, mdict;#, m::Int, n::Int
-    tru::String="IFRK3-025000")
-    
+    tru::String="IFRK3-025000")  
     k = k[2:Int(end/2)]
     truth=log.(readdlm("../txtfiles/"*tru*".txt")' ./ k)
     β = truth[65]*64;
@@ -157,7 +158,7 @@ function plotErrvH!(k, name::Vector{String}, hdict, mdict;#, m::Int, n::Int
     for (i,na) in enumerate(name)
         #subplot(m*100+n*10+i)
         E = log.(readdlm("../txtfiles/"*na*".txt")' ./ k)
-        err = norm(truth-E,2)#/norm(truth,Inf)
+        err = norm(truth-E,Inf)/norm(truth,Inf)
         scatter(hdict[na], err, 
             #label=hdict[na],
         c=cdict[na])
@@ -177,11 +178,11 @@ function plotErrvH!(k, name::Vector{String}, hdict, mdict;#, m::Int, n::Int
     for (i,m) in enumerate(mds)
         scatter([], [], c=cs[i], label=m)
     end
-    ylim(.9*ymin, ymax*1.1)
+    ylim(0.5*ymin, ymax*1.5)
     #ylim(5e-3, 10^(0.5))
     xlabel("h: time-step size")
-    ylabel("Error (2-norm)")
-    title("log: h vs error")
+    ylabel("Relative error (Inf-norm)")
+    title("Error in log(Energy Spectrum)")
     legend()
     ax.set_axisbelow(true)
     ax.grid(true)
