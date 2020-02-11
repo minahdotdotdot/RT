@@ -1,9 +1,8 @@
 function genRationalApprox(name)
-    %name = 'A';
     nf = load(join(['../data/Lhc_',name,'.mat'],''));
     scheme=nf.scheme;
     h=nf.h; deg=nf.deg;
-    file = load(join(['../data/',scheme,'h=',string(h),'.mat'],''));
+    file = load(join(['../data/',scheme,'h=',string(h),'d',string(deg),'.mat'],''));
     crat = file.crat;
     s = size(file.x);
     for i = 1 : s(1)
@@ -13,5 +12,5 @@ function genRationalApprox(name)
             crat(i,j) = {r(h*file.x(i,j)*file.L)};
         end
     end
-    save(join(['../data/',scheme,'h=',string(h),'R.mat'],''), 'crat');
+    save(join(['../data/',scheme,'h=',string(h),'d',string(deg),'R.mat'],''), 'crat');
 end

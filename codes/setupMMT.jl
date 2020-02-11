@@ -1,8 +1,8 @@
 include("MMT.jl")
-scheme="IFRK3"; deg = 6
+scheme="IFRK3_rat"; deg = 6
 # time-step, ND final time, save "every"
 h=0.06
-name=scheme*"-"*string(Int(h*1000000),pad=6)
+name=scheme*"-"*string(Int(h*1000000),pad=6)*"-d"*string(deg)
 T =10000
 M = ceil(Int, T/h);
 #T = floor(Int,M*h)
@@ -41,13 +41,13 @@ if scheme ∈ ["IFRK3_rat", "IFRK4_rat"]
     write(file, "deg", deg)
     close(file)
     if scheme == "IFRK3_rat"
-        file = matopen("../data/"*scheme*"h="*string(h)*".mat", "w")
+        file = matopen("../data/"*scheme*"h="*string(h)*"d"*string(deg)*".mat", "w")
         write(file, "L", L)
         write(file, "x", IFRK3.x)
         write(file, "crat", IFRK3.c)
         close(file)
     else
-        file = matopen("../data/Lhc.mat", "w")
+        file = matopen("../data/"*scheme*"h="*string(h)*"d"*string(deg)*".mat", "w")
         write(file, "L", L)
         write(file, "h", h)
         write(file, "x", IFRK4.x)
@@ -118,7 +118,7 @@ listn= ["IFRK3-060000", "IFRK3-050000","IFRK3-025000",
 "ARK3-001000", "ARK3-001000","ARK3-000500", "ARK3-000250",
 "ARK3-000100", "ARK3-000075","ARK3-000050",
 "ARK4-060000", "ARK4-050000", "ARK4-025000",
-"ARK4-010000", "ARK4-005000"];
+"ARK4-010000", "ARK4-005000", "ARK4-002500"];
 
 function plotEnergy!(k, name::Vector{String}, m,n,hdict, mdict;#, m::Int, n::Int
     tru::String="IFRK3-025000")
@@ -158,7 +158,7 @@ function plotErrvH!(k, name::Vector{String}, hdict, mdict;#, m::Int, n::Int
     for (i,na) in enumerate(name)
         #subplot(m*100+n*10+i)
         E = log.(readdlm("../txtfiles/"*na*".txt")' ./ k)
-        err = norm(truth-E,Inf)/norm(truth,Inf)
+        err = norm(truth-E,2)/norm(truth,2)
         scatter(hdict[na], err, 
             #label=hdict[na],
         c=cdict[na])
@@ -181,7 +181,7 @@ function plotErrvH!(k, name::Vector{String}, hdict, mdict;#, m::Int, n::Int
     ylim(0.5*ymin, ymax*1.5)
     #ylim(5e-3, 10^(0.5))
     xlabel("h: time-step size")
-    ylabel("Relative error (Inf-norm)")
+    ylabel("Relative error (2-norm)")
     title("Error in log(Energy Spectrum)")
     legend()
     ax.set_axisbelow(true)
