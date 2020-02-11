@@ -1,5 +1,5 @@
 include("MMT.jl")
-scheme="IFRK3_rat"; deg = 6
+scheme="IFRK3R"; deg = 6
 # time-step, ND final time, save "every"
 h=0.06
 name=scheme*"-"*string(Int(h*1000000),pad=6)*"-d"*string(deg)
@@ -32,15 +32,15 @@ L[[6+1, 7+1, 8+1, 9+1, -6+(N+1), -7+(N+1), -8+(N+1), -9+(N+1)]] .+= fP.F;
 L[2:end] += -196.61 * (abs.(k[2:end]).^(-8)) - fP.D[1]* (abs.(k[2:end]) .^ fP.D[2]); 
 L[1]= -200.0;
 
-if scheme ∈ ["IFRK3_rat", "IFRK4_rat"]
+if scheme ∈ ["IFRK3R", "IFRK4R"]
     using MAT
     include("IF_methods.jl")
-    file = matopen("../data/Lhc_"*name*".mat","w")
+    file = matopen("../data/Lhc_"*scheme*"h="*string(h)*"d"*string(deg)*".mat","w")
     write(file, "scheme", scheme)
     write(file, "h", h)
     write(file, "deg", deg)
     close(file)
-    if scheme == "IFRK3_rat"
+    if scheme == "IFRK3R"
         file = matopen("../data/"*scheme*"h="*string(h)*"d"*string(deg)*".mat", "w")
         write(file, "L", L)
         write(file, "x", IFRK3.x)
