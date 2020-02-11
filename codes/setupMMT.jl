@@ -92,7 +92,7 @@ function saveEnergy!(k, N, T, name::String; scheme::String, h, ES::Bool=true)
         savefig(scheme*"-"*string(Int(h*1000000),pad=6)*"ES.png")
         close(fig)
     else
-        newtxt!(E[2:Int(end/2)], name)
+        newtxt!(E[2:Int(end/2)], name=name)
     end
 end
 
