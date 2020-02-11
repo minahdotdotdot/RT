@@ -1,7 +1,7 @@
 include("MMT.jl")
 scheme="IFRK3R"; deg = 6
 # time-step, ND final time, save "every"
-h=0.06
+h=0.025
 name=scheme*"-"*string(Int(h*1000000),pad=6)*"-d"*string(deg)
 T =10000
 M = ceil(Int, T/h);

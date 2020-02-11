@@ -15,6 +15,6 @@ else
 end
 
 using PyPlot, LaTeXStrings
+saveEnergy!(k, N, T, name, scheme=scheme, h=h, ES=false, deg=deg)
 saveEnergy!(k, N, T, name, scheme=scheme, h=h, ES=true)
-saveEnergy!(k, N, T, name, scheme=scheme, h=h, ES=false)
 
