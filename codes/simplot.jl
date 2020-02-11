@@ -1,7 +1,7 @@
 include("setupMMT.jl")
 if scheme  ∈ ["IFRK3R", "IFRK4R"]
 	using MAT
-	file = matopen("../data/"*scheme*"h="*string(h)*"R.mat");
+	file = matopen("../data/"*scheme*"h="*string(h)*"d"*string(deg)*"R.mat");
 	crat = read(file, "crat");
 	close(file)
 	if scheme == "IFRK3R"
