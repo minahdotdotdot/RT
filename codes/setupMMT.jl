@@ -78,7 +78,8 @@ function runMMT(method::eRKTableau,
     IFRK!(M, every, IC, h, L, NLfunc, fP, method, k; name=name, cont=cont)
 end
 
-function saveEnergy!(k, N, T, name::String; scheme::String, h, ES::Bool=true)
+function saveEnergy!(k, N, T, name::String; 
+    scheme::String, h, ES::Bool=true, deg::Int=0)
     solhat = readCfile(name)[11:end,:]
     #sol = ifft(solhat, 2)
     E = k .* transpose(sum(abs.(solhat).^2, dims = 1)/size(solhat)[1])/N^2;
@@ -89,8 +90,13 @@ function saveEnergy!(k, N, T, name::String; scheme::String, h, ES::Bool=true)
         ylabel("n(k)")
         legend()
         title("h="*string(h)*", "*scheme)
-        savefig(scheme*"-"*string(Int(h*1000000),pad=6)*"ES.png")
-        close(fig)
+        if deg == 0
+            savefig(scheme*"-"*string(Int(h*1000000),pad=6)*"ES.png")
+            close(fig)
+        else
+            savefig(scheme*"-"*string(Int(h*1000000),pad=6)*"d"*string(deg)*"ES.png")
+            close(fig)
+        end
     else
         newtxt!(E[2:Int(end/2)], name=name)
     end
