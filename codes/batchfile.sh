@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name A:ARK3
+#SBATCH --job-name I3R06d6
 #SBATCH --qos=blanca-igg
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
@@ -8,10 +8,10 @@
 #SBATCH --mail-user=luya7574@colorado.edu
 
 cd /projects/luya7574/RT/codes
-#julia ./setupMMT.jl
+julia ./setupMMT.jl
 
-#module purge
-#module load matlab
-#matlab -nodesktop -nodisplay -r "addpath(fullfile(cd,'chebfun'));genRationalApprox('A');exit"
+module purge
+module load matlab
+matlab -nodesktop -nodisplay -r "addpath(fullfile(cd,'chebfun'));genRationalApprox('IFRK3Rh=0.06d6');exit"
 
 julia ./simplot.jl
