@@ -2,7 +2,7 @@ function genRationalApprox(name)
     nf = load(join(['../data/Lhc_',name,'.mat'],''));
     scheme=nf.scheme;
     h=nf.h; deg=nf.deg;
-    file = load(join(['../data/',name'.mat'],''));
+    file = load(join(['../data/',name,'.mat'],''));
     crat = file.crat;
     s = size(file.x);
     for i = 1 : s(1)
