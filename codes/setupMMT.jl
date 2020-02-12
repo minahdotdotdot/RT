@@ -1,7 +1,7 @@
 include("MMT.jl")
-scheme="IFRK3R"; deg = 6
+scheme="IFRK3R"; deg = 8
 # time-step, ND final time, save "every"
-h=0.025
+h=0.06
 name=scheme*"-"*string(Int(h*1000000),pad=6)*"-d"*string(deg)
 T =10000
 M = ceil(Int, T/h);
@@ -75,7 +75,7 @@ end
 
 function runMMT(method::eRKTableau, 
     M::Int, every::Int, IC, h, L, NLfunc, fP, k, name, cont::Bool=false)
-    IFRK!(M, every, IC, h, L, NLfunc, fP, method, k; name=name, cont=cont)
+    IFRK!(M, every, IC, h, L, NLfunc, fP, method, k, name=name, cont=cont)
 end
 
 function saveEnergy!(k, N, T, name::String; 
@@ -129,18 +129,20 @@ for h in hs
     end
 end
 
-listn= ["IFRK3-060000", "IFRK3-050000","IFRK3-025000", "IFRK3-010000",          # 1
-"IFRK3-005000","IFRK3-002500", "IFRK3-001000", "IFRK3-000500",                  # 2
-"IFRK3-000250", "IFRK3-000100", "ETDRK3-002500","ETDRK3-001000",                # 3
-"ETDRK3-000500", "ETDRK3-000100", "ARK3-025000", "ARK3-010000",                 # 4
-"ARK3-005000","ARK3-002500", "ARK3-001000", "ARK3-001000",                      # 5
-"ARK3-000500", "ARK3-000250","ARK3-000100", "ARK3-000075",                      # 6
-"ARK3-000050","ARK4-060000", "ARK4-050000", "ARK4-025000",                      # 7
-"ARK4-010000", "ARK4-005000", "ARK4-002500","IFRK3R-060000-d6",                 # 8 
-"IFRK3R-050000-d6","IFRK3R-025000-d6","IFRK3R-010000-d6","IFRK3R-005000-d6",    # 9
+listn= ["IFRK3-060000", "IFRK3-050000","IFRK3-025000", "IFRK3-010000", # 1
+"IFRK3-005000","IFRK3-002500", "IFRK3-001000", "IFRK3-000500",         # 2
+"IFRK3-000250", "IFRK3-000100", "ETDRK3-002500","ETDRK3-001000",       # 3
+"ETDRK3-000500", "ETDRK3-000250", "ETDRK3-000100", "ARK3-025000",      # 4
+"ARK3-010000", "ARK3-005000","ARK3-002500", "ARK3-001000",             # 5
+"ARK3-001000", "ARK3-000500", "ARK3-000250","ARK3-000100",             # 6
+"ARK3-000075", "ARK3-000050","ARK4-060000", "ARK4-050000",             # 7
+"ARK4-025000", "ARK4-010000", "ARK4-005000", "ARK4-002500",            # 8
+"ARK4-001000", "IFRK3R-060000-d8", "IFRK3R-060000-d6", "IFRK3R-060000-d4",            # 8 
+"IFRK3R-050000-d8","IFRK3R-050000-d6","IFRK3R-050000-d4", "IFRK3R-025000-d6",
+"IFRK3R-025000-d4"]#=, "IFRK3R-010000-d6", "IFRK3R-005000-d6",    # 9
 "IFRK3R-002500-d6", "IFRK3R-060000-d4", "IFRK3R-050000-d4","IFRK3R-025000-d4",  # 10
 "IFRK3R-010000-d4","IFRK3R-005000-d4","IFRK3R-002500-d4"                        # 11
-];
+];=#
 
 function plotEnergy!(k, name::Vector{String}, m,n,hdict, mdict;#, m::Int, n::Int
     tru::String="IFRK3-025000")
@@ -182,7 +184,9 @@ function plotErrvH!(k, name::Vector{String}, hdict, mdict;#, m::Int, n::Int
         E = log.(readdlm("../txtfiles/"*na*".txt")' ./ k)
         err = norm(truth-E,2)/norm(truth,2)
         if mdict[na] == "IFRK3R"
-            scatter(hdict[na], err, c=cdict[na], s=(ddict[na]-4)*20+20)
+            if ddict[na] != 8
+                scatter(hdict[na], err, c=cdict[na], s=(ddict[na]-4)*20+20)
+            end
         else
             scatter(hdict[na], err, c=cdict[na])
         end

@@ -39,7 +39,7 @@ end
 struct eRKTableau
     A # matrix        :: (s-1)-by-s matrix
     b # stage weights :: s-length vector
-    c # t increments  :: s-length vector
+    c # for i > j, e^((c_i - c_j)hL)
     x # 
     eRKTableau(A, b, c, x) = new(copy(A),copy(b), copy(c), copy(x))
 end
@@ -52,8 +52,7 @@ end
 end
 
 function IFRK_step(zhat::Array{ComplexF64,1}, h::Float64, 
-    L, NLfunc::Function, fP::funcparams, 
-    RKT::eRKTableau, ks, k)
+    L, NLfunc::Function, fP::funcparams, RKT::eRKTableau, ks, k)
     ks[1,:] = c[1,1] .* NLfunc(zhat, fP, k); #c[1,1] should be just ones.
     for i = 2 :length(RKT.b)
         PP = h* lincomIF(RKT.A[i,1:i-1] .* RKT.c[i,1:i-1], ks[1:i-1,:]); # sum
