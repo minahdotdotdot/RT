@@ -8,7 +8,7 @@ function genRationalApprox(name)
     for i = 1 : s(1)
         for j = 1: s(1)-1
             Z = exp(h*file.x(i,j)*file.L);
-            [r, pol, res, zer, zj, fj, wj] = aaa(Z,file.L,'degree', deg);
+            [r, pol, res, zer, zj, fj, wj] = aaa(Z,h*file.x(i,j)*file.L,'degree', deg);
             crat(i,j) = {r(h*file.x(i,j)*file.L)};
         end
     end
