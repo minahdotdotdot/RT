@@ -9,7 +9,7 @@ function genRationalApprox(name)
         for j = 1: s(1)-1
             Z = exp(h*file.x(i,j)*file.L);
             [r, pol, res, zer, zj, fj, wj] = aaa(Z,h*file.x(i,j)*file.L,'degree', deg);
-            crat(i,j) = {r(h*file.x(i,j)*file.L)};
+            crat(i,j) = {r(h*file.x(i,j)*file.L)-r([0])+1};
         end
     end
     save(join(['../data/',name,'R.mat'],''), 'crat');
