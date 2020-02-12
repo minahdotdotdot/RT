@@ -23,3 +23,6 @@ using PyPlot, LaTeXStrings
 saveEnergy!(k, N, T, name, scheme=scheme, h=h, ES=false, deg=deg)
 saveEnergy!(k, N, T, name, scheme=scheme, h=h, ES=true)
 
+saveEnergy!(k, N, T, "IFRK3-"*string(Int(h*1000000),pad=6)*"-d"*string(deg), scheme=scheme, h=h, ES=false)
+saveEnergy!(k, N, T, "IFRK3-"*string(Int(h*1000000),pad=6)*"-d"*string(deg), scheme=scheme, h=h, ES=true)
+
