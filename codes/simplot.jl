@@ -6,7 +6,6 @@ if scheme  ∈ ["IFRK3R", "IFRK4R"]
 	crat = read(file, "crat");
 	close(file)
 	#norm(IFRK3.c-crat2)/norm(IFRK3.c)
-	RKT=0
 	if scheme == "IFRK3R"
 		RKT = eRKTableau(IFRK3.A, IFRK3.b, crat, IFRK3.x);
 	elseif scheme == "IFRK4R"

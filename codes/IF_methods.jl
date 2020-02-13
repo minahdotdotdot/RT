@@ -16,11 +16,16 @@ function cfromx(x::Vector{T}) where T<:AbstractFloat
 end
 
 
-function fillc(c, h, L)
-	tmp = Matrix{typeof(L)}(undef,size(c))
-	for i = 1 : size(c)[1]
-		for j = 1 : size(c)[2]
-			tmp[i,j] = exp.((h*c[i,j])*L)
+function fillc(x, h, L)
+	uniquec = unique(x)
+	uniquet = Dict{Float64, typeof(L)}();
+	for u in uniquec
+		push!(uniquet, u => exp.((h*u)*L)+1e-16*randn(length(L)))
+	end
+	tmp = Matrix{typeof(L)}(undef,size(x))
+	for i = 1 : size(x)[1]
+		for j = 1 : size(x)[2]
+			tmp[i,j] = uniquet[x[i,j]]
 		end
 	end
 	return tmp
