@@ -4,11 +4,11 @@ function genRationalApprox(name)
     h=nf.h; deg=nf.deg;
     file = load(join(['../data/',name,'.mat'],''));
     crat = file.crat;
-    crat2 = file.crat
+    crat2 = file.crat;
     s = size(file.x);
     uniquex = unique(file.x);
-    c = containers.Map('KeyType', 'double', 'ValueType', 'any')
-    c2 = containers.Map('KeyType', 'double', 'ValueType', 'any')
+    c = containers.Map('KeyType', 'double', 'ValueType', 'any');
+    c2 = containers.Map('KeyType', 'double', 'ValueType', 'any');
     for i = 1 : length(uniquex)
         L = h*uniquex(i)*file.L;
         Z = exp(L);
@@ -20,7 +20,7 @@ function genRationalApprox(name)
     for i = 1 : s(1)
         for j = 1: s(1)-1
             crat(i,j) = {c(file.x(i,j))};
-            crat2(i,j) = {c2(file.x(i,j))}
+            crat2(i,j) = {c2(file.x(i,j))};
         end
     end
     save(join(['../data/',name,'R.mat'],''), 'crat');

@@ -56,6 +56,8 @@ if scheme ∈ ["IFRK3R", "IFRK4R"]
 
 end
 
+import Base: +
+
 function +(c::Matrix{Vector{Complex{T}}}, x::T) where T<:AbstractFloat
     m,n = size(c);
     for i = 1 : m
@@ -83,7 +85,8 @@ function runMMT(method::String,
         ETDRK!(M, every, IC, h, L, NLfunc, fP, ETDdict[method], k, name=name, cont=cont)
     elseif method ∈ ["IFRK3", "IFRK4"]
         include("IF_methods.jl")
-        x = (5e-14*(sign.(randn(length(L))).*rand(eltype(L),length(L))) .+5e-15)
+        #x = (5e-14*(sign.(randn(length(L))).*rand(eltype(L),length(L))) .+5e-15)
+        x = 5e-15 .+ 5e-14*exp.(im * range(0, 2pi, length=length(L)+1)[1:end-1])
         RKT = eRKTableau(IFdict[method].A, 
             IFdict[method].b, 
             IFdict[method].c + x,
