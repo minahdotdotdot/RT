@@ -49,12 +49,31 @@ if scheme ∈ ["IFRK3R", "IFRK4R"]
     else
         file = matopen("../data/"*scheme*"h="*string(h)*"d"*string(deg)*".mat", "w")
         write(file, "L", L)
-        write(file, "h", h)
         write(file, "x", IFRK4.x)
         write(file, "crat", IFRK4.c)
         close(file)
     end
 
+end
+
+function +(c::Matrix{Vector{Complex{T}}}, x::T) where T<:AbstractFloat
+    m,n = size(c);
+    for i = 1 : m
+        for j = 1 : n
+            c = c .+ x
+        end
+    end
+    return c
+end
+
+function +(c::Matrix{Vector{Complex{T}}}, x::Vector{Complex{T}}) where T<:AbstractFloat
+    m,n = size(c);
+    for i = 1 : m
+        for j = 1 : n
+            c = c + x
+        end
+    end
+    return c
 end
 
 function runMMT(method::String, 
@@ -64,7 +83,11 @@ function runMMT(method::String,
         ETDRK!(M, every, IC, h, L, NLfunc, fP, ETDdict[method], k, name=name, cont=cont)
     elseif method ∈ ["IFRK3", "IFRK4"]
         include("IF_methods.jl")
-        IFRK!(M, every, IC, h, L, NLfunc, fP, IFdict[method], k, name=name, cont=cont)
+        RKT = eRKTableau(IFdict[method].A, 
+            IFdict[method].b, 
+            IFdict[method].c - ((5e-14*sign.(randn(L))).*rand(length(L)) .+5e-15)
+            IFdict[method].x)
+        IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name, cont=cont)
     elseif method ∈ ["ARK3", "ARK4"]
         include("IMEX_methods.jl")
         IMEXRK!(M, every, IC, h, L, NLfunc, fP, IMEXdict[method], k, name=name, cont=cont)
