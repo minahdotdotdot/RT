@@ -1,4 +1,4 @@
-einclude("readwrite.jl")
+include("readwrite.jl")
 using FFTW, LinearAlgebra, Printf
 
 ####### MMT Problem Set-up #######
