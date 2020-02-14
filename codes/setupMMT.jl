@@ -1,12 +1,12 @@
 include("MMT.jl")
-scheme="IFRK3"#R"; deg = 8
+scheme="IFRK3R"; deg = 8;
 # time-step, ND final time, save "every"
 h=0.01
-name=scheme*"-"*string(Int(h*1000000),pad=6)*"p"#-d"*string(deg)
-T =10000
+name=scheme*"-"*string(Int(h*1000000),pad=6)*"-d"*string(deg)
+T =10.0#000
 M = ceil(Int, T/h);
 #T = floor(Int,M*h)
-every = floor(Int, M/1000) # save solution at only 10 time locations.
+every = 50;#floor(Int, M/1000) # save solution at only 10 time locations.
 
 # Problem Parameters
 λ = 1;  #Defocusing MMT model
@@ -32,30 +32,6 @@ L[[6+1, 7+1, 8+1, 9+1, -6+(N+1), -7+(N+1), -8+(N+1), -9+(N+1)]] .+= fP.F;
 L[2:end] += -196.61 * (abs.(k[2:end]).^(-8)) - fP.D[1]* (abs.(k[2:end]) .^ fP.D[2]); 
 L[1]= -200.0;
 
-if scheme ∈ ["IFRK3R", "IFRK4R"]
-    using MAT
-    include("IF_methods.jl")
-    file = matopen("../data/Lhc_"*scheme*"h="*string(h)*"d"*string(deg)*".mat","w")
-    write(file, "scheme", scheme)
-    write(file, "h", h)
-    write(file, "deg", deg)
-    close(file)
-    if scheme == "IFRK3R"
-        file = matopen("../data/"*scheme*"h="*string(h)*"d"*string(deg)*".mat", "w")
-        write(file, "L", L)
-        write(file, "x", IFRK3.x)
-        write(file, "crat", IFRK3.c)
-        close(file)
-    else
-        file = matopen("../data/"*scheme*"h="*string(h)*"d"*string(deg)*".mat", "w")
-        write(file, "L", L)
-        write(file, "x", IFRK4.x)
-        write(file, "crat", IFRK4.c)
-        close(file)
-    end
-
-end
-
 import Base: +
 
 function +(c::Matrix{Vector{Complex{T}}}, x::T) where T<:AbstractFloat
@@ -79,7 +55,7 @@ function +(c::Matrix{Vector{Complex{T}}}, x::Vector{Complex{T}}) where T<:Abstra
 end
 
 function runMMT(method::String, 
-    M::Int, every::Int, IC, h, L, NLfunc, fP, k, name, cont::Bool=false)
+    M::Int, every::Int, IC, h, L, NLfunc, fP, k, name, cont::Bool=false; deg::Int=0)
     if method ∈ ["ETDRK2", "ETDRK3", "ETDRK4", "ETDRK4B"]
         include("ETD_methods.jl")
         ETDRK!(M, every, IC, h, L, NLfunc, fP, ETDdict[method], k, name=name, cont=cont)
@@ -95,15 +71,26 @@ function runMMT(method::String,
     elseif method ∈ ["ARK3", "ARK4"]
         include("IMEX_methods.jl")
         IMEXRK!(M, every, IC, h, L, NLfunc, fP, IMEXdict[method], k, name=name, cont=cont)
-    else
-        error("method must be ETD, IF, or IMEX.")
+    elseif method ∈ ["IFRK3R", "IFRK4R"]
+        include("IF_methods.jl");
+        file = matopen("../data/"*scheme*"h="*string(h)*"d"*string(deg)*"R.mat");
+        crat = read(file, "crat");
+        close(file)
+        if method == "IFRK3R"
+            RKT = eRKTableau(IFRK3.A, IFRK3.b, crat, IFRK3.x)
+        else
+            RKT = eRKTableau(IFRK4.A, IFRK4.b, crat, IFRK4.x)
+        end
+        IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name, cont=cont)
     end
 end
 
+#=
 function runMMT(method::eRKTableau, 
     M::Int, every::Int, IC, h, L, NLfunc, fP, k, name, cont::Bool=false)
     IFRK!(M, every, IC, h, L, NLfunc, fP, method, k, name=name, cont=cont)
 end
+=#
 
 function saveEnergy!(k, N, T, name::String; 
     scheme::String, h, ES::Bool=true, deg::Int=0)
@@ -129,6 +116,30 @@ function saveEnergy!(k, N, T, name::String;
     end
 end
 
+
+#=
+if scheme ∈ ["IFRK3R", "IFRK4R"]
+    include("IF_methods.jl")
+    file = matopen("../data/Lhc_"*scheme*"h="*string(h)*"d"*string(deg)*".mat","w")
+    write(file, "scheme", scheme)
+    write(file, "h", h)
+    write(file, "deg", deg)
+    close(file)
+    if scheme == "IFRK3R"
+        file = matopen("../data/"*scheme*"h="*string(h)*"d"*string(deg)*".mat", "w")
+        write(file, "L", L)
+        write(file, "x", IFRK3.x)
+        write(file, "crat", IFRK3.c)
+        close(file)
+    else
+        file = matopen("../data/"*scheme*"h="*string(h)*"d"*string(deg)*".mat", "w")
+        write(file, "L", L)
+        write(file, "x", IFRK4.x)
+        write(file, "crat", IFRK4.c)
+        close(file)
+    end
+end
+=#
 hdict = Dict{String, Float64}();
 mdict = Dict{String, String}();
 cdict = Dict{String, Symbol}();

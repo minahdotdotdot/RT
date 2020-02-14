@@ -1,4 +1,12 @@
 include("setupMMT.jl")
+using PyPlot, LaTeXStrings, MAT
+runMMT(scheme, M, every, IC, h, L, NLfunc, fP, k, name, deg=deg);
+saveEnergy!(k, N, T, name, scheme=scheme, h=h, ES=false, deg=deg)
+#saveEnergy!(k, N, T, name, scheme=scheme, h=h, ES=true, deg=deg)
+
+
+
+#=
 if scheme  ∈ ["IFRK3R", "IFRK4R"]
 	using MAT
 	include("IF_methods.jl");
@@ -22,10 +30,8 @@ if scheme  ∈ ["IFRK3R", "IFRK4R"]
 else 
 	runMMT(scheme, M, every, IC, h, L, NLfunc, fP, k, name)
 end
+=#
 
-using PyPlot, LaTeXStrings
-saveEnergy!(k, N, T, name, scheme=scheme, h=h, ES=false)#, deg=deg)
-saveEnergy!(k, N, T, name, scheme=scheme, h=h, ES=true)
 
 #saveEnergy!(k, N, T, "IFRK3-"*string(Int(h*1000000),pad=6)*"-d"*string(deg), scheme=scheme, h=h, ES=false)
 #saveEnergy!(k, N, T, "IFRK3-"*string(Int(h*1000000),pad=6)*"-d"*string(deg), scheme=scheme, h=h, ES=true)
