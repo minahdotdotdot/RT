@@ -60,7 +60,7 @@ function +(c::Matrix{Vector{Complex{T}}}, x::T) where T<:AbstractFloat
     m,n = size(c);
     for i = 1 : m
         for j = 1 : n
-            c = c .+ x
+            c[i,j] = c[i,j] .+ x
         end
     end
     return c
@@ -70,7 +70,7 @@ function +(c::Matrix{Vector{Complex{T}}}, x::Vector{Complex{T}}) where T<:Abstra
     m,n = size(c);
     for i = 1 : m
         for j = 1 : n
-            c = c + x
+            c[i,j] = c[i,j] + x
         end
     end
     return c
@@ -83,9 +83,10 @@ function runMMT(method::String,
         ETDRK!(M, every, IC, h, L, NLfunc, fP, ETDdict[method], k, name=name, cont=cont)
     elseif method ∈ ["IFRK3", "IFRK4"]
         include("IF_methods.jl")
+        x = (5e-14*(sign.(randn(length(L))).*rand(eltype(L),length(L))) .+5e-15)
         RKT = eRKTableau(IFdict[method].A, 
             IFdict[method].b, 
-            IFdict[method].c - ((5e-14*sign.(randn(L))).*rand(length(L)) .+5e-15)
+            IFdict[method].c + x,
             IFdict[method].x)
         IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name, cont=cont)
     elseif method ∈ ["ARK3", "ARK4"]
