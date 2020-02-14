@@ -20,7 +20,7 @@ function fillc(x, h, L)
 	uniquec = unique(x)
 	uniquet = Dict{Float64, typeof(L)}();
 	for u in uniquec
-		push!(uniquet, u => exp.((h*u)*L))#+1e-16*randn(length(L)))
+		push!(uniquet, u => exp.((h*u)*L))
 	end
 	tmp = Matrix{typeof(L)}(undef,size(x))
 	for i = 1 : size(x)[1]
