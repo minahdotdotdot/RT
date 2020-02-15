@@ -1,7 +1,14 @@
 include("setupMMT.jl")
 using PyPlot, LaTeXStrings, MAT
-runMMT(scheme, M, every, IC, h, L, NLfunc, fP, k, name, deg=deg);
-saveEnergy!(k, N, T, name, scheme=scheme, h=h, ES=false, deg=deg)
+
+include("IF_methods.jl")
+file = matopen("../data/"*scheme*"h="*string(h)*"d"*string(deg)*"R.mat");
+crat = read(file, "crat");
+close(file)
+RKT = eRKTableau(IFRK3.A, IFRK3.b, crat, IFRK3.x)
+
+#runMMT(scheme, M, every, IC, h, L, NLfunc, fP, k, name, deg=deg);
+#saveEnergy!(k, N, T, name, scheme=scheme, h=h, ES=false, deg=deg)
 #saveEnergy!(k, N, T, name, scheme=scheme, h=h, ES=true, deg=deg)
 
 
