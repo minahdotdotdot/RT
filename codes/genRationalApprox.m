@@ -27,6 +27,8 @@ function genRationalApprox(name)
             crat2(i,j) = {c2(file.x(i,j))};
         end
     end
+    save(join(['../data/',name,'R.mat'],''), 'crat');
+    save(join(['../data/',name,'R2.mat'],''), 'crat2');
 
     %{
     c = containers.Map('KeyType', 'double', 'ValueType', 'any');
