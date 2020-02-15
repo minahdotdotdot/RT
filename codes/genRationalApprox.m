@@ -9,9 +9,9 @@ function genRationalApprox(name)
     uniquex = unique(file.x);
     L = [];
     for i = 1 : length(uniquex)
-        L = [L h*uniquex(i)*file.L]
+        L = [L h*uniquex(i)*file.L];
     end
-    Z = exp(L)
+    Z = exp(L);
     [r, pol, res, zer, zj, fj, wj] = aaa(Z,L,'degree', deg);
     c = containers.Map('KeyType', 'double', 'ValueType', 'any');
     for i = 1 : length(uniquex)
