@@ -13,7 +13,7 @@ function genRationalApprox(name)
     end
     Z = exp(L)
     [r, pol, res, zer, zj, fj, wj] = aaa(Z,L,'degree', deg);
-
+    c = containers.Map('KeyType', 'double', 'ValueType', 'any');
     for i = 1 : length(uniquex)
         L = h*uniquex(i)*file.L;
         c(uniquex(i)) = r(L) - r(0) +1;
