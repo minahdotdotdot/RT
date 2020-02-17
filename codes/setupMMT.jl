@@ -121,10 +121,12 @@ function saveEnergy!(k, N, T, name::String;
         legend()
         title("h="*string(h)*", "*scheme)
         if deg == 0
-            savefig(scheme*"-"*string(Int(h*1000000),pad=6)*"ES.png")
+            savefig(name*"-ES.png")
+                #scheme*"-"*string(Int(h*1000000),pad=6)*"ES.png")
             close(fig)
         else
-            savefig(scheme*"-"*string(Int(h*1000000),pad=6)*"d"*string(deg)*"ES.png")
+            savefig(name*"-ES.png")
+            #scheme*"-"*string(Int(h*1000000),pad=6)*"d"*string(deg)*"ES.png")
             close(fig)
         end
     else
