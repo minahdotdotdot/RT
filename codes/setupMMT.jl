@@ -61,11 +61,12 @@ function runMMT(method::String,
         ETDRK!(M, every, IC, h, L, NLfunc, fP, ETDdict[method], k, name=name, cont=cont)
     elseif method ∈ ["IFRK3", "IFRK4"]
         include("IF_methods.jl")
+        #x = 5e-14*rand(length(L)) .* exp.(im*2*pi*rand(length(L)))
         #x = (5e-14*(sign.(randn(length(L))).*rand(eltype(L),length(L))) .+5e-15)
-        x = 5e-15 .+ 5e-14*exp.(im * range(0, 2pi, length=length(L)+1)[1:end-1])
+        #x = 5e-15 .+ 5e-14*exp.(im * range(0, 2pi, length=length(L)+1)[1:end-1])
         RKT = eRKTableau(IFdict[method].A, 
             IFdict[method].b, 
-            IFdict[method].c + x,
+            IFdict[method].c,#+ x,
             IFdict[method].x)
         IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name, cont=cont)
     elseif method ∈ ["ARK3", "ARK4"]
@@ -76,14 +77,29 @@ function runMMT(method::String,
         file = matopen("../data/"*scheme*"h="*string(h)*"d"*string(deg)*"R.mat");
         crat = read(file, "crat");
         close(file)
+        
         if method == "IFRK3R"
+            #err = IFRK3.c-crat;
+            crat = convertcrat(Vector{ComplexF64}, crat, IFRK3.c)
             RKT = eRKTableau(IFRK3.A, IFRK3.b, crat, IFRK3.x)
         else
+            crat = convertcrat(Vector{ComplexF64}, crat, IFRK4.c)
             RKT = eRKTableau(IFRK4.A, IFRK4.b, crat, IFRK4.x)
         end
         IFRK!(M, every, IC, h, L, NLfunc, fP, RKT, k, name=name, cont=cont)
     end
 end
+
+function convertcrat(dt::DataType, a::Matrix{Any}, c)
+    tmp = copy(c)
+    for i = 1 : size(c)[1]
+        for j = 1:size(c)[2]
+            tmp[i,j] = dt(a[i,j][:,1])
+        end
+    end
+    return tmp
+end
+
 
 #=
 function runMMT(method::eRKTableau, 
@@ -167,20 +183,38 @@ for h in hs
     end
 end
 
-listn= ["IFRK3-060000", "IFRK3-050000","IFRK3-025000", "IFRK3-010000", # 1
-"IFRK3-005000","IFRK3-002500", "IFRK3-001000", "IFRK3-000500",         # 2
-"IFRK3-000250", "IFRK3-000100", "ETDRK3-002500","ETDRK3-001000",       # 3
-"ETDRK3-000500", "ETDRK3-000250", "ETDRK3-000100", "ARK3-025000",      # 4
-"ARK3-010000", "ARK3-005000","ARK3-002500", "ARK3-001000",             # 5
-"ARK3-001000", "ARK3-000500", "ARK3-000250","ARK3-000100",             # 6
-"ARK3-000075", "ARK3-000050","ARK4-060000", "ARK4-050000",             # 7
-"ARK4-025000", "ARK4-010000", "ARK4-005000", "ARK4-002500",            # 8
-"ARK4-001000", "IFRK3R-060000-d8", "IFRK3R-060000-d6", "IFRK3R-060000-d4",            # 8 
-"IFRK3R-050000-d8","IFRK3R-050000-d6","IFRK3R-050000-d4", "IFRK3R-025000-d6",
-"IFRK3R-025000-d4"]#=, "IFRK3R-010000-d6", "IFRK3R-005000-d6",    # 9
-"IFRK3R-002500-d6", "IFRK3R-060000-d4", "IFRK3R-050000-d4","IFRK3R-025000-d4",  # 10
-"IFRK3R-010000-d4","IFRK3R-005000-d4","IFRK3R-002500-d4"                        # 11
-];=#
+IFlist = ["IFRK3-060000", "IFRK3-050000","IFRK3-025000", "IFRK3-010000",
+"IFRK3-005000","IFRK3-002500", "IFRK3-001000", "IFRK3-000500",
+"IFRK3-000250", "IFRK3-000100"];
+ETDlist = ["ETDRK3-002500","ETDRK3-001000", "ETDRK3-000500", "ETDRK3-000250", 
+"ETDRK3-000100"];
+ARK3list = ["ARK3-025000", "ARK3-010000", "ARK3-005000","ARK3-002500", 
+"ARK3-001000", "ARK3-001000", "ARK3-000500", "ARK3-000250",
+"ARK3-000100", "ARK3-000075", "ARK3-000050"];
+ARK4list = ["ARK4-060000", "ARK4-050000", "ARK4-025000", "ARK4-010000", 
+"ARK4-005000", "ARK4-002500", "ARK4-001000", "ARK4-000500", 
+"ARK4-000250"];
+
+listn = vcat(IFlist, ETDlist, ARK3list, ARK4list);
+
+function saveerror(k, listn::Vector{String}, tru::String, nt::T, rel::Bool=true) where T<:Real
+    k = k[2:Int(end/2)];
+    truth= log.(readdlm("../txtfiles/"*tru*".txt")' ./ k);
+    edict = Dict{String, Float64}();
+    for (i, na) in enumerate(listn)
+        E = log.(readdlm("../txtfiles/"*na*".txt")' ./ k);
+        if rel == true
+            push!(edict, na => norm(truth-E,nt)/norm(truth,nt))
+        else
+            push!(edict, na => norm(truth-E,nt))
+        end
+    end
+    return edict
+end
+#=IFdict = saveerror(k, IFlist, "IFRK3-001000",2);
+ETDdict = saveerror(k, ETDlist, "IFRK3-001000",2);
+ARK3dict = saveerror(k, ARK3list, "IFRK3-001000",2);
+ARK4dict = saveerror(k, ARK4list, "IFRK3-001000",2); =#
 
 function plotEnergy!(k, name::Vector{String}, m,n,hdict, mdict;#, m::Int, n::Int
     tru::String="IFRK3-025000")
