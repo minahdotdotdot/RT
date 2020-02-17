@@ -1,12 +1,12 @@
 include("MMT.jl")
 scheme="IFRK3R"; deg = 8;
 # time-step, ND final time, save "every"
-h=0.01
+h=0.025
 name=scheme*"-"*string(Int(h*1000000),pad=6)*"-d"*string(deg)
-T =10.0#000
+T =10000
 M = ceil(Int, T/h);
 #T = floor(Int,M*h)
-every = 50;#floor(Int, M/1000) # save solution at only 10 time locations.
+every = floor(Int, M/1000) # save solution at only 10 time locations.
 
 # Problem Parameters
 λ = 1;  #Defocusing MMT model

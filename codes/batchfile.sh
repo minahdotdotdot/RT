@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name perturbed
-#SBATCH --qos=blanca-appm-student
+#SBATCH --job-name 8_0.05
+#SBATCH --qos=blanca-igg
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --time 24:00:00  
