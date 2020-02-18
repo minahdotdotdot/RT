@@ -1,4 +1,4 @@
-using PyPlot, DelimitedFiles, LinearAlgebra
+using PyPlot, DelimitedFiles, LinearAlgebra, DataFrames, GLM
 
 # Numerical Simulation Parameters
 N = 2^13;
@@ -51,50 +51,79 @@ IFr6list = ["IFRK3R-060000-d6", "IFRK3R-050000-d6", "IFRK3R-025000-d6", "IFRK3R-
 IFr8list = ["IFRK3R-060000-d8", "IFRK3R-050000-d8", "IFRK3R-025000-d8", "IFRK3R-010000-d8",
 "IFRK3R-005000-d8", "IFRK3R-002500-d8", "IFRK3R-001000-d8", "IFRK3R-000500-d8"];
 
-listn = vcat(ETDlist, ARK3list, ARK4list, IFr8list, IFr6list, IFlist, IFr4list);
+listn = vcat(ETDlist, ARK3list, ARK4list, IFr8list, IFr6list, IFlist[1:end-1], IFr4list);
 
-function saveerror(k, listn::Vector{String}, tru::String, nt::T, rel::Bool=true) where T<:Real
+function saveerror(k, listn::Vector{String}, tru::String, nt::T, rel::Bool=true;
+    errtype::String="Dict", hdict=0,logB::Bool=true) where T<:Real
     k = k[2:Int(end/2)];
     truth= log.(readdlm("../txtfiles/"*tru*".txt")' ./ k);
-    edict = Dict{String, Float64}();
-    for (i, na) in enumerate(listn)
-        E = log.(readdlm("../txtfiles/"*na*".txt")' ./ k);
-        if rel == true
-            push!(edict, na => norm(truth-E,nt)/norm(truth,nt))
+    if errtype=="Dict"
+        edict = Dict{String, Float64}();
+        for (i, na) in enumerate(listn)
+            E = log.(readdlm("../txtfiles/"*na*".txt")' ./ k);
+            if rel == true
+                if logB == false    
+                    push!(edict, na => norm(truth-E,nt)/norm(truth,nt))
+                else
+                    push!(edict, na => log(norm(truth-E,nt)/norm(truth,nt)))
+                end
+            else
+                if logB == false
+                    push!(edict, na => norm(truth-E,nt))
+                else
+                    push!(edict, na => log(norm(truth-E,nt)))
+                end
+            end
+        end
+    elseif errtype=="Matrix"
+        err = Matrix{Float64}(undef, length(listn),2);
+        for (i, na) in enumerate(listn)
+            E = log.(readdlm("../txtfiles/"*na*".txt")' ./ k);
+            err[i,1] = hdict[na]
+            if rel==true
+                err[i,2] = norm(truth-E,nt)/norm(truth,nt)
+            else
+                err[i,2] = norm(truth-E,nt)
+            end
+        end
+        p = sortperm(err[:,1]);
+        err = err[p,:]
+        if logB == false
+            return err
         else
-            push!(edict, na => norm(truth-E,nt))
+            return log.(err)
         end
     end
-    return edict
 end
-IFdict = saveerror(k, IFlist, "IFRK3-001000",2);
-ETDdict = saveerror(k, ETDlist, "IFRK3-001000",2);
-ARK3dict = saveerror(k, ARK3list, "IFRK3-001000",2);
-ARK4dict = saveerror(k, ARK4list, "IFRK3-001000",2);
-IFr4dict = saveerror(k, IFr4list, "IFRK3-001000",2);
-IFr6dict = saveerror(k, IFr6list, "IFRK3-001000",2);
-IFr8dict = saveerror(k, IFr8list, "IFRK3-001000",2);
+#=IFdict = saveerror(k, IFlist, "IFRK3-000100",2);
+ETDdict = saveerror(k, ETDlist, "IFRK3-000100",2);
+ARK3dict = saveerror(k, ARK3list, "IFRK3-000100",2);
+ARK4dict = saveerror(k, ARK4list, "IFRK3-000100",2);
+IFr4dict = saveerror(k, IFr4list, "IFRK3-000100",2);
+IFr6dict = saveerror(k, IFr6list, "IFRK3-000100",2);
+IFr8dict = saveerror(k, IFr8list, "IFRK3-000100",2);=#
+IFerr = saveerror(k, IFlist, "IFRK3-000100",2, true, errtype="Matrix", hdict=hdict);
+ETDerr = saveerror(k, ETDlist, "IFRK3-000100",2, true, errtype="Matrix", hdict=hdict);
+A3err = saveerror(k, ARK3list, "IFRK3-000100",2, true, errtype="Matrix", hdict=hdict);
+A4err = saveerror(k, ARK4list, "IFRK3-000100",2, true, errtype="Matrix", hdict=hdict);
+IFr4err = saveerror(k, IFr4list, "IFRK3-000100",2, true, errtype="Matrix", hdict=hdict);
+IFr6err = saveerror(k, IFr6list, "IFRK3-000100",2, true, errtype="Matrix", hdict=hdict);
+IFr8err = saveerror(k, IFr8list, "IFRK3-000100",2, true, errtype="Matrix", hdict=hdict);
 
 function plotErrvH!(k, name::Vector{String}, hdict, mdict;#, m::Int, n::Int
-    tru::String="IFRK3-000100")  
-    k = k[2:Int(end/2)]
-    truth=log.(readdlm("../txtfiles/"*tru*".txt")' ./ k)
-    fig, ax = subplots()#(m,n)
-    ax.set_xscale("log")
-    ax.set_yscale("log")
-    ymin=-1
-    ymax=-1
+    tru::String="IFRK3-000100", regfit::Bool=false, minV=0)  
+    k2 = k[2:Int(end/2)]
+    truth=log.(readdlm("../txtfiles/"*tru*".txt")' ./ k2)
+    #fig, ax = subplots()#(m,n); #ymin=-1; ymax=-1
     for (i,na) in enumerate(name)
-        #subplot(m*100+n*10+i)
-        E = log.(readdlm("../txtfiles/"*na*".txt")' ./ k)
+        E = log.(readdlm("../txtfiles/"*na*".txt")' ./ k2)
         err = norm(truth-E,2)/norm(truth,2)
-        print(err,"\n")
         if mdict[na] == "IFRK3R"
             scatter(hdict[na], err, c=cdict[na], s=(ddict[na]-4)*20+20)
         else
             scatter(hdict[na], err, c=cdict[na])
         end
-        if i == 1
+        #=if i == 1
             ymin = err
             ymax == err
         else
@@ -104,33 +133,63 @@ function plotErrvH!(k, name::Vector{String}, hdict, mdict;#, m::Int, n::Int
             if ymax < err
                 ymax = err
             end
-        end
-        #print(na*": ymin is "*string(ymin)*", and ymax is "*string(ymax)*".\n")
+        end=#
     end 
+    if regfit == true
+        err = saveerror(k, name, tru,2, true, errtype="Matrix", hdict=hdict);
+        data = DataFrame(logh=err[:,1], logerr=err[:,2]);
+        ols=lm(@formula(logh ~ logerr), data);
+        errrange = range(minV, stop=maximum(err), length=1001)
+        fitline = exp.(predict(ols, DataFrame(logerr=errrange)))
+        #axvline(fitline[1], c=cdict[name[1]])
+        plot(fitline, exp.(errrange), c=cdict[name[1]], linewidth=0.75)#, linestyle=":"    
+        scatter(fitline[1], exp.(errrange)[1], c=cdict[name[1]], marker="x")  
+    end
+end
+
+function plotErrvH2!()
+    fig,ax = subplots()
+    err = saveerror(k, IFlist[1:end-1], "IFRK3-000100", 2, true, errtype="Matrix", hdict=hdict);
+    minV=minimum(err[:,2]);
+    #print(minV)
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    axhline(y=exp(minV),c=:red)
+    plotErrvH!(k,ETDlist, hdict, mdict, regfit=true, minV=minV)
+    plotErrvH!(k,ARK3list, hdict, mdict, regfit=true, minV=minV)
+    plotErrvH!(k,ARK4list, hdict, mdict, regfit=true, minV=minV)
+    plotErrvH!(k,IFr8list, hdict, mdict, regfit=false)
+    plotErrvH!(k,IFr6list, hdict, mdict, regfit=false)
+    plotErrvH!(k,IFlist[1:end-1], hdict, mdict, regfit=false)
+    plotErrvH!(k,IFr4list, hdict, mdict, regfit=false)
     for (i,m) in enumerate(mds)
         scatter([], [], c=cs[i], label=m)
     end
     for (i,d) in enumerate(ds)
         scatter([], [], c=cs2[i], label="deg="*string(d), s=(d-4)*20+20)
     end
-    ylim(0.5*ymin, ymax*1.5)
-    #ylim(5e-3, 10^(0.5))
     xlabel("h: time-step size")
     ylabel("Relative error (2-norm)")
     title("Error in log(Energy Spectrum)")
     legend()
     ax.set_axisbelow(true)
     ax.grid(true)
+    #ax.grid(which="major", axis="both", linestyle="--")
+    #ax.grid(which="major", axis="both", linestyle="--")
     # Turn on the minor TICKS, which are required for the minor GRID
     ax.minorticks_on()
 
     # Customize the major grid
-    ax.grid(which="major", linestyle="-", linewidth=0.5, color=:red)
+    ax.grid(which="major", axis="both", linestyle="-", linewidth=0.5, color=:red)
     # Customize the minor grid
-    ax.grid(which="minor", linestyle=":", linewidth=0.5, 
+    ax.grid(which="minor", axis="both", linestyle=":", linewidth=0.5, 
         color=:black, alpha=0.7)
+    axvline.(vcat((2:2:10)*1e-8, (2:2:10)*1e-7, (2:2:10)*1e-6, (2:2:10)*1e-5, 
+        (2:2:10)*1e-4, (2:2:10)*1e-3, (2:2:10)*1e-2, (2:2:10)*1e-9), 
+    linestyle=":", linewidth=0.5, color=:black, alpha=0.7)
+    ylim(1e-3, 3e1)
+    xlim(7e-10, 0.1)
 end
-
 function plotEnergy!(k, name::Vector{String}, m,n,hdict, mdict;#, m::Int, n::Int
     tru::String="IFRK3-025000")
     k = k[2:Int(end/2)]
