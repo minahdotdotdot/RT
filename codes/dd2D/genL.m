@@ -12,8 +12,12 @@ end
 
 % This is a 3-by-3 block of L_{k,m}.
 function lilL = gen3by3L(k, m, Rrho, Sc, tau)
-	km = k^2+m^2;
-	lilL = [[-Sc*km; -1i*k*Sc/(km*tau); 1i*k*Sc/(km*tau*Rrho); ] ...
-	[-1i*k; -km/tau; 0] ... 
-	[-1i*k; 0; -km/tau]];
+        if k == 0 || m == 0
+	    lilL = zeros(3,3)
+        else
+            km = k^2+m^2;
+	    lilL = [[-Sc*km; -1i*k*Sc/(km*tau); 1i*k*Sc/(km*tau*Rrho); ] ...
+	    [-1i*k; -km/tau; 0] ... 
+	    [-1i*k; 0; -km/tau]];
+        end
 end
