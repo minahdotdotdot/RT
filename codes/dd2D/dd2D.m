@@ -13,7 +13,7 @@
 
 %% Domain
 a_ratio = 2;
-N = 2^7; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
+N = 2^2; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
 l_o = 14.86; Lx = l_o; Lz = a_ratio*Lx;
 x = linspace(0, Lx, N+1); x=x(1:end-1);
 z = linspace(0, Lz, a_ratio*N+1); z=z(1:end-1);
