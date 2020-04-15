@@ -10,6 +10,11 @@ T = 10;
 h = tau/10;
 M = T/h;
 x = xIC;
+
 for ii = 1 : M
-	x = exRK(x, A_RK4, b_RK4, c_RK4, h, L, Nx, Nz, dx, km);
+	if sum(isnan(x)) == [0 0 0]
+		x = exRK(x, A_RK4, b_RK4, c_RK4, h, L, Nx, Nz, dx, km);
+	else
+		break
+	end
 end
