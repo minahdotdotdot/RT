@@ -1,5 +1,4 @@
-function [Psi, T, S] = boxify3(xvec)
-	Psi = xvec(:,1);
-	T = xvec(:,2);
-	S = xvec(:,3);
+function xbox = boxify3(x)
+	xlen = length(x)/3;
+	xbox = [x(1:xlen) x(xlen+1:2*xlen) x(2*xlen+1:end)];
 end
