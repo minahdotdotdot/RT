@@ -15,7 +15,7 @@
 tau = 0.01;
 Pr = 7;
 Ra = 1.1;
-Sc = tau/Pr;
+Sc = Pr/tau;
 Rrho = 1/(Ra*tau);
 
 %% Domain
