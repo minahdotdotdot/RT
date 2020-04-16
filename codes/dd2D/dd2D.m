@@ -11,13 +11,6 @@
 % Function boxify assigns [Psi, T, S] = boxify(x, ...)
 % Function flatten reshapes x to be appropriate for linear solve. 
 
-%% Domain
-a_ratio = 2;
-N = 2^7; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
-l_o = 14.86; Lx = l_o; Lz = a_ratio*Lx;
-x = linspace(0, Lx, N+1); x=x(1:end-1);
-z = linspace(0, Lz, a_ratio*N+1); z=z(1:end-1);
-
 %% Problem Parameters 
 tau = 0.01;
 Pr = 7;
@@ -25,10 +18,18 @@ Ra = 1.1;
 Sc = tau/Pr;
 Rrho = 1/(Ra*tau);
 
+%% Domain
+a_ratio = 2;
+N = 2^7; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
+l_o = 2*pi/( .25*(-2-Ra + Ra*sqrt(1+8/Ra)) )^(.25);
+Lx = l_o; Lz = a_ratio*Lx;
+x = linspace(0, Lx, N+1); x=x(1:end-1);
+z = linspace(0, Lz, a_ratio*N+1); z=z(1:end-1);
+
 %% Discretization parameters
 dx = Lx/Nx;
-ks = 2*pi/Lx*[linspace(0, Nx/2, Nx/2+1)';linspace(-Nx/2+1,-1,Nx/2-1)'];
-ms = 2*pi/Lz*[linspace(0, Nz/2, Nz/2+1)';linspace(-Nz/2+1,-1,Nz/2-1)'];
+ks = (2*pi/Lx)*[linspace(0, Nx/2, Nx/2+1)';linspace(-Nx/2+1,-1,Nx/2-1)'];
+ms = (2*pi/Lz)*[linspace(0, Nz/2, Nz/2+1)';linspace(-Nz/2+1,-1,Nz/2-1)'];
 [kk,mm] = meshgrid(ks,ms);
 km = kk.^2 + mm.^2; km = reshape(km', Nz*Nx, 1);
 
