@@ -19,6 +19,6 @@ function lilL = gen3by3L(k, m, Rrho, Sc, tau)
     else
         lilL = [[-Sc*km; -1i*k*Sc/(km*tau); 1i*k*Sc/(km*tau*Rrho)] ...
         [-1i*k; -km/tau; 0] ... 
-        [-1i*k; 0; -km/tau]];
+        [-1i*k; 0; -km]];
     end
 end
