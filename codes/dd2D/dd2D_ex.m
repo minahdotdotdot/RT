@@ -7,12 +7,12 @@ b_RK4 = [1/6; 1/3; 1/3; 1/6];
 c_RK4 = [0; 1/2; 1/2; 1]; 
 
 T = 10;
-h = 1e-6;
+h = 5e-7;
 M = T/h;
 x = xIC;
-every = 100;
+every = 500;
 
-xf = RK4(xIC, M, h, L, Nx, Nz, dx, km, every);
+[xf, amp] = RK4(xIC, M, h, L, Nx, Nz, dx, km, every);
 
 %{
 for ii = 1 : M

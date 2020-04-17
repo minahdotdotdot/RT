@@ -34,6 +34,7 @@ ms = (2*pi/Lz)*[linspace(0, Nz/2, Nz/2+1)';linspace(-Nz/2+1,-1,Nz/2-1)'];
 km = kk.^2 + mm.^2; km = reshape(km', NxNz, 1);
 
 %% Initial Condition
-xIC = fft2(randn(NxNz,3)/NxNz/3000);
+xIC = zeros(NxNz,3); xIC(2,:)=ones(1,3);
+%xIC = fft2(randn(NxNz,3)/(9*NxNz^2*10000));
 %[Psi, T, S] = boxify3NL(xIC);
 %Psibox = boxify(Psi, Nx, Nz);
