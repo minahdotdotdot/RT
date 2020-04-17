@@ -23,18 +23,19 @@ a_ratio = 2;
 N = 2^7; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
 l_o = 2*pi/( .25*(-2-Ra + Ra*sqrt(1+8/Ra)) )^(.25);
 Lx = l_o; Lz = a_ratio*Lx;
-x = linspace(0, Lx, N+1); x=x(1:end-1);
-z = linspace(0, Lz, a_ratio*N+1); z=z(1:end-1);
+%x = linspace(0, Lx, Nx+1); x=x(2:end);
+%z = linspace(0, Lz, Nz+1); z=z(2:end);
+%[xx,zz] = meshgrid(x,z);
 
 %% Discretization parameters
 dx = Lx/Nx;
-ks = (2*pi/Lx)*[linspace(0, Nx/2, Nx/2+1)';linspace(-Nx/2+1,-1,Nx/2-1)'];
-ms = (2*pi/Lz)*[linspace(0, Nz/2, Nz/2+1)';linspace(-Nz/2+1,-1,Nz/2-1)'];
+ks = (2*pi/Lx)*[0:Nx/2 -Nx/2+1:-1]';
+ms = (2*pi/Lz)*[0:Nz/2 -Nz/2+1:-1]';
 [kk,mm] = meshgrid(ks,ms);
-km = kk.^2 + mm.^2; km = reshape(km', NxNz, 1);
-
+km = kk.^2 + mm.^2; %km = reshape(km', NxNz, 1);
 %% Initial Condition
-xIC = zeros(NxNz,3); xIC(2,:)=ones(1,3);
-%xIC = fft2(randn(NxNz,3)/(9*NxNz^2*10000));
+xIC = randn(NxNz,3)/(9*NxNz^2*10000); 
+xIC(1,:)=zeros(3); 
+xIC = fft2(xIC);
 %[Psi, T, S] = boxify3NL(xIC);
 %Psibox = boxify(Psi, Nx, Nz);
