@@ -4,7 +4,7 @@ function x = RK4(IC, M, h, bigL, Nx, Nz, dx, km, every)
 		x = RK4_step(x, h, bigL, Nx, Nz, dx, km);
 		if mod(tt, every) == 1 
 			if ismember(1, isnan(x)) || ismember(1, isinf(x))
-				display(tt)
+				display(tt*h)
 				break
 			end
 		end
