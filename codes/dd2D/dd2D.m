@@ -5,12 +5,12 @@
 %[Psi(1,1) T(1,1) S(1,1) ... Psi(Nx,1) T(Nx,1) S(Nx,1)
 %... Psi(1,2) T(1,2) S(1,2) ... Psi(Nx,2) T(Nx,2) S(Nx,2)
 %... Psi(1,Nz) T(1,Nz) S(1,Nz) ... Psi(Nx,Nz) T(Nx,Nz) S(Nx,Nz)]'
-% i.e. boxPsi = reshape(Psi, Nx, Nz)' should yield the exact physical 
+% i.e. boxPsi      = boxify(Psi, Nx, Nz)' should yield the exact physical 
 %      domain with top left as the origin. 
-%      reshape(boxPsi', Nz*Nx, 1) returns boxT to flattned shape.
-% Function boxify assigns [Psi, T, S] = boxify(x, ...)
-% Function flatten reshapes x to be appropriate for linear solve. 
-
+%      Psi         = vectorize(Psibox) puts it back into a vector.
+%      longx       = flatten(x) so it's suitable for linear operator
+%      [Psi, T, S] = boxify3NL(x) outputs the 3 variables
+%      x = boxify3(longx) shapes it into the NxNz-by-3 shape.
 %% Problem Parameters 
 tau = 0.01;
 Pr = 7;
@@ -34,6 +34,6 @@ ms = (2*pi/Lz)*[linspace(0, Nz/2, Nz/2+1)';linspace(-Nz/2+1,-1,Nz/2-1)'];
 km = kk.^2 + mm.^2; km = reshape(km', NxNz, 1);
 
 %% Initial Condition
-xIC = fft2(randn(NxNz,3)/NxNz);
+xIC = fft2(randn(NxNz,3)/NxNz/3000);
 %[Psi, T, S] = boxify3NL(xIC);
 %Psibox = boxify(Psi, Nx, Nz);

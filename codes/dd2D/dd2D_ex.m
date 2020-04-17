@@ -10,7 +10,7 @@ T = 10;
 h = 1e-6;
 M = T/h;
 x = xIC;
-every = 4;
+every = 100;
 
 xf = RK4(xIC, M, h, L, Nx, Nz, dx, km, every);
 
