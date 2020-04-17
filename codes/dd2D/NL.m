@@ -12,7 +12,7 @@ function z = Jacobian(f,g,Nx,Nz,dx)
 	f=real(ifft2(boxify(f,Nx,Nz)));
 	g=real(ifft2(boxify(g,Nx,Nz)));
 	z = (partialx(f).*partialy(g) - partialy(f).*partialx(g)) /(4*dx^2);
-	z = vectorize(fft2(z));
+	z = vectorize(fft2(z),Nx*Nz);
 end
 
 function ddx = partialx(f)
