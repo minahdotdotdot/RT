@@ -1,7 +1,7 @@
 %% Nonlinear tendency
 function nltend = NL(x, Nx, Nz, dx, km)
 	[Psi, T, S] = boxify3NL(x);
-	nltend = [Jacobian(Psi, km.*Psi, Nx, Nz, dx) ./km ...
+	nltend = [Jacobian(Psi, -km.*Psi, Nx, Nz, dx) ./km ...
 	-Jacobian(Psi, T, Nx, Nz, dx)...
 	-Jacobian(Psi, S, Nx, Nz, dx)];
 	%Because we divide by 0 for km(1,1)=0
@@ -9,10 +9,10 @@ function nltend = NL(x, Nx, Nz, dx, km)
 end
 
 function z = Jacobian(f,g,Nx,Nz,dx)
-	f=ifft(ifft(boxify(f,Nx,Nz) ,Nz,1), Nx,2);
-	g=ifft(ifft(boxify(g,Nx,Nz) ,Nz,1), Nx,2);
+	f=real(ifft2(boxify(f,Nx,Nz)));
+	g=real(ifft2(boxify(g,Nx,Nz)));
 	z = (partialx(f).*partialy(g) - partialy(f).*partialx(g)) /(4*dx^2);
-	z = fft(fft(z, Nx,2), Nz,1);
+	z = fft(z);
 	z = reshape(z', Nz*Nx,1);
 end
 

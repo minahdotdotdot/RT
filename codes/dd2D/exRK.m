@@ -1,5 +1,17 @@
-function update = exRK(x, A, b, c, h, bigL, Nx, Nz, dx, km)
-	NxNz = Nx*Nz;
+function final = exRK(IC, A, b, c, M, h, bigL, Nx, Nz, dx, km, every)
+	x = IC
+	for tt = 1 : M
+		x = exRK_step(x, A, b, c, h, bigL, Nx, Nz, dx, km)
+		if mod(tt, every) == 1 
+			if ismember(1, isnan(x)) || ismember(1, isinf(x));
+				break
+			end
+		end
+	end
+end
+
+
+function update = exRK_step(x, A, b, c, h, bigL, Nx, Nz, dx, km)
 	stages = cell(length(b),1);
 	stages(1) = {LandNL(x, bigL, Nx, Nz, dx, km)};
 	for kk = 2 : length(b)

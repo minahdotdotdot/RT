@@ -1,5 +1,6 @@
 %% Linear tendency
 % This creates a giant sparse operator L.
+
 function bigL = genL(ks, ms, Rrho, Sc, tau, Nx, Nz)
     bigL=sparse(3*Nx*Nz, 3*Nx*Nz);
     for jj = 1 : Nz
@@ -8,8 +9,8 @@ function bigL = genL(ks, ms, Rrho, Sc, tau, Nx, Nz)
             bigL((kk-1)*3+1:3*kk, (kk-1)*3+1:3*kk)=gen3by3L(ks(ii), ms(jj), Rrho, Sc, tau);
         end
     end
-    bigL(1:3,1:3)=zeros(3,3);
 end
+
 
 % This is a 3-by-3 block of L_{k,m}.
 function lilL = gen3by3L(k, m, Rrho, Sc, tau)
@@ -17,8 +18,8 @@ function lilL = gen3by3L(k, m, Rrho, Sc, tau)
     if km == 0
         lilL = zeros(3,3);
     else
-        lilL = [[-Sc*km; -1i*k*Sc/(km*tau); 1i*k*Sc/(km*tau*Rrho)] ...
-        [-1i*k; -km/tau; 0] ... 
-        [-1i*k; 0; -km]];
+        lilL = [[-Sc*km; -1i*k; -1i*k]...
+        [-1i*k*Sc/(km*tau); -km/tau; 0]...
+        [1i*k*Sc/(km*tau*Rrho);0;-km]];
     end
 end

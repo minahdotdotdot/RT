@@ -31,9 +31,9 @@ dx = Lx/Nx;
 ks = (2*pi/Lx)*[linspace(0, Nx/2, Nx/2+1)';linspace(-Nx/2+1,-1,Nx/2-1)'];
 ms = (2*pi/Lz)*[linspace(0, Nz/2, Nz/2+1)';linspace(-Nz/2+1,-1,Nz/2-1)'];
 [kk,mm] = meshgrid(ks,ms);
-km = kk.^2 + mm.^2; km = reshape(km', Nz*Nx, 1);
+km = kk.^2 + mm.^2; km = reshape(km', NxNz, 1);
 
 %% Initial Condition
-xIC = randn(Nx*Nz,3);
+xIC = randn(NxNz,3);
 %[Psi, T, S] = boxify3(xIC);
 %Psibox = boxify(Psi, Nx, Nz);
