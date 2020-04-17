@@ -13,11 +13,16 @@ end
 % This is the analytic solution to the 3-by-3 block of inv(I-hL_{k,m}).
 function lilImexL = gen3by3ImexInv(k, m, Rrho, Sc, tau, h)
 	km = k^2+m^2;
-	a = 1 + h*Sc*km;
-	b = 1i*h*k;
-	c = 1 + h*km/tau;
-	d = 1i*h*k*Sc/(tau*km);
-	lilImexL = [[c^2*Rrho; -b*c*Rrho; -b*c*Rrho] ...
-	[-c*d*Rrho; b*d + a*c*Rrho; b*d*Rrho] ... 
-	[c*d; -b*d; (a*c-b*d)*Rrho]] / (b*c*d+a*c^2*Rrho-b*c*d*Rrho);
+	if km == 0
+		lilImexL = zeros(3,3);
+	else
+		a = 1 + h*Sc*km;
+		b = 1i*h*k;
+		c = 1 + h*km/tau;
+		d = 1i*h*k*Sc/(tau*km);
+		e = 1 + h*km;
+		lilImexL = [[c*e*Rrho; -b*e*Rrho; -b*c*Rrho]...
+			[-d*e*R; b*d+a*e*Rrho; b*d*Rrho]...
+			[c*d; -b*d; (a*c-b*d)*Rrho]] / (a*c*e*Rrho - b*d*(c-e*Rrho));
+	end
 end
