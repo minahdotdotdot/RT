@@ -32,10 +32,10 @@ dx = Lx/Nx;
 ks = (2*pi/Lx)*[0:Nx/2 -Nx/2+1:-1]';
 ms = (2*pi/Lz)*[0:Nz/2 -Nz/2+1:-1]';
 [kk,mm] = meshgrid(ks,ms);
-km = kk.^2 + mm.^2; %km = reshape(km', NxNz, 1);
+km = kk.^2 + mm.^2; km = reshape(km', NxNz, 1);
+
 %% Initial Condition
-xIC = randn(NxNz,3)/(9*NxNz^2*10000); 
-xIC(1,:)=zeros(3); 
-xIC = fft2(xIC);
+xIC = randn(NxNz,3)/(9*NxNz^2); 
+xIC = fft2(xIC); xIC(1,:)=zeros(3); 
 %[Psi, T, S] = boxify3NL(xIC);
 %Psibox = boxify(Psi, Nx, Nz);
