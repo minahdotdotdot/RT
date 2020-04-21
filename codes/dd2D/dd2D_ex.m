@@ -2,14 +2,14 @@ run dd2D
 %% Set up Linear Operator
 L = genL(ks, ms, Rrho, Sc, tau, Nx, Nz);
 eigs = eigL(ks, ms, Rrho, Sc, tau, Nx, Nz);
-T = 10;
-h = 5e-7;
+T = 1.06;
+h = 0.9/max(max(abs(eigs)))
 M = T/h;
 x = xIC;
 every = 1000;
 
 xf = RK4(xIC, M, h, L, Nx, Nz, km, kk, mm, every);
-
+save(xf, 'RK4');
 %{
 
 A_RK4 = [[0; .5; 0; 0] [0; 0; .5; 0] [0; 0; 0; 1.0]];
