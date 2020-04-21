@@ -1,17 +1,13 @@
-function [x,amp] = RK4(IC, M, h, bigL, Nx, Nz, dx, km, kk, mm, every)
+function x = RK4(IC, M, h, bigL, Nx, Nz, dx, km, kk, mm, every)
 	x = IC;
         [Psi, T, S] = boxify3NL(x);
-        amp = sparse(M,3);
-        amp(1,:) = [norm(Psi) norm(T) norm(S)]; kk =1;
 	for tt = 1 : M
 		x = RK4_step(x, h, bigL, Nx, Nz, dx, km);
 		if mod(tt, every) == 1
-                        kk = kk + 1;
                         [Psi, T, S] = boxify3NL(x);
-                        amp(kk,:) = [norm(Psi) norm(T) norm(S)];
-                        display(tt*h) 
+                        display(norm(x)) 
 			if ismember(1, isnan(x)) || ismember(1, isinf(x))
-				%display(tt*h)
+				display(tt*h)
 				break
 			end
 		end
