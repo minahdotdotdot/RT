@@ -12,7 +12,7 @@
 %      [Psi, T, S] = boxify3NL(x) outputs the 3 variables
 %      x = boxify3(longx) shapes it into the NxNz-by-3 shape.
 %% Problem Parameters 
-tau = 0.1;
+tau = 0.01;
 Pr = 7;
 Ra = 1.1;
 Sc = Pr/tau;
