@@ -1,12 +1,12 @@
 %% Nonlinear tendency
 function nltend = NL(x, Nx, Nz, km, kk, mm)
-	nltend = zeros(Nx*Nz, 3);
-	%[Psi, T, S] = boxify3NL(x);
-	%nltend = [Jacobian(Psi, -km.*Psi, Nx, Nz, kk, mm) ./km ...
-	%-Jacobian(Psi, T, Nx, Nz, kk, mm)...
-	%-Jacobian(Psi, S, Nx, Nz, kk, mm)];
+	%nltend = zeros(Nx*Nz, 3);
+	[Psi, T, S] = boxify3NL(x);
+	nltend = [Jacobian(Psi, -km.*Psi, Nx, Nz, kk, mm) ./km ...
+	-Jacobian(Psi, T, Nx, Nz, kk, mm)...
+	-Jacobian(Psi, S, Nx, Nz, kk, mm)];
 	%Because we divide by 0 for km(1,1)=0
-	%nltend(1,1)=0;
+	nltend(1,1)=0;
 end
 
 function z = Jacobian(f,g,Nx,Nz,kk,mm)

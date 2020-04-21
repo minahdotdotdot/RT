@@ -4,9 +4,9 @@ function x = RK4(IC, M, h, bigL, Nx, Nz, km, kk, mm, every)
 	for tt = 1 : M
 		x = RK4_step(x, h, bigL, Nx, Nz, km, kk, mm);
 		if mod(tt, every) == 1
-                        display([norm(x(:,1)) norm(x(:,2)) norm(x(:,3))]) 
+                        display(tt*h) 
 			if ismember(1, isnan(x)) || ismember(1, isinf(x))
-				display(tt*h)
+				%display(tt*h)
 				break
 			end
 		end

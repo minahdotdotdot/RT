@@ -8,7 +8,7 @@ M = T/h;
 x = xIC;
 every = 1000;
 
-%xf = RK4(xIC, M, h, L, Nx, Nz, km, kk, mm, every);
+xf = RK4(xIC, M, h, L, Nx, Nz, km, kk, mm, every);
 
 %{
 
