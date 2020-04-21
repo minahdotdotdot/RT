@@ -1,4 +1,4 @@
-function [x,amp] = RK4(IC, M, h, bigL, Nx, Nz, dx, km, every)
+function [x,amp] = RK4(IC, M, h, bigL, Nx, Nz, dx, km, kk, mm, every)
 	x = IC;
         [Psi, T, S] = boxify3NL(x);
         amp = sparse(M,3);
@@ -18,7 +18,7 @@ function [x,amp] = RK4(IC, M, h, bigL, Nx, Nz, dx, km, every)
 	end
 end
 
-function update = RK4_step(x, h, bigL, Nx, Nz, dx, km)
+function update = RK4_step(x, h, bigL, Nx, Nz, dx, km, kk, mm)
 	update = x;
 	k = h * LandNL(x, bigL, Nx, Nz, dx, km);        %k1
 	update = update + 1/6*k;
@@ -30,6 +30,6 @@ function update = RK4_step(x, h, bigL, Nx, Nz, dx, km)
     update = update + 1/6*k; 
 end
 
-function tend = LandNL(x, bigL, Nx, Nz, dx, km)
-	tend = boxify3(bigL*flatten(x)) + NL(x, Nx, Nz, dx, km);
+function tend = LandNL(x, bigL, Nx, Nz, dx, km, kk, mm)
+	tend = boxify3(bigL*flatten(x)) + NL(x, Nx, Nz, dx, km, kk, mm);
 end

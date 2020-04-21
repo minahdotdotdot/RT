@@ -12,7 +12,7 @@
 %      [Psi, T, S] = boxify3NL(x) outputs the 3 variables
 %      x = boxify3(longx) shapes it into the NxNz-by-3 shape.
 %% Problem Parameters 
-tau = 0.01;
+tau = 0.1;
 Pr = 7;
 Ra = 1.1;
 Sc = Pr/tau;
@@ -21,7 +21,8 @@ Rrho = 1/(Ra*tau);
 %% Domain
 a_ratio = 2;
 N = 2^7; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
-l_o = 2*pi/( .25*(-2-Ra + Ra*sqrt(1+8/Ra)) )^(.25);
+k_o = ( .25*(-2-Ra + Ra*sqrt(1+8/Ra)) )^(.25);
+l_o = 2*pi/k_o;
 Lx = l_o; Lz = a_ratio*Lx;
 %x = linspace(0, Lx, Nx+1); x=x(2:end);
 %z = linspace(0, Lz, Nz+1); z=z(2:end);
@@ -34,8 +35,9 @@ ms = (2*pi/Lz)*[0:Nz/2 -Nz/2+1:-1]';
 [kk,mm] = meshgrid(ks,ms);
 km = kk.^2 + mm.^2; km = reshape(km', NxNz, 1);
 
+
 %% Initial Condition
-xIC = randn(NxNz,3)/(9*NxNz^2); 
-xIC = fft2(xIC); xIC(1,:)=zeros(3); 
+xIC = zeros(NxNz,3);%; 
+xIC = fft2(xIC); xIC(2,:)=ones(1,3)/(9*NxNz^2); 
 %[Psi, T, S] = boxify3NL(xIC);
 %Psibox = boxify(Psi, Nx, Nz);
