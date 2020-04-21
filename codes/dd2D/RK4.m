@@ -15,13 +15,13 @@ end
 
 function update = RK4_step(x, h, bigL, Nx, Nz, km, kk, mm)
 	update = x;
-	k = h * LandNL(x, bigL, Nx, Nz, dx, km);        %k1
+	k = h * LandNL(x, bigL, Nx, Nz, km, kk, mm);        %k1
 	update = update + 1/6*k;
-	k = h * LandNL(x + .5*k, bigL, Nx, Nz, dx, km); %k2
+	k = h * LandNL(x + .5*k, bigL, Nx, Nz, km, kk, mm); %k2
     update = update + 1/3*k;
-    k = h * LandNL(x + .5*k, bigL, Nx, Nz, dx, km); %k3
+    k = h * LandNL(x + .5*k, bigL, Nx, Nz, km, kk, mm); %k3
     update = update + 1/3*k;  
-    k = h * LandNL(x + k, bigL, Nx, Nz, dx, km);    %k4
+    k = h * LandNL(x + k, bigL, Nx, Nz, km, kk, mm);    %k4
     update = update + 1/6*k; 
 end
 
