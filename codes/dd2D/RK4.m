@@ -26,5 +26,5 @@ function update = RK4_step(x, h, bigL, Nx, Nz, km, kk, mm)
 end
 
 function tend = LandNL(x, bigL, Nx, Nz, km, kk, mm)
-	tend = boxify3(bigL*flatten(x)) + NL(x, Nx, Nz, km, kk, mm);
+	tend = boxify3(bigL*flatten(x), Nx, Nz) + NL(x, Nx, Nz, km, kk, mm);
 end
