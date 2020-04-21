@@ -1,9 +1,9 @@
 %% Nonlinear tendency
-function nltend = NL(x, Nx, Nz, km, kk,mm)
+function nltend = NL(x, Nx, Nz, km, kk, mm)
 	[Psi, T, S] = boxify3NL(x);
-	nltend = [Jacobian(Psi, -km.*Psi, Nx, Nz, dx) ./km ...
-	-Jacobian(Psi, T, Nx, Nz, dx)...
-	-Jacobian(Psi, S, Nx, Nz, dx)];
+	nltend = [Jacobian(Psi, -km.*Psi, Nx, Nz, kk, mm) ./km ...
+	-Jacobian(Psi, T, Nx, Nz, kk, mm)...
+	-Jacobian(Psi, S, Nx, Nz, kk, mm)];
 	%Because we divide by 0 for km(1,1)=0
 	nltend(1,1)=0;
 end

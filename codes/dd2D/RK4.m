@@ -2,7 +2,7 @@ function x = RK4(IC, M, h, bigL, Nx, Nz, km, kk, mm, every)
 	x = IC;
         [Psi, T, S] = boxify3NL(x);
 	for tt = 1 : M
-		x = RK4_step(x, h, bigL, Nx, Nz, km);
+		x = RK4_step(x, h, bigL, Nx, Nz, km, kk, mm);
 		if mod(tt, every) == 1
                         display(norm(x)) 
 			if ismember(1, isnan(x)) || ismember(1, isinf(x))
