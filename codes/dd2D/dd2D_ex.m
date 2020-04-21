@@ -2,12 +2,12 @@ run dd2D
 %% Set up Linear Operator
 L = genL(ks, ms, Rrho, Sc, tau, Nx, Nz);
 T = 10;
-h = 1e-7;
+h = 5e-7;
 M = T/h;
 x = xIC;
-every = 500;
+every = 1000;
 
-xf = RK4(xIC, M, h, L, Nx, Nz, km, kk, mm, every);
+%xf = RK4(xIC, M, h, L, Nx, Nz, km, kk, mm, every);
 
 %{
 
