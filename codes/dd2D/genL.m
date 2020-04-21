@@ -15,9 +15,9 @@ end
 % This is a 3-by-3 block of L_{k,m}.
 function lilL = gen3by3L(k, m, Rrho, Sc, tau, Nx)
     km = k^2+m^2;
-    if km == 0 || k == Nx/2
+    if km == 0
         lilL = zeros(3,3);
-    elseif k == Nx/3
+    elseif k == Nx/2
         lilL = [[-Sc*km; 0; 0]...
             [0; -km/tau; 0]...
             [0;0;-km]];

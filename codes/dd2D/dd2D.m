@@ -20,7 +20,7 @@ Rrho = 1/(Ra*tau);
 
 %% Domain
 a_ratio = 2;
-N = 2^5; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
+N = 2^7; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
 k_o = ( .25*(-2-Ra + Ra*sqrt(1+8/Ra)) )^(.25);
 l_o = 2*pi/k_o;
 Lx = l_o; Lz = a_ratio*Lx;
