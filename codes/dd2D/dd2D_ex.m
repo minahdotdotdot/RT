@@ -1,6 +1,7 @@
 run dd2D
 %% Set up Linear Operator
 L = genL(ks, ms, Rrho, Sc, tau, Nx, Nz);
+eigs = eigL(ks, ms, Rrho, Sc, tau, Nx, Nz);
 T = 10;
 h = 5e-7;
 M = T/h;

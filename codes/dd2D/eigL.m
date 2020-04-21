@@ -2,7 +2,7 @@ function eigs = eigL(ks, ms, Rrho, Sc, tau, Nx, Nz)
 	eigs = [];
     for jj = 1 : Nz
         for ii = 1 : Nx
-        	eigs[end+1,:] = eig(gen3by3L(ks(ii), ms(jj), Rrho, Sc, tau, Nx))';
+        	eigs(end+1,:) = eig(gen3by3L(ks(ii), ms(jj), Rrho, Sc, tau, Nx))';
         end
     end
 end
