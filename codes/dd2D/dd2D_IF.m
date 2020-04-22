@@ -6,6 +6,7 @@ M = T/h;
 x = xIC;
 every = 100;
 
+parpool
 %linear operator
-L = genL(ks, ms, Rrho, Sc, tau, Nx, Nz);
-[cx, cmat] = IFRK(xIC, M, h, L, Nx, Nz, ks, ms, every, "RK3", Rrho, Sc, tau);
+%L = genL(ks, ms, Rrho, Sc, tau, Nx, Nz);
+xf = IFRK(xIC, M, h, L, Nx, Nz, ks, ms, km, every, "RK3", Rrho, Sc, tau);
