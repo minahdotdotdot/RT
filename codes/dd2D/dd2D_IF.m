@@ -1,10 +1,10 @@
 run dd2D
 %Time-stepping 
-T = 10;
-h = 5e-7;
-M = 5000;%T/h;
+T = 2000;
+h = 5e-2;
+M = T/h;
 x = xIC;
-every = 1000;
+every = 100;
 
 %linear operator
 L = genL(ks, ms, Rrho, Sc, tau, Nx, Nz);

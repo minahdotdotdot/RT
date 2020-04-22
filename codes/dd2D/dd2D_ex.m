@@ -7,9 +7,9 @@ h = 0.9/max(max(abs(eigs)))
 M = T/h;
 x = xIC;
 every = 1000;
-
 xf = RK4(xIC, M, h, L, Nx, Nz, km, kk, mm, every);
-save(xf, 'RK4');
+save('RK4.mat', 'xf');
+
 %{
 
 A_RK4 = [[0; .5; 0; 0] [0; 0; .5; 0] [0; 0; 0; 1.0]];
