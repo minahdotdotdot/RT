@@ -3,7 +3,7 @@ function L = genexpL(ch, ks, ms, Rrho, Sc, tau, Nx, Nz)
         L = speye(3*Nx*Nz);
     else
         L=sparse(3*Nx*Nz, 3*Nx*Nz);
-        for kk = 1 : Nx*Nz
+        parfor kk = 1 : Nx*Nz
         	jj = ceil(kk/Nx); 
         	ii = kk - (jj-1)*Nx;
         	L((kk-1)*3+1:3*kk, (kk-1)*3+1:3*kk)=gen3by3expL(ch, ks(ii), ms(jj), Rrho, Sc, tau, Nx);

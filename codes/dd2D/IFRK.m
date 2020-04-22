@@ -13,7 +13,9 @@ function x= IFRK(x, M, h, L, Nx, Nz, ks, ms, km, every, name, Rrho, Sc, tau)
 		cx = [0; 1/2; 1/2; 1]; 
 	end
 	cx = cfromx(cx);
+	tic
 	cmat = fillc(cx, h, ks, ms, Rrho, Sc, tau, Nx, Nz);
+	toc
 	
 	for tt = 1 : M
 		x = IFRK_step(x, A, b, h, cx, cmat, Nx, Nz, km, kk, mm);
