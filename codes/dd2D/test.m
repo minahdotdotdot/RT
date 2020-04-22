@@ -1,3 +1,23 @@
+tic
+n = 200;
+A = 500;
+a = zeros(1,n);
+parfor i = 1:n
+    a(i) = max(abs(eig(rand(A))));
+end
+toc
+
+tic
+n = 200;
+A = 500;
+a = zeros(1,n);
+for i = 1:n
+    a(i) = max(abs(eig(rand(A))));
+end
+toc
+
+
+%{
 %test partialx and partialy
 xx = linspace(0,2*pi,Nz+1)';xx=xx(1:end-1);
 f = cos(xx)+1i*sin(xx);
@@ -24,3 +44,6 @@ xvec = flatten(Psi, T, S);
 x = linspace(1,15,15);
 xbox = boxify(x,3,5);
 x3 = flatten(ones(5,1), 2*ones(5,1), 3*ones(5,1));
+%}
+
+

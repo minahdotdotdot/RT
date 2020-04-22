@@ -1,4 +1,4 @@
-function x= IFRK(x, M, h, L, Nx, Nz, ks, ms, km, every, name, Rrho, Sc, tau)
+function x= IFRK(x, M, h, Nx, Nz, ks, ms, km, every, name, Rrho, Sc, tau)
 	[kk,mm] = meshgrid(ks,ms);
 	A=0;b=0;cx=0;
 	if name == "RK3"

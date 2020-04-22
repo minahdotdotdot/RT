@@ -5,10 +5,11 @@ eigs = eigL(ks, ms, Rrho, Sc, tau, Nx, Nz);
 T = 1.06;
 h = 0.9/max(max(abs(eigs)))
 M = T/h;
-x = xIC;
+a=load('RK4.mat');
+x = a.xf;
 every = 1000;
 xf = RK4(xIC, M, h, L, Nx, Nz, km, kk, mm, every);
-save('RK4.mat', 'xf');
+save('RK4-continued.mat', 'xf');
 
 %{
 
