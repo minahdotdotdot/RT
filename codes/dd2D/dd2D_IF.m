@@ -8,4 +8,4 @@ every = 100;
 
 %linear operator
 L = genL(ks, ms, Rrho, Sc, tau, Nx, Nz);
-xf = IFRK(xIC, M, h, L, Nx, Nz, km, kk, mm, every, "RK3");
+[cx, cmat] = IFRK(xIC, M, h, L, Nx, Nz, ks, ms, every, "RK3", Rrho, Sc, tau);

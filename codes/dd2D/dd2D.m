@@ -11,6 +11,7 @@
 %      longx       = flatten(x) so it's suitable for linear operator
 %      [Psi, T, S] = boxify3NL(x) outputs the 3 variables
 %      x = boxify3(longx) shapes it into the NxNz-by-3 shape.
+
 %% Problem Parameters 
 tau = 0.01;
 Pr = 7;
@@ -20,7 +21,7 @@ Rrho = 1/(Ra*tau);
 
 %% Domain
 a_ratio = 2;
-N = 2^7; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
+N = 2^1; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
 k_o = ( .25*(-2-Ra + Ra*sqrt(1+8/Ra)) )^(.25);
 l_o = 2*pi/k_o;
 Lx = l_o; Lz = a_ratio*Lx;
@@ -33,8 +34,8 @@ Lx = l_o; Lz = a_ratio*Lx;
 dx = Lx/Nx;
 ks = (2*pi/Lx)*[0:Nx/2 -Nx/2+1:-1]';
 ms = (2*pi/Lz)*[0:Nz/2 -Nz/2+1:-1]';
-[kk,mm] = meshgrid(ks,ms);
-km = kk.^2 + mm.^2; km = reshape(km', NxNz, 1);
+%[kk,mm] = meshgrid(ks,ms);
+%km = kk.^2 + mm.^2; km = reshape(km', NxNz, 1);
 
 
 %% Initial Condition
