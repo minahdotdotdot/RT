@@ -17,8 +17,8 @@ tau = 0.01;
 Pr = 7;
 Ra = 1.1;
 Sc = Pr/tau;
-Rrho = 1/(Ra*tau);
-
+Rrho = 1/(Ra*tau); 
+pp = struct('tau', tau, 'Pr', Pr, 'Ra', Ra, 'Sc', Sc, 'Rrho', Rrho);
 %% Domain
 a_ratio = 2;
 N = 2^7; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
@@ -36,10 +36,16 @@ ks = (2*pi/Lx)*[0:Nx/2 -Nx/2+1:-1]';
 ms = (2*pi/Lz)*[0:Nz/2 -Nz/2+1:-1]';
 [kk,mm] = meshgrid(ks,ms);
 km = kk.^2 + mm.^2; km = reshape(km', NxNz, 1);
-
+vars = {'tau','Pr','Ra','Sc','Rrho',...
+'a_ratio', 'N', 'Nx', 'Nz', 'NxNz',...
+'k_o', 'l_o', 'Lx', 'Lz',...
+'dx', 'ks', 'ms','kk','mm','km'};
+dp = struct('Nx', Nx, 'Nz', Nz, 'NxNz', NxNz, ...
+	'ks', ks, 'ms', ms, 'km', km, 'kk', kk, 'mm', mm);
+clear(vars{:});clear vars;
 
 %% Initial Condition
-xIC = randn(NxNz,3)/(9*NxNz^2);  
+%xIC = randn(dp.NxNz,3)/(9*dp.NxNz^2);
 %zeros(NxNz,3); xIC(2,1)=1/(9*NxNz^2); 
 %xIC = fft2(xIC);
 %[Psi, T, S] = boxify3NL(xIC);

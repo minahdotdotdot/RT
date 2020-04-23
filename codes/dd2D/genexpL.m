@@ -1,23 +1,22 @@
-function expL= genexpL(L, workers, blocksize)
+function expL= genexpL(L, workers, bs)
     [m,n] = size(L);
-    if mod(m, workers*blocksize) == 0
-        p = m / (workers*blocksize);
+    if mod(m, workers*bs) == 0
+        p = m / (workers*bs);
         blocks = cell(workers,1);%mm);
-        parfor ii = 1 : workers
+        for ii = 1 : workers
             for jj = 1 : p
                 kk = (jj-1)*workers + ii;
                 if jj == 1
                     blocks{ii} = cell(p,1);
                 end
                 %display(join(['worker',sprintf('%d',ii),'job',sprintf('%d',jj),'kk',sprintf('%d',kk)],''))
-                blocks{ii}{jj}=sparse(expm(L((kk-1)*blocksize+1:kk*blocksize, (kk-1)*blocksize+1:kk*blocksize)));
+                blocks{ii}{jj}=sparse(expm(L((kk-1)*bs+1:kk*bs, (kk-1)*bs+1:kk*bs)));
             end
         end
         expL = sparse(m,n);
-       
         for kk = 1 : workers*p
             jj= ceil(kk/workers); ii = kk - (jj-1)*workers;
-            expL((kk-1)*blocksize+1:kk*blocksize, (kk-1)*blocksize+1:kk*blocksize) = blocks{ii}{jj};
+            expL((kk-1)*bs+1:kk*bs, (kk-1)*bs+1:kk*bs) = blocks{ii}{jj};
         end
         if issparse(expL) == false
             expL = sparse(expL);

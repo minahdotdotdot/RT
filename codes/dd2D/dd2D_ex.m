@@ -1,18 +1,17 @@
 run dd2D
 %% Set up Linear Operator
-L = genL(ks, ms, Rrho, Sc, tau, Nx, Nz);
-eigs = eigL(ks, ms, Rrho, Sc, tau, Nx, Nz);
+L = genL(pp,dp);
+eigs = eigL(pp,dp);
 T = 1.06;
 h = 0.9/max(max(abs(eigs)))
 M = T/h;
 a=load('RK4.mat');
 x = a.xf;
-every = 1000;
-xf = RK4(xIC, M, h, L, Nx, Nz, km, kk, mm, every);
+every = 50;
+xf = RK4(x, M, h, every, L, dp);
 save('RK4-continued.mat', 'xf');
 
 %{
-
 A_RK4 = [[0; .5; 0; 0] [0; 0; .5; 0] [0; 0; 0; 1.0]];
 b_RK4 = [1/6; 1/3; 1/3; 1/6];
 c_RK4 = [0; 1/2; 1/2; 1]; 
