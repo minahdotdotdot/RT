@@ -14,7 +14,7 @@ function x= IFRK(x, M, h, Nx, Nz, ks, ms, km, every, name, Rrho, Sc, tau, L, wor
 	end
 	cx = cfromx(cx);
 	tic
-	cmat = fillc(cx, h, ks, ms, Rrho, Sc, tau, Nx, Nz, L);
+	cmat = fillc(cx, h, ks, ms, Rrho, Sc, tau, Nx, Nz, L, workers);
 	toc
 	
 	for tt = 1 : M
@@ -68,7 +68,8 @@ end
 function cmat= fillc(cx, h, ks, ms, Rrho, Sc, tau, Nx, Nz, L, workers)
 	uniquec = unique(cx);
 	cmat = containers.Map('KeyType', 'double', 'ValueType', 'any');
-	parpool(workers)
+	delete(gcp('nocreate'))
+        parpool(workers)
 	for ii = 1 : length(uniquec)
 		cmat(uniquec(ii)) = genexpL(L, workers);
 		%genexpL(uniquec(ii)*h, ks, ms, Rrho, Sc, tau, Nx, Nz);

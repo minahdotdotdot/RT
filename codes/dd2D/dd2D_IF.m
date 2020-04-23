@@ -2,7 +2,7 @@ run dd2D
 %Time-stepping 
 T = 10;
 h = 5e-2;
-M = 500;%T/h;
+M = T/h;
 x = xIC;
 every = 100;
 
