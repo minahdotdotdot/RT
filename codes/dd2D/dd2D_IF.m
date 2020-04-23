@@ -1,8 +1,8 @@
 %Time-stepping 
-T = 100;
+T = 1000;
 h = 5e-2;
-M = 500%T/h;
-every = 100;
+M = T/h;
+every = 1000;
 bname = join(['IFRK3',sprintf('%02d',h*1e2)],'');
 data = load(join(['../../data/',bname,'.mat'],''));
 
@@ -10,3 +10,4 @@ data = load(join(['../../data/',bname,'.mat'],''));
 xIC = randn(data.dp.NxNz,3)/(9*data.dp.NxNz^2);
 
 xf = IFRK(xIC, M, h, every, data.dp, data.RK);
+

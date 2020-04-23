@@ -1,12 +1,17 @@
 function x= IFRK(x, M, h, every, dp, RK)
 	for tt = 1 : M
 		x = IFRK_step(x, h, RK, dp);
+                if tt == 1
+                   tic
+                end
 		if mod(tt, every) == 1
-			%display([norm(x(:,1)) norm(x(:,2)) norm(x(:,3))])
+                        toc
+			display([norm(x(:,1)) norm(x(:,2)) norm(x(:,3))])
 			if ismember(1, isnan(x)) || ismember(1, isinf(x))
 				%display(tt*h) 
 				break
 			end
+                        tic
 		end
 	end
 end

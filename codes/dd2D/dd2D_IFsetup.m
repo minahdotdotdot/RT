@@ -1,6 +1,5 @@
 run dd2D
 %Time-stepping 
-T = 100;
 h = 5e-2;
 bname = join(['IFRK3',sprintf('%02d',h*1e2)],'');
 

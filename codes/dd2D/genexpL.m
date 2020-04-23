@@ -22,7 +22,10 @@ function expL= genexpL(L, workers, bs)
             expL = sparse(expL);
         end
        
+    else
+        error('check m/workers*bs')
     end
+   
 end
 
 
