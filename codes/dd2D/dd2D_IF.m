@@ -1,6 +1,6 @@
 run dd2D
 %Time-stepping 
-T = 10;
+T = 100;
 h = 5e-2;
 M = T/h;
 x = xIC;
