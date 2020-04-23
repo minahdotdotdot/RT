@@ -25,8 +25,8 @@ N = 2^7; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
 k_o = ( .25*(-2-Ra + Ra*sqrt(1+8/Ra)) )^(.25);
 l_o = 2*pi/k_o;
 Lx = l_o; Lz = a_ratio*Lx;
-%x = linspace(0, Lx, Nx+1); x=x(2:end);
-%z = linspace(0, Lz, Nz+1); z=z(2:end);
+x = linspace(0, Lx, Nx+1); x=x(2:end);
+z = linspace(0, Lz, Nz+1); z=z(2:end);
 %[xx,zz] = meshgrid(x,z);
 %zzz = reshape(zz', NxNz,1);
 
@@ -39,9 +39,9 @@ km = kk.^2 + mm.^2; km = reshape(km', NxNz, 1);
 vars = {'tau','Pr','Ra','Sc','Rrho',...
 'a_ratio', 'N', 'Nx', 'Nz', 'NxNz',...
 'k_o', 'l_o', 'Lx', 'Lz',...
-'dx', 'ks', 'ms','kk','mm','km'};
+'dx', 'ks', 'ms','kk','mm','km','x','z'};
 dp = struct('Nx', Nx, 'Nz', Nz, 'NxNz', NxNz, ...
-	'ks', ks, 'ms', ms, 'km', km, 'kk', kk, 'mm', mm);
+	'ks', ks, 'ms', ms, 'km', km, 'kk', kk, 'mm', mm,'x',x,'z',z);
 clear(vars{:});clear vars;
 
 %% Initial Condition

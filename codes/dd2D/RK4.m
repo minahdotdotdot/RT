@@ -1,4 +1,5 @@
-function x = RK4(x, M, h, every, L, dp);
+function [x, ES, FS] = RK4(x, M, h, every, L, dp);
+	ES = []; FS = [];
 	for tt = 1 : M
 		x = RK4_step(x, h, L, dp);
 		if tt == 1
@@ -7,6 +8,7 @@ function x = RK4(x, M, h, every, L, dp);
 		if mod(tt, every) == 1
 			toc
             %display(tt*h) 
+            [ES(end+1), FS(end+1)] = computeE(x, dp);
 			if ismember(1, isnan(x)) || ismember(1, isinf(x))
 				%display(tt*h)
 				break
