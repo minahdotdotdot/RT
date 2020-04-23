@@ -10,4 +10,4 @@ every = 100;
 %linear operator
 workers = 8;
 L = genL(ks, ms, Rrho, Sc, tau, Nx, Nz);
-xf = IFRK(xIC, M, h, Nx, Nz, ks, ms, km, every, "RK3", Rrho, Sc, tau, L, workers);
+%xf = IFRK(xIC, M, h, Nx, Nz, ks, ms, km, every, "RK3", Rrho, Sc, tau, L, workers);

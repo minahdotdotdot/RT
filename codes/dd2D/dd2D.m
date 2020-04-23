@@ -39,7 +39,8 @@ km = kk.^2 + mm.^2; km = reshape(km', NxNz, 1);
 
 
 %% Initial Condition
-xIC = zeros(NxNz,3); xIC(2,1)=1/(9*NxNz^2); 
+xIC = randn(NxNz,3)/(9*NxNz^2);  
+%zeros(NxNz,3); xIC(2,1)=1/(9*NxNz^2); 
 %xIC = fft2(xIC);
 %[Psi, T, S] = boxify3NL(xIC);
 %Psibox = boxify(Psi, Nx, Nz);

@@ -1,4 +1,4 @@
-function x= IFRK(x, M, h, Nx, Nz, ks, ms, km, every, name, Rrho, Sc, tau, L, workers)
+function cmat= IFRK(x, M, h, Nx, Nz, ks, ms, km, every, name, Rrho, Sc, tau, L, workers)
 	[kk,mm] = meshgrid(ks,ms);
 	A=0;b=0;cx=0;
 	if name == "RK3"
@@ -18,7 +18,7 @@ function x= IFRK(x, M, h, Nx, Nz, ks, ms, km, every, name, Rrho, Sc, tau, L, wor
 	tic
 	cmat = fillc(cx, h, ks, ms, Rrho, Sc, tau, Nx, Nz, L, workers);
 	toc
-	
+	%{
 	for tt = 1 : M
 		x = IFRK_step(x, A, b, h, cx, cmat, Nx, Nz, km, kk, mm);
 		if mod(tt, every) == 1
@@ -29,7 +29,7 @@ function x= IFRK(x, M, h, Nx, Nz, ks, ms, km, every, name, Rrho, Sc, tau, L, wor
 			end
 		end
 	end
-	
+	%}
 end
 
 function update = IFRK_step(x, A, b, h, cx, cmat, Nx, Nz, km, kk, mm)

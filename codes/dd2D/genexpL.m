@@ -2,13 +2,13 @@ function expL= genexpL(L, workers)
     [m,n] = size(L);
     if mod(m, workers) == 0
         mm = m / workers;
-        blocks = cell(workers);
+        blocks = cell(workers,1);
         parfor ii = 1 : workers
-            blocks{ii} = sparse(expm(L((mm-1)*workers+1:mm*workers, (mm-1)*workers+1:mm*workers)));
+            blocks{ii} = sparse(expm(L((ii-1)*mm+1:mm*ii, (ii-1)*mm+1:mm*ii)));
         end
         expL = sparse(m,n);
         for ii = 1 : workers
-            expL((mm-1)*workers+1:mm*workers, (mm-1)*workers+1:mm*workers) = blocks{ii};
+            expL((ii-1)*mm+1:mm*ii, (ii-1)*mm+1:mm*ii) = blocks{ii};
         end
         if issparse(expL) == false
             expL = sparse(expL);
