@@ -8,5 +8,6 @@ every = 100;
 
 %parpool
 %linear operator
-%L = genL(ks, ms, Rrho, Sc, tau, Nx, Nz);
-xf = IFRK(xIC, M, h, Nx, Nz, ks, ms, km, every, "RK3", Rrho, Sc, tau);
+workers = 8;
+L = genL(ks, ms, Rrho, Sc, tau, Nx, Nz);
+xf = IFRK(xIC, M, h, Nx, Nz, ks, ms, km, every, "RK3", Rrho, Sc, tau, L, workers);

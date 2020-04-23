@@ -1,4 +1,4 @@
-function x= IFRK(x, M, h, Nx, Nz, ks, ms, km, every, name, Rrho, Sc, tau)
+function x= IFRK(x, M, h, Nx, Nz, ks, ms, km, every, name, Rrho, Sc, tau, L, workers)
 	[kk,mm] = meshgrid(ks,ms);
 	A=0;b=0;cx=0;
 	if name == "RK3"
@@ -14,7 +14,7 @@ function x= IFRK(x, M, h, Nx, Nz, ks, ms, km, every, name, Rrho, Sc, tau)
 	end
 	cx = cfromx(cx);
 	tic
-	cmat = fillc(cx, h, ks, ms, Rrho, Sc, tau, Nx, Nz);
+	cmat = fillc(cx, h, ks, ms, Rrho, Sc, tau, Nx, Nz, L);
 	toc
 	
 	for tt = 1 : M
@@ -65,10 +65,12 @@ function c = cfromx(cx)
 	c(end,1:s) = 1 - cx;
 end
 
-function cmat= fillc(cx, h, ks, ms, Rrho, Sc, tau, Nx, Nz)
+function cmat= fillc(cx, h, ks, ms, Rrho, Sc, tau, Nx, Nz, L, workers)
 	uniquec = unique(cx);
 	cmat = containers.Map('KeyType', 'double', 'ValueType', 'any');
+	parpool(workers)
 	for ii = 1 : length(uniquec)
-		cmat(uniquec(ii)) = genexpL(uniquec(ii)*h, ks, ms, Rrho, Sc, tau, Nx, Nz);
+		cmat(uniquec(ii)) = genexpL(L, workers);
+		%genexpL(uniquec(ii)*h, ks, ms, Rrho, Sc, tau, Nx, Nz);
     end
 end

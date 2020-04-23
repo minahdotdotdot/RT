@@ -1,3 +1,23 @@
+function expL= genexpL(L, workers)
+    [m,n] = size(L);
+    if mod(m, workers) == 0
+        mm = m / workers;
+        blocks = cell(workers);
+        parfor ii = 1 : workers
+            blocks{ii} = sparse(expm(L((mm-1)*workers+1:mm*workers, (mm-1)*workers+1:mm*workers)));
+        end
+        expL = sparse(m,n);
+        for ii = 1 : workers
+            expL((mm-1)*workers+1:mm*workers, (mm-1)*workers+1:mm*workers) = blocks{ii};
+        end
+        if issparse(expL) == false
+            expL = sparse(expL);
+        end
+    end
+end
+
+
+%{
 function L = genexpL(ch, ks, ms, Rrho, Sc, tau, Nx, Nz)
     if ch == 0
         L = speye(3*Nx*Nz);
@@ -26,3 +46,4 @@ function lilexpL = gen3by3expL(ch, k, m, Rrho, Sc, tau, Nx)
         [1i*k*Sc/(km*tau*Rrho);0;-km]]));
     end
 end
+%}
