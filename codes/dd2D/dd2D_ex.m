@@ -8,7 +8,7 @@ M = T/h;
 a=load('RK4.mat');
 x = a.xf;
 every = 50;
-xf = RK4(x, M, h, every, L, dp);
+[xf,ES,FS] = RK4(x, M, h, every, L, dp);
 save('RK4-continued.mat', 'xf');
 
 %{

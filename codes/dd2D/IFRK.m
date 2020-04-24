@@ -1,5 +1,5 @@
-function x= IFRK(x, M, h, every, dp, RK)
-	ES = []; FS = [];
+function [x, ES, FS]= IFRK(x, M, h, every, dp, RK)
+	ES = zeros(M/every+1,1); FS = zeros(M/every+1,1);kk = 0;
 	for tt = 1 : M
 		x = IFRK_step(x, h, RK, dp);
         if tt == 1
@@ -8,7 +8,7 @@ function x= IFRK(x, M, h, every, dp, RK)
 		if mod(tt, every) == 1
             %toc
 			%display([norm(x(:,1)) norm(x(:,2)) norm(x(:,3))])
-			[ES(end+1), FS(end+1)] = computeE(x, dp);
+			kk = kk+1; [ES(kk), FS(kk)] = computeE(x, dp);
 			if ismember(1, isnan(x)) || ismember(1, isinf(x))
 				%display(tt*h) 
 				break
