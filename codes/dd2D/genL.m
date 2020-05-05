@@ -15,23 +15,23 @@ function bigL = genL(pp, dp, par)
         workers = par;
         delete(gcp('nocreate'))
         parpool(workers)
-        m=dp.NxNz;
-        if mod(m, workers) == 0
-            p = m / workers;
+        if mod(dp.Nz, workers) == 0
+            p = dp.Nz / workers;
             blocks = cell(workers,1);
-            parfor ii = 1 : workers
-                for jj = 1 : p
-                    kk = (jj-1)*workers + ii;
-                    if jj == 1
-                        blocks{ii} = cell(p,1);
+            parfor w = 1 : workers
+                blocks{w} = sparse(3*dp.Nx*p, 3*dp.Nx*p);
+                jjj = 0;
+                for jj = (w-1)*p+1:w*p
+                    jjj = jjj + 1;
+                    for ii = 1 : dp.Nx
+                    kk = (jjj-1)*workers + ii;
+                        blocks{w}((kk-1)*3+1:3*kk, (kk-1)*3+1:3*kk)=gen3by3L(dp.ks(ii), dp.ms(jj), pp, dp);
                     end
-                    yy = floor(kk/dp.Nx); xx = kk-(yy-1)*dp.Nx;
-                    blocks{ii}{jj}=gen3by3L(dp.ks(xx), dp.ms(yy), pp, dp);
                 end
             end
-            for kk = 1 : workers*p
-                jj= ceil(kk/workers); ii = kk - (jj-1)*workers;
-                bigL((kk-1)*3+1:3*kk, (kk-1)*3+1:3*kk) = blocks{ii}{jj};
+            m = 3*dp.Nx*p;
+            for w = 1 : workers
+                bigL((w-1)*m+1:w*m,(w-1)*m+1:w*m) = blocks{w};
             end
             if issparse(bigL) == false
                 bigL = sparse(bigL);
