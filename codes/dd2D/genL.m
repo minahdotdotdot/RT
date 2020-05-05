@@ -13,8 +13,8 @@ function bigL = genL(pp, dp, par)
         end
     else
         workers = par;
-        delete(gcp('nocreate'))
-        parpool(workers)
+        %delete(gcp('nocreate'))
+        %parpool(workers)
         if mod(dp.Nz, workers) == 0
             p = dp.Nz / workers;
             blocks = cell(workers,1);

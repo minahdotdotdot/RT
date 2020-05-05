@@ -1,7 +1,7 @@
 run dd2D
 %Time-stepping 
 h = 5e-2;
-bname = join(['IFRK3',sprintf('%02d',h*1e2)],'');
+bname = join(['IFRK3',sprintf('%02d',h*1e2),'D32N10'],'');
 
 %parpool %parpool only called in fillc
 %linear operator
@@ -15,15 +15,20 @@ bname = join(['IFRK3',sprintf('%02d',h*1e2)],'');
 
 workers = 16;
 %i.e. aspect ratio = 1, p = 10 --> 3NxNz = 3(2^{20})
-bs = 3*2^7; % blocksize: log_2(20 - 3 = 17)
-%bs = 3*2*7;
-%N=2^7 : 3NxNz=3*2^{14} --->  4   sec
-%N=2^8 : 3NxNz=3*2^{16} ---> 11.8 sec
-%N=2^9 : 3NxNz=3*2^{18} --->
+bs = 3*2^7; % Each worker does: TOTAL: 3*2^{20 - 4 = 16} since workers=16=2^4
+%                             AT ITER: bs=3*2^7, 2^{16-7} ITERs
+%p=log_2(N) :  3NxNz   -> genL  || expL
+%  7        : 3*2^{14} ->   25s ||   1.4s
+%  8        : 3*2^{16} ->   21s ||   3.5s
+%  9        : 3*2^{18} ->   22s ||  20. s
+% 10        : 3*2^{20} -> 1637s ||    . s
 
 %par = 0;
-par = workers;
-L = genL(pp, dp, par);
+par = workers;tic
+delete(gcp('nocreate'))
+parpool(workers)
+L = genL(pp, dp, par);toc
+save(join(['../../data/',bname,'.mat'],''),'L');
 RK = genIFRKexpL("RK3", h, L, workers, bs, pp, dp);
 run setupNL
-save(join(['../../data/',bname,'.mat'],''),'RK', 'dpNL');
+save(join(['../../data/',bname,'.mat'],''),'RK', 'dpNL','-append');

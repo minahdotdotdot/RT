@@ -12,8 +12,8 @@ function RK = genIFRKexpL(name, h, L, workers, bs, pp, dp)
 		cx = [0; 1/2; 1/2; 1]; 
 	end
 	cx = cfromx(cx);
-	delete(gcp('nocreate'))
-    parpool(workers)
+	%delete(gcp('nocreate'))
+        %parpool(workers)
 	tic
 	cmat = fillc(cx, h, L, workers, bs);
 	toc

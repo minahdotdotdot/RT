@@ -23,7 +23,7 @@ pp = struct('tau', tau, 'Pr', Pr, 'Ra', Ra, 'Sc', Sc, 'Rrho', Rrho);
 
 %% Domain
 a_ratio = 1;
-N = 2^9; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
+N = 2^10; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
 k_o = ( .25*(-2-Ra + Ra*sqrt(1+8/Ra)) )^(.25);
 l_o = 2*pi/k_o;
 vars = {'tau','Pr','Ra','Sc','Rrho'}; clear(vars{:}); clear vars;
