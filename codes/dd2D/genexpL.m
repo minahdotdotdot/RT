@@ -3,7 +3,8 @@ function expL= genexpL(L, workers, bs)
     if mod(m, workers*bs) == 0
         p = m / (workers*bs);
         blocks = cell(workers,1);%mm);
-        for ii = 1 : workers
+        %for ii = 1 : workers
+        parfor ii = 1 : workers
             for jj = 1 : p
                 kk = (jj-1)*workers + ii;
                 if jj == 1

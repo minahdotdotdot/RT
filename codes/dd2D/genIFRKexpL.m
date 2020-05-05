@@ -13,10 +13,10 @@ function RK = genIFRKexpL(name, h, L, workers, bs, pp, dp)
 	end
 	cx = cfromx(cx);
 	%delete(gcp('nocreate'))
-    %parpool(workers)
-	%tic
+        %parpool(workers)
+	tic
 	cmat = fillc(cx, h, L, workers, bs);
-	%toc
+	toc
 	RK = struct('A', A, 'b', b, 'cx', cx, 'cmat', cmat);
 end
 
