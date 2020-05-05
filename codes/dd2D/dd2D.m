@@ -5,7 +5,7 @@
 %[Psi(1,1) T(1,1) S(1,1) ... Psi(Nx,1) T(Nx,1) S(Nx,1)
 %... Psi(1,2) T(1,2) S(1,2) ... Psi(Nx,2) T(Nx,2) S(Nx,2)
 %... Psi(1,Nz) T(1,Nz) S(1,Nz) ... Psi(Nx,Nz) T(Nx,Nz) S(Nx,Nz)]'
-% i.e. boxPsi      = boxify(Psi, Nx, Nz)' should yield the exact physical 
+% i.e. boxPsi      = boxify(Psi, Nx, Nz) should yield the exact physical 
 %      domain with top left as the origin. 
 %      Psi         = vectorize(Psibox) puts it back into a vector.
 %      longx       = flatten(x) so it's suitable for linear operator
@@ -19,11 +19,14 @@ Ra = 1.1;
 Sc = Pr/tau;
 Rrho = 1/(Ra*tau); 
 pp = struct('tau', tau, 'Pr', Pr, 'Ra', Ra, 'Sc', Sc, 'Rrho', Rrho);
+
+
 %% Domain
 a_ratio = 2;
-N = 2^7; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
+N = 2^2; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
 k_o = ( .25*(-2-Ra + Ra*sqrt(1+8/Ra)) )^(.25);
 l_o = 2*pi/k_o;
+vars = {'tau','Pr','Ra','Sc','Rrho'}; clear(vars{:}); clear vars;
 Lx = l_o; Lz = a_ratio*Lx;
 x = linspace(0, Lx, Nx+1); x=x(2:end);
 z = linspace(0, Lz, Nz+1); z=z(2:end);
@@ -34,18 +37,22 @@ z = linspace(0, Lz, Nz+1); z=z(2:end);
 dx = Lx/Nx;
 ks = (2*pi/Lx)*[0:Nx/2 -Nx/2+1:-1]';
 ms = (2*pi/Lz)*[0:Nz/2 -Nz/2+1:-1]';
+% Nx/2,Nz/2 are not zero since these are for setting up Laplacian.
 [kk,mm] = meshgrid(ks,ms);
 km = kk.^2 + mm.^2; km = reshape(km', NxNz, 1);
-vars = {'tau','Pr','Ra','Sc','Rrho',...
-'a_ratio', 'N', 'Nx', 'Nz', 'NxNz',...
-'k_o', 'l_o', 'Lx', 'Lz',...
-'dx', 'ks', 'ms','kk','mm','km','x','z'};
+
+
 dp = struct('Nx', Nx, 'Nz', Nz, 'NxNz', NxNz, ...
-	'ks', ks, 'ms', ms, 'km', km, 'kk', kk, 'mm', mm,'x',x,'z',z);
+	'ks', ks, 'ms', ms, 'km', km, 'kk', kk, 'mm', mm, ...
+	'x',x,'z',z, ...
+	'Lx', Lx, 'Lz', Lz);
+vars = {'a_ratio', 'N', 'Nx', 'Nz', 'NxNz',...
+'dx', 'ks', 'ms','kk','mm','km','x','z',...
+'Lx','Lz'};
 clear(vars{:});clear vars;
 
 %% Initial Condition
-%xIC = randn(dp.NxNz,3)/(9*dp.NxNz^2);
+xIC = randn(dp.NxNz,3)/(3*dp.NxNz);
 %zeros(NxNz,3); xIC(2,1)=1/(9*NxNz^2); 
 %xIC = fft2(xIC);
 %[Psi, T, S] = boxify3NL(xIC);

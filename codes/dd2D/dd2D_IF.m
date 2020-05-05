@@ -9,5 +9,6 @@ data = load(join(['../../data/',bname,'.mat'],''));
 %% Initial Condition
 xIC = randn(data.dp.NxNz,3)/(data.dp.NxNz);
 
+
 [xf, ES, FS] = IFRK(xIC, M, h, every, data.dp, data.RK);
 save('IFRK3h05.mat','xf', 'ES', 'FS');

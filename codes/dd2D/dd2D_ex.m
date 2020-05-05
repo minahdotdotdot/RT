@@ -2,13 +2,18 @@ run dd2D
 %% Set up Linear Operator
 L = genL(pp,dp);
 eigs = eigL(pp,dp);
+%% Set up Nonlinear stuff.
+run setupNL
+
+
+
 T = 1.06;
 h = 0.9/max(max(abs(eigs)))
 M = T/h;
 a=load('RK4.mat');
 x = a.xf;
 every = 50;
-[xf,ES,FS] = RK4(x, M, h, every, L, dp);
+[xf,ES,FS] = RK4(x, M, h, every, L, dpNL);
 save('RK4-continued.mat', 'xf');
 
 %{
