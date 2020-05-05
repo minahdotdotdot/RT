@@ -16,4 +16,4 @@ bs = 3*2^5; % block size: log_2(15 - 3 = 12)
 L = genL(pp, dp);
 RK = genIFRKexpL("RK3", h, L, workers, bs, pp, dp);
 run setupNL
-save(join(['../../data/',bname,'.mat'],''),'RK', 'dp');
+save(join(['../../data/',bname,'.mat'],''),'RK', 'dpNL');
