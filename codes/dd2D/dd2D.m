@@ -22,12 +22,12 @@ pp = struct('tau', tau, 'Pr', Pr, 'Ra', Ra, 'Sc', Sc, 'Rrho', Rrho);
 
 
 %% Domain
-a_ratio = 2;
-N = 2^2; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
+a_ratio = 1;
+N = 2^10; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
 k_o = ( .25*(-2-Ra + Ra*sqrt(1+8/Ra)) )^(.25);
 l_o = 2*pi/k_o;
 vars = {'tau','Pr','Ra','Sc','Rrho'}; clear(vars{:}); clear vars;
-Lx = l_o; Lz = a_ratio*Lx;
+Lx = 32*l_o; Lz = a_ratio*Lx;
 x = linspace(0, Lx, Nx+1); x=x(2:end);
 z = linspace(0, Lz, Nz+1); z=z(2:end);
 %[xx,zz] = meshgrid(x,z);
