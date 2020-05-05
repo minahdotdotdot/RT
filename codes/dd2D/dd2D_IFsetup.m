@@ -21,9 +21,9 @@ bs = 3*2^7; % blocksize: log_2(20 - 3 = 17)
 %N=2^8 : 3NxNz=3*2^{16} ---> 11.8 sec
 %N=2^9 : 3NxNz=3*2^{18} --->
 
-
-
-L = genL(pp, dp);
+%par = 0;
+par = workers;
+L = genL(pp, dp, par);
 RK = genIFRKexpL("RK3", h, L, workers, bs, pp, dp);
 run setupNL
 save(join(['../../data/',bname,'.mat'],''),'RK', 'dpNL');

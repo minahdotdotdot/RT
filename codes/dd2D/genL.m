@@ -12,9 +12,10 @@ function bigL = genL(pp, dp, par)
             end
         end
     else
+        workers = par;
         delete(gcp('nocreate'))
         parpool(workers)
-        workers =par(1); m=3*dp.Nx*dp*Nz;
+        m=dp.NxNz;
         if mod(m, workers) == 0
             p = m / workers;
             blocks = cell(workers,1);
@@ -24,17 +25,16 @@ function bigL = genL(pp, dp, par)
                     if jj == 1
                         blocks{ii} = cell(p,1);
                     end
-                    yy = floor(kk/Nx); xx = kk-(yy-1)dp.Nx;
+                    yy = floor(kk/dp.Nx); xx = kk-(yy-1)*dp.Nx;
                     blocks{ii}{jj}=gen3by3L(dp.ks(xx), dp.ms(yy), pp, dp);
                 end
             end
-            expL = sparse(m,n);
             for kk = 1 : workers*p
                 jj= ceil(kk/workers); ii = kk - (jj-1)*workers;
                 bigL((kk-1)*3+1:3*kk, (kk-1)*3+1:3*kk) = blocks{ii}{jj};
             end
             if issparse(bigL) == false
-                expL = sparse(bigL);
+                bigL = sparse(bigL);
             end
         else
             error('check m/workers')
