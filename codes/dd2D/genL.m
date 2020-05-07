@@ -24,7 +24,7 @@ function bigL = genL(pp, dp, par)
                 for jj = (w-1)*p+1:w*p
                     jjj = jjj + 1;
                     for ii = 1 : dp.Nx
-                    kk = (jjj-1)*workers + ii;
+                    kk = (jjj-1)*dp.Nx + ii;
                         blocks{w}((kk-1)*3+1:3*kk, (kk-1)*3+1:3*kk)=gen3by3L(dp.ks(ii), dp.ms(jj), pp, dp);
                     end
                 end
