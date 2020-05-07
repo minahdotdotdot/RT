@@ -23,7 +23,7 @@ pp = struct('tau', tau, 'Pr', Pr, 'Ra', Ra, 'Sc', Sc, 'Rrho', Rrho);
 
 %% Domain
 a_ratio = 1;
-N = 2^10; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
+N = 2^9; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
 k_o = ( .25*(-2-Ra + Ra*sqrt(1+8/Ra)) )^(.25);
 l_o = 2*pi/k_o;
 vars = {'tau','Pr','Ra','Sc','Rrho'}; clear(vars{:}); clear vars;
@@ -38,16 +38,18 @@ dx = Lx/Nx;
 ks = (2*pi/Lx)*[0:Nx/2 -Nx/2+1:-1]';
 ms = (2*pi/Lz)*[0:Nz/2 -Nz/2+1:-1]';
 % Nx/2,Nz/2 are not zero since these are for setting up Laplacian.
-[kk,mm] = meshgrid(ks,ms);
-km = kk.^2 + mm.^2; km = reshape(km', NxNz, 1);
-
+[kkk,mm] = meshgrid(ks,ms);
+km = kkk.^2 + mm.^2; km = reshape(km', NxNz, 1);
+%We need the not-inflated wave numbers for computing the Energy.
+%In NL.m, we'll get the new wave numbers for dealiasing, and save
+%it as kk.
 
 dp = struct('Nx', Nx, 'Nz', Nz, 'NxNz', NxNz, ...
-	'ks', ks, 'ms', ms, 'km', km, 'kk', kk, 'mm', mm, ...
+	'ks', ks, 'ms', ms, 'km', km, 'kkk', kkk, 'mm', mm, ...
 	'x',x,'z',z, ...
 	'Lx', Lx, 'Lz', Lz);
 vars = {'a_ratio', 'N', 'Nx', 'Nz', 'NxNz',...
-'dx', 'ks', 'ms','kk','mm','km','x','z',...
+'dx', 'ks', 'ms','kkk','mm','km','x','z',...
 'Lx','Lz'};
 clear(vars{:});clear vars;
 

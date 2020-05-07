@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name setupIF
+#SBATCH --job-name setupIF9
 #SBATCH --qos=blanca-appm
 #SBATCH --nodes 1
 #SBATCH --ntasks 16

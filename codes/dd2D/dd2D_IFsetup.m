@@ -1,7 +1,7 @@
 run dd2D
 %Time-stepping 
 h = 5e-2;
-bname = join(['IFRK3',sprintf('%02d',h*1e2),'D32N10'],'');
+bname = join(['IFRK3',sprintf('%02d',h*1e2),'D32N09'],'');
 
 %parpool %parpool only called in fillc
 %linear operator
@@ -23,7 +23,8 @@ bs = 3*2^7; % Each worker does: TOTAL: 3*2^{20 - 4 = 16} since workers=16=2^4
 %  9        : 3*2^{18} ->   22s ||  20. s
 % 10        : 3*2^{20} -> 1637s ||    . s
 
-%par = 0;
+%par = 0;tic
+%L=genL(pp,dp,par);toc
 par = workers;tic
 delete(gcp('nocreate'))
 parpool(workers)
