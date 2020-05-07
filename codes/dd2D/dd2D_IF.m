@@ -3,13 +3,13 @@ T = 1500;
 h = 5e-2;
 M = T/h;
 every = 1000;
-bname = join(['IFRK3',sprintf('%02d',h*1e2),'D32N10'],'');
+bname = join(['IFRK3',sprintf('%02d',h*1e2),'D32N09'],'');
 data = load(join(['../../data/',bname,'.mat'],''));
-RK = data.RK; dp = data.dp;
+RK = data.RK; dp = data.dpNL;
 clear data;
 %% Initial Condition
-xIC = randn(data.dp.NxNz,3)/(data.dp.NxNz);
+xIC = randn(dp.NxNz,3)/(dp.NxNz);
 
 
 [xf, ES, FS] = IFRK(xIC, M, h, every, dp, RK);
-save('I305D32N10.mat','xf', 'ES', 'FS');
+save('I305D32N09.mat','xf', 'ES', 'FS');
