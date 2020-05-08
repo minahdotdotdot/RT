@@ -18,22 +18,22 @@ function [x, ES, FS]= ARK(x, M, h, every, dp, arks)
 end
 
 function update = ARK_step(x, h, arks, dp, stages)
-	s = length(RK.b);
+	s = length(arks.b);
 	PP=0;
 	% ks, x, PP are stored as vectors (flattened) within this function.
 	x = flatten(x);
 	stages(:,1) = x;
 	for ii = 2 : s
-		ks[i,:] = invd .* (x + h*(
-            L .* lincom(RKT.Ae(i-1,1:i-1), stages(:,1:i-1)
-            + lincomN(RKT.Ai(i-1,1:i-1), stages(:,1:i-1), dp)
+		ks[i,:] = arks.invd * (x + h*(
+            arks.L * (arks.Ae(i-1,1:i-1).*stages(:,1:i-1)) %matlab does this fast.
+            + lincomN(arks.Ai(i-1,1:i-1), stages(:,1:i-1), dp)
             )
         )
 	end
 	%new PP for update
-	PP = h*lincomIF(RK.b, RK.cx(end,:), RK.cmat, stages);
-	update = boxify3(...
-		zhat + h*( L .* lincom(RKT.b, ks) + lincomN(RKT.b, ks, fP, k, NLfunc)),...
+	PP = h*lincomIF(arks.b, arks.cx(end,:), arks.cmat, stages);
+	update = boxify3(
+		zhat + h*(arks.L* (arks.b.* stages + lincomN(arks.b, stages, dp))),...
 		dp.Nx, dp.Nz);
 end
 
