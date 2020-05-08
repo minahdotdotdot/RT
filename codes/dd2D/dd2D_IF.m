@@ -1,15 +1,18 @@
 %Time-stepping 
-T = 1500;
-h = 5e-2;
+T = 2400;
+h = 5e-1;
 M = T/h;
-every = 1000;
-bname = join(['IFRK3',sprintf('%02d',h*1e2),'D32N09'],'');
+every = 500;
+bname = join(['IFRK3',sprintf('%02d',h*1e2),'D32N07'],'');
 data = load(join(['../../data/',bname,'.mat'],''));
 RK = data.RK; dp = data.dpNL;
 clear data;
 %% Initial Condition
-xIC = randn(dp.NxNz,3)/(dp.NxNz);
+xIC = randn(dp.NxNz,3)/sqrt(dp.NxNz);
+%data = load('./I305D32N07.mat');
+%xIC = data.xf;
+%clear data
 
 
 [xf, ES, FS] = IFRK(xIC, M, h, every, dp, RK);
-save('I305D32N09.mat','xf', 'ES', 'FS');
+save('I350D32N07.mat','xf', 'ES', 'FS');

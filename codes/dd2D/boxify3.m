@@ -1,3 +1,3 @@
-function xbox = boxify3(x, Nx, Nz)
-	xbox = reshape(x, 3, Nx*Nz)';
+function xbox = boxify3(x, NxNz)
+	xbox = reshape(x, 3, NxNz)';
 end
