@@ -18,4 +18,17 @@ dpNL = struct('Nx', dp.Nx, 'Nz', dp.Nz, 'NxNz', dp.NxNz, ...
 	'km', km, 'kk', kk, 'mm', mm, 'kkk', dp.kkk, ...%'x',dp.x,'z',dp.z,...
 	'Lx', dp.Lx, 'Lz', dp.Lz);
 vars = {'dp', 'ks', 'ms', 'kk', 'mm'};
-clear(vars{:});clear vars;
+clear(vars{:}); clear vars;
+
+%{
+NxNz = dp.NxNz; Nz=dp.Nz; Nx = dp.Nx;
+ind = 4/9*vectorize(pad_var(reshape(1:NxNz, Nz, Nx), dpNL), 9/4*NxNz);
+ind(ind==0)=NxNz+1;
+
+
+[Psi, T, S] = boxify3NL(xIC);
+Psibox = boxify(Psi, Nx, Nz);
+Psi(end+1) = 0;
+pPsi = Psi(ind);
+upPsi = pPsi(ind<=NxNz);
+%}

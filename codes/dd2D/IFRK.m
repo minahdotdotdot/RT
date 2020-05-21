@@ -26,11 +26,11 @@ function update = IFRK_step(x, h, RK, dp)
 	x = flatten(x);
 	for ii = 2 : s
 		PP = h*lincomIF(RK.A(ii, 1:ii-1), RK.cx(ii, 1:ii-1), RK.cmat, stages(1:ii-1));
-		stages{ii} = flatten(NL(boxify3(RK.cmat(RK.cx(ii,ii))*x + PP, dp.Nx, dp.Nz), dp));
+		stages{ii} = flatten(NL(boxify3(RK.cmat(RK.cx(ii,ii))*x + PP, dp.NxNz), dp));
 	end
 	%new PP for update
 	PP = h*lincomIF(RK.b, RK.cx(end,:), RK.cmat, stages);
-	update = boxify3(RK.cmat(RK.cx(end-1,end))*x+PP, dp.Nx, dp.Nz);
+	update = boxify3(RK.cmat(RK.cx(end-1,end))*x+PP, dp.NxNz);
 end
 
 %lincom outputs a flat vector

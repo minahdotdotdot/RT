@@ -31,5 +31,5 @@ function update = RK4_step(x, h, L, dp)
 end
 
 function tend = LandNL(x, L, dp); 
-	tend = boxify3(L*flatten(x), dp.Nx, dp.Nz) + NL(x, dp);
+	tend = boxify3(L*flatten(x), dp.NxNz) + NL(x, dp);
 end
