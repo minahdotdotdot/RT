@@ -23,7 +23,7 @@ pp = struct('tau', tau, 'Pr', Pr, 'Ra', Ra, 'Sc', Sc, 'Rrho', Rrho);
 
 %% Domain
 a_ratio = 1;
-N = 2^2p; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
+N = 2^7; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
 k_o = ( .25*(-2-Ra + Ra*sqrt(1+8/Ra)) )^(.25);
 l_o = 2*pi/k_o;
 vars = {'tau','Pr','Ra','Sc','Rrho'}; clear(vars{:}); clear vars;
@@ -47,7 +47,7 @@ km = kkk.^2 + mm.^2; km = reshape(km', NxNz, 1);
 dp = struct('Nx', Nx, 'Nz', Nz, 'NxNz', NxNz, ...
 	'ks', ks, 'ms', ms, 'km', km, 'kkk', kkk, 'mm', mm, ...
 	'x',x,'z',z, ...
-	'Lx', Lx, 'Lz', Lz);
+	'Lx', Lx, 'Lz', Lz, 'l_o',l_o);
 vars = {'a_ratio', 'N', 'Nx', 'Nz', 'NxNz',...
 'dx', 'ks', 'ms','kkk','mm','km','x','z',...
 'Lx','Lz'};

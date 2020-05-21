@@ -1,8 +1,8 @@
 %Time-stepping 
-T = 2400;
+T = 1200;
 h = 5e-1;
 M = T/h;
-every = 500;
+every = 100;
 bname = join(['IFRK3',sprintf('%02d',h*1e2),'D32N07'],'');
 data = load(join(['../../data/',bname,'.mat'],''));
 RK = data.RK; dp = data.dpNL;

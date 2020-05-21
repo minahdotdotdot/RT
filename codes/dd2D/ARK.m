@@ -23,21 +23,19 @@ function update = ARK_step(x, h, arks, dp, stages, L, invd)
 	stages(:,1) = x;
 	for ii = 2 : s
 		stages(:,ii) = invd * (x + h*(...
-            L * (arks.Ae(ii-1,1:ii-1).*stages(:,1:ii-1))... %matlab does this fast.
+            L * sum(arks.Ae(ii-1,1:ii-1).*stages(:,1:ii-1),2)... %matlab does this fast.
             + lincomN(arks.Ai(ii-1,1:ii-1), stages(:,1:ii-1), dp)...
             )...
-        )
-	end
-	%new PP for update
-	PP = h*lincomIF(arks.b, arks.cx(end,:), arks.cmat, stages);
+        );
+    end
 	update = boxify3(...
-		zhat + h*(L* (arks.b.* stages + lincomN(arks.b, stages, dp))),...
-		dp.Nx, dp.Nz);
+		x + h*(L*sum(arks.b.*stages,2) + lincomN(arks.b, stages, dp)),...
+		dp.NxNz);
 end
 
 
 function tmp = lincomN(A, stages, dp)
-    tmp = A(1)*flatten(NL(boxify3(stages(:,1), dp.NxNz),dp));
+    tmp = A(1)*flatten(NL(boxify3(stages(:,1),dp.NxNz),dp));
     for ii = 2 : length(A)
         tmp = tmp + A(ii) * flatten(NL(boxify3(stages(:,ii), dp.NxNz), dp));
     end
