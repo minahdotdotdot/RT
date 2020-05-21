@@ -1,7 +1,7 @@
 run dd2D
 %Time-stepping 
-h = 5e-1;
-bname = join(['IFRK3',sprintf('%02d',h*1e2),'D32N07'],'');
+h = 5e-2; dname='D32N08P1'
+bname = join(['IFRK3',sprintf('%02d',h*1e2),dname],'');
 
 %parpool %parpool only called in fillc
 %linear operator
