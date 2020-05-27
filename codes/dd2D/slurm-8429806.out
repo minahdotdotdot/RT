@@ -1,0 +1,33 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018b (9.5.0.944444) 64-bit (glnxa64)
+                              August 28, 2018
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+
+dname =
+
+    'D32N08P1'
+
+Starting parallel pool (parpool) using the 'local' profile ...
+{Error using parpool (line 113)
+You requested a minimum of 16 workers, but the cluster "local" has the
+NumWorkers property set to allow a maximum of 2 workers. To run a communicating
+job on more workers than this (up to a maximum of 512 for the Local cluster),
+increase the value of the NumWorkers property for the cluster. The default
+value of NumWorkers for a Local cluster is the number of cores on the local
+machine.
+
+Error in dd2D_IFsetup (line 30)
+parpool(workers)
+
+Error in run (line 91)
+evalin('caller', strcat(script, ';'));
+
+Error in dd2D_IF (line 2)
+run dd2D_IFsetup.m
+} 
