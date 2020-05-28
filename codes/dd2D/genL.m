@@ -2,7 +2,7 @@
 % This creates a giant sparse operator L.
 
 function bigL = genL(pp, dp, par)
-    bigL=sparse(3*dp.Nx*dp.Nz, 3*dp.Nx*dp.Nz);
+    bigL=spalloc(3*dp.Nx*dp.Nz, 3*dp.Nx*dp.Nz, 9*dp.Nx*dp.Nz);
     if par == 0
         for jj = 1 : dp.Nz
             for ii = 1 : dp.Nx
