@@ -1,4 +1,4 @@
-function expL= genexpL(L, workers, bs)
+function expL= genexpL(L, workers, bs) % Block size has to be divisible by 3 or it will cause errors
     [m,n] = size(L);
     if mod(m, workers*bs) == 0
         p = m / (workers*bs);
