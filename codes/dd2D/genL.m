@@ -2,8 +2,9 @@
 % This creates a giant sparse operator L.
 
 function bigL = genL(pp, dp, par)
-    bigL=spalloc(3*dp.Nx*dp.Nz, 3*dp.Nx*dp.Nz, 9*dp.Nx*dp.Nz);
+    NxNz = dp.NxNz;  
     if par == 0
+        bigL=spalloc(3*NxNz, 3*NxNz, 9*NxNz);
         for jj = 1 : dp.Nz
             for ii = 1 : dp.Nx
                 kk = (jj-1)*dp.Nx+ii;
@@ -16,8 +17,23 @@ function bigL = genL(pp, dp, par)
         %delete(gcp('nocreate'))
         %parpool(workers)
         if mod(dp.Nz, workers) == 0
-            p = dp.Nz / workers;
-            blocks = cell(workers,1);
+            %p = dp.Nz / workers;
+            blocks = cell(NxNz,1);
+            parfor kk = 1 : NxNz
+                jj = ceil(kk/dp.Nx); ii = kk - (jj-1)*dp.Nx;
+                [spi, spj, snz] = find(gen3by3L(dp.ks(ii), dp.ms(jj), pp, dp));
+                blocks{kk}=[(kk-1)*3+spi (kk-1)*3+spj snz];
+            end
+            SP = zeros(9*NxNz,3); %[rowind, colind, nzval]
+            iold=1; inew=1;
+            for kk = 1 : NxNz
+                inew = iold-1 + size(blocks{kk},1);
+                SP(iold:inew,:)=blocks{kk}(:,:);
+                iold=inew+1;
+            end
+            SP = SP(1:iold-1,:);
+            bigL = sparse(SP(:,1), SP(:,2), SP(:,3));
+            %{
             parfor w = 1 : workers
                 blocks{w} = spalloc(3*dp.Nx*p, 3*dp.Nx*p,9*dp.Nx*p);
                 jjj = 0;
@@ -36,6 +52,7 @@ function bigL = genL(pp, dp, par)
             if issparse(bigL) == false
                 bigL = sparse(bigL);
             end
+            %}
         else
             error('check m/workers')
         end
@@ -58,4 +75,6 @@ function lilL = gen3by3L(k, m, pp, dp)
         [-1i*k*pp.Sc/(km*pp.tau); -km/pp.tau; 0]...
         [1i*k*pp.Sc/(km*pp.tau*pp.Rrho);0;-km]];
     end
+    %[spi, spj, nz]=find(lilL);
+    %spinfo = [spi spj nz];
 end

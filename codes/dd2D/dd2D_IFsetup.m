@@ -1,6 +1,6 @@
 run dd2D
 %Time-stepping 
-h = 2e-2; 
+%h = 2e-2; 
 dname=join(['D32N',sprintf('%02d',log2(dp.Nx)),'P1'],'');%dname='D32N07P1'
 bname = join(['I3',sprintf('%03d',h*1e3)],'');
 %% Timings for reference
@@ -30,7 +30,9 @@ bs = 3*2^7; % Each worker does: TOTAL: 3*2^{20 - 4 = 16} since workers=16=2^4
 par = workers;tic
 delete(gcp('nocreate'))
 parpool(workers)
-L = genL(pp, dp, par);toc
+L2 = genL(pp, dp, par);toc;tic;
+expL=genexpL(L, workers, bs);toc
+
 pname = join(['../../data/',bname,dname,'params.mat'],'')
 save(pname,'L');
 

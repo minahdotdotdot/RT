@@ -11,6 +11,7 @@ function [x, ES, FS]= IFRK(x, M, h, every, dp, RK)
 			kk = kk+1; [ES(kk), FS(kk)] = computeE(x, dp);
 			if ismember(1, isnan(x)) || ismember(1, isinf(x))
 				%display(tt*h) 
+                ES = ES(1:kk); FS=FS(1:kk);
 				break
 			end
             %tic

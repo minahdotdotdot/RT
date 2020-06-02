@@ -1,4 +1,5 @@
 h=5e-3;
+N = 2^7; 
 % By default, every variable is in Fourier space.
 % x = [Psi T S], where Psi, T, S each are columns.
 % This is the default shape of our variables.
@@ -24,7 +25,7 @@ pp = struct('tau', tau, 'Pr', Pr, 'Ra', Ra, 'Sc', Sc, 'Rrho', Rrho);
 
 %% Domain
 a_ratio = 1;
-N = 2^8; Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
+Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
 k_o = ( .25*(-2-Ra + Ra*sqrt(1+8/Ra)) )^(.25);
 l_o = 2*pi/k_o;
 vars = {'tau','Pr','Ra','Sc','Rrho'}; clear(vars{:}); clear vars;
@@ -50,7 +51,7 @@ dp = struct('Nx', Nx, 'Nz', Nz, 'NxNz', NxNz, ...
 	'x',x,'z',z, ...
 	'Lx', Lx, 'Lz', Lz, 'l_o',l_o);
 vars = {'a_ratio', 'N', 'Nx', 'Nz', 'NxNz',...
-'dx', 'ks', 'ms','kkk','mm','km','x','z',...
+'dx', 'ks', 'ms','kkk','mm','km',...%'x','z',...
 'Lx','Lz'};
 clear(vars{:});clear vars;
 
