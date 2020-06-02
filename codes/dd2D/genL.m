@@ -2,7 +2,7 @@
 % This creates a giant sparse operator L.
 
 function bigL = genL(pp, dp, par)
-    bigL=sparse(3*dp.Nx*dp.Nz, 3*dp.Nx*dp.Nz);
+    bigL=spalloc(3*dp.Nx*dp.Nz, 3*dp.Nx*dp.Nz, 9*dp.Nx*dp.Nz);
     if par == 0
         for jj = 1 : dp.Nz
             for ii = 1 : dp.Nx
@@ -19,7 +19,7 @@ function bigL = genL(pp, dp, par)
             p = dp.Nz / workers;
             blocks = cell(workers,1);
             parfor w = 1 : workers
-                blocks{w} = sparse(3*dp.Nx*p, 3*dp.Nx*p);
+                blocks{w} = spalloc(3*dp.Nx*p, 3*dp.Nx*p,9*dp.Nx*p);
                 jjj = 0;
                 for jj = (w-1)*p+1:w*p
                     jjj = jjj + 1;

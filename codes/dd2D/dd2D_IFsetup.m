@@ -3,7 +3,7 @@ run dd2D
 h = 2e-2; 
 dname=join(['D32N',sprintf('%02d',log2(dp.Nx)),'P1'],'');%dname='D32N07P1'
 bname = join(['I3',sprintf('%03d',h*1e3)],'');
-
+%% Timings for reference
 %parpool %parpool only called in fillc
 %linear operator
 %workers = 8; %3*Nx*Nz = 3(2^{2p+log_2(aspectratio)}) 
@@ -26,11 +26,15 @@ bs = 3*2^7; % Each worker does: TOTAL: 3*2^{20 - 4 = 16} since workers=16=2^4
 
 %par = 0;tic
 %L=genL(pp,dp,par);toc
+%% Set up Linear operator
 par = workers;tic
 delete(gcp('nocreate'))
 parpool(workers)
 L = genL(pp, dp, par);toc
-save(join(['../../data/',bname,dname,'params.mat'],''),'L');
+pname = join(['../../data/',bname,dname,'params.mat'],'')
+save(pname,'L');
+
+%% Set up RK scheme and exp(chL)'s
 RK = genIFRKexpL("RK3", h, L, workers, bs, pp, dp);
 run setupNL
-save(join(['../../data/',bname,dname,'params.mat'],''),'RK', 'dpNL','-append');
+save(pname,'RK', 'dpNL','-append');

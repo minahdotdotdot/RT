@@ -1,4 +1,4 @@
-function expL= genexpL(L, workers, bs)
+function expL= genexpL(L, workers, bs) % Block size has to be divisible by 3 or it will cause errors
     [m,n] = size(L);
     if mod(m, workers*bs) == 0
         p = m / (workers*bs);
@@ -14,7 +14,7 @@ function expL= genexpL(L, workers, bs)
                 blocks{ii}{jj}=sparse(expm(L((kk-1)*bs+1:kk*bs, (kk-1)*bs+1:kk*bs)));
             end
         end
-        expL = sparse(m,n);
+        expL = spalloc(m,n,9*m);
         for kk = 1 : workers*p
             jj= ceil(kk/workers); ii = kk - (jj-1)*workers;
             expL((kk-1)*bs+1:kk*bs, (kk-1)*bs+1:kk*bs) = blocks{ii}{jj};
