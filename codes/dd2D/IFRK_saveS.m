@@ -1,23 +1,27 @@
-function [x, ES, FS]= IFRK_saveS(x, M, h, every, dp, RK)
+function [x, ES, FS]= IFRK_saveS(x, M, h, every, Severy,name, dp, RK)
 	ES = zeros(M/every+1,1); FS = zeros(M/every+1,1);kk = 0;
 	run cmap
 	dx=dp.x/dp.l_o;
 	z=dp.z/dp.l_o;
+	imk = 0
 	for tt = 1 : M
 		x = IFRK_step(x, h, RK, dp);
         if tt == 1
         end
 		if mod(tt, every) == 1
 			kk = kk+1; [ES(kk), FS(kk)] = computeE(x, dp);
-			Sbox =real(ifft2(boxify(x(:,3), dp.Nx, dp.Nz)));
-			f=figure;
+		        if mod(kk, Severy) ==1)
+			    imk = imk +1;
+			    Sbox =real(ifft2(boxify(x(:,3), dp.Nx, dp.Nz)));
+			    f=figure;
 			%clims = [-3,3];
-			imagesc(dx,z,Sbox);%, clims)
-			colormap(OrPu/255)
-			title(join(['S at time ', sprintf('%.2f', 1400+tt*h)],''))
-			colorbar
-			saveas(gcf,sprintf('../../plots/test%4d.png',tt+23800));
-			close(f)
+			    imagesc(dx,z,Sbox);%, clims)
+			    colormap(OrPu/255)
+			    title(join(['S at time ', sprintf('%.2f', tt*h)],''))
+			    colorbar
+			    saveas(gcf,join(['../../plots/',name,sprintf('%4d.png',imk)],''));
+			    close(f)
+			end
 			if ismember(1, isnan(x)) || ismember(1, isinf(x))
                 ES = ES(1:kk-1); FS=FS(1:kk-1);
 				break
