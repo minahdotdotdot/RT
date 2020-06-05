@@ -1,8 +1,8 @@
 %% setup IFRK
 run dd2D.m;%_IFsetup.m
-name = 'A8'
+name = 'A7'
 %% Time-stepping 
-dT = 6000;
+dT = 100;
 %h=5e-3;
 dname=join(['D32N',sprintf('%02d',log2(dp.Nx)),'P1'],'');%'D32N07';
 bname = join(['I3',sprintf('%03d',h*1e3)],'');

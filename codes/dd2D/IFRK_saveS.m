@@ -1,4 +1,4 @@
-function [x, ES, FS]= IFRK_saveS(x, M, h, every, Severy,name, dp, RK)
+function [x, ES, FS]= IFRK_saveS(x, M, h, every, Severy, name, dp, RK)
 	ES = zeros(M/every+1,1); FS = zeros(M/every+1,1);kk = 0;
 	run cmap
 	dx=dp.x/dp.l_o;
@@ -6,11 +6,9 @@ function [x, ES, FS]= IFRK_saveS(x, M, h, every, Severy,name, dp, RK)
 	imk = 0
 	for tt = 1 : M
 		x = IFRK_step(x, h, RK, dp);
-        if tt == 1
-        end
 		if mod(tt, every) == 1
 			kk = kk+1; [ES(kk), FS(kk)] = computeE(x, dp);
-		        if mod(kk, Severy) ==1)
+            if mod(kk, Severy) ==1
 			    imk = imk +1;
 			    Sbox =real(ifft2(boxify(x(:,3), dp.Nx, dp.Nz)));
 			    f=figure;

@@ -1,5 +1,5 @@
 h=5e-2;
-N = 2^8; 
+N = 2^7; 
 % By default, every variable is in Fourier space.
 % x = [Psi T S], where Psi, T, S each are columns.
 % This is the default shape of our variables.
