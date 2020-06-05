@@ -22,7 +22,6 @@ Sc = Pr/tau;
 Rrho = 1/(Ra*tau); 
 pp = struct('tau', tau, 'Pr', Pr, 'Ra', Ra, 'Sc', Sc, 'Rrho', Rrho);
 
-
 %% Domain
 a_ratio = 1;
 Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
