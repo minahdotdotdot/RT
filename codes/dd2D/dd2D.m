@@ -1,4 +1,4 @@
-h=5e-3;
+h=5e-2;
 N = 2^7; 
 % By default, every variable is in Fourier space.
 % x = [Psi T S], where Psi, T, S each are columns.
@@ -56,7 +56,7 @@ vars = {'a_ratio', 'N', 'Nx', 'Nz', 'NxNz',...
 clear(vars{:});clear vars;
 
 %% Initial Condition
-xIC = randn(dp.NxNz,3)/(3*dp.NxNz);
+%xIC = randn(dp.NxNz,3)/(3*dp.NxNz);
 %zeros(NxNz,3); xIC(2,1)=1/(9*NxNz^2); 
 %xIC = fft2(xIC);
 %[Psi, T, S] = boxify3NL(xIC);

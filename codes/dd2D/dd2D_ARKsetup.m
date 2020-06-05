@@ -6,7 +6,7 @@ bname = join(['A3',sprintf('%03d',h*1e3)],'');
 %% Set-up Linear operator
 %par = 0;tic
 %L=genL(pp,dp,par);toc
-workers = 4;
+workers = 16;
 par = workers;tic
 delete(gcp('nocreate'))
 parpool(workers)

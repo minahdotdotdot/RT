@@ -1,12 +1,12 @@
 %% Nonlinear tendency
 function nltend = NL(x, dp)
-	%Unpack into box domain form.
-	[Psi, T, S] = boxify3NL(x);
+	%Unpack into 3 vars.
+	%[Psi, T, S] = boxify3NL(x);
 
-	%Pad variables with zeros
-	pPsi = pad_var(Psi, dp);
-	pT   = pad_var(T, dp);
-	pS   = pad_var(S, dp);
+	%Pad variables with zeros and put them in box form.
+	pPsi = pad_var(x(:,1), dp);
+	pT   = pad_var(x(:,2), dp);
+	pS   = pad_var(x(:,3), dp);
 
 	%Form omega = Laplacian(Psi)
 	pomega= -dp.km.*pPsi;

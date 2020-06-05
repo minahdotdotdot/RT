@@ -26,16 +26,18 @@ bs = 3*2^7; % Each worker does: TOTAL: 3*2^{20 - 4 = 16} since workers=16=2^4
 
 %par = 0;tic
 %L=genL(pp,dp,par);toc
-%% Set up Linear operator
-par = workers;tic
+%% Load Linear operator
+data = load(join(['../../data/','D32N',sprintf('%02d',log2(dp.Nx)),'P1L.mat'],''));
+L = data.L; clear data;
+par = workers;
+%{
+tic
 delete(gcp('nocreate'))
 parpool(workers)
-L2 = genL(pp, dp, par);toc;tic;
-expL=genexpL(L, workers, bs);toc
-
+L2 = genL(pp, dp, par);toc;
+%}
 pname = join(['../../data/',bname,dname,'params.mat'],'')
 save(pname,'L');
-
 %% Set up RK scheme and exp(chL)'s
 RK = genIFRKexpL("RK3", h, L, workers, bs, pp, dp);
 run setupNL
