@@ -14,7 +14,7 @@ bname = join(['I3',sprintf('%03d',h*1e3)],'');
 %                       -> bs = 3*2^5 || 5.3 sec
 %                       -> bs = 3*2^4 || 6.2 sec
 
-workers = 16;
+workers = 4;
 %i.e. aspect ratio = 1, p = 10 --> 3NxNz = 3(2^{20})
 bs = 3*2^7; % Each worker does: TOTAL: 3*2^{20 - 4 = 16} since workers=16=2^4
 %                             AT ITER: bs=3*2^7, 2^{16-7} ITERs

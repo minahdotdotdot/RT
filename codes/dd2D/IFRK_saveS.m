@@ -10,28 +10,36 @@ function [x, ES, FS]= IFRK_saveS(x, M, h, every, Severy, name, dp, RK)
 			kk = kk+1; [ES(kk), FS(kk)] = computeE(x, dp);
             if mod(kk, Severy) ==1
 			    imk = imk +1;
+                display(imk)
                 tth =  sprintf('%.2f', tt*h)
-                Psibox =real(ifft2(boxify(x(:,1), dp.Nx, dp.Nz)));
+                Psi = boxify(x(:,1),dp.Nx,dp.Nz);
+                ubox = real(ifft2(-1i*dp.mmm.*Psi));
+                wbox = real(ifft2(1i*dp.kkk.*Psi));
                 Tbox =real(ifft2(boxify(x(:,2), dp.Nx, dp.Nz)));
 			    Sbox =real(ifft2(boxify(x(:,3), dp.Nx, dp.Nz)));
-			    f=figure('position',[0,0,900,250])
-                subplot(131)
-                imagesc(dx,z,Psibox);%, clims)
+			    f=figure('position',[0,0,750,650])
+                subplot(221)
+                imagesc(dx,z,ubox);%, clims)
 			    colormap(OrPu/255)
-			    title(join(['Psi at time ', tth],''))
+			    title(join(['Horizontal velocity at time ', tth],''))
 			    colorbar
-                subplot(132)
+                subplot(222)
+                imagesc(dx,z,wbox);%, clims)
+			    colormap(OrPu/255)
+			    title(join(['Vertical velocity at time ', tth],''))
+			    colorbar
+                subplot(223)
                 imagesc(dx,z,Tbox);%, clims)
 			    colormap(OrPu/255)
 			    title(join(['T at time ',tth],''))
 			    colorbar
-                subplot(133)
+                subplot(224)
                 %clims = [-3,3];
 			    imagesc(dx,z,Sbox);%, clims)
 			    colormap(OrPu/255)
 			    title(join(['S at time ',tth],''))
 			    colorbar
-			    saveas(gcf,join(['../../plots/',name,sprintf('%4d.png',imk)],''));
+			    saveas(gcf,join(['../../plots/',name,sprintf('%04d.png',imk)],''));
 			    close(f)
 			end
 			if ismember(1, isnan(x)) || ismember(1, isinf(x))
