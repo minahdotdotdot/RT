@@ -7,7 +7,7 @@ dT = 6000;
 dname=join(['D32N',sprintf('%02d',log2(dp.Nx)),'P1'],'');%'D32N07';
 bname = join(['I3',sprintf('%03d',h*1e3)],'');
 M = dT/h;
-every = 1000; Severy = 1; 
+every = 100; Severy = 5; 
 data = load(join(['../../data/',bname,dname,'params.mat'],''));
 RK = data.RK; dp = data.dpNL;
 clear data;
@@ -25,7 +25,7 @@ clear data
 %save('../../testreal2IC.mat','xf','ES','FS','dT');
 save(join(['../../data/',bname,dname,'.mat'],''),'xf', 'ES', 'FS','dT');
 
-% Plot
+%% Plot
 %data = load('../../testrealIC.mat');
 data = load(join(['../../data/',bname,dname,'.mat'],''));
 x=dp.x/dp.l_o;
