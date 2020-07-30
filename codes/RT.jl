@@ -1,4 +1,4 @@
-using LinearAlgebra, PyPlot, Random, DelimitedFiles, Printf
+using LinearAlgebra, PyPlot, Random, DelimitedFiles, Printf, SparseArrays
 include("readwrite.jl")
 #generating IC on unit circle
 function onUnitCircle(n::Int=3)
@@ -98,14 +98,14 @@ end
 end
 
 
-@inline function phi(A::T) where T<:Complex
+@inline function phi1(A::T) where T<:Complex
     return expm1(A)/A
 end
 ####### ETD methods ###########
 using ExponentialUtilities
 
 @inline function ETD1(h::Float64, z::Array{T,1}, update::Array{T,1};ω, ϵ, C) where T<:ComplexF64
-    return Lfunc(z, ω, h) + h*NLfunc(z, ϵ, C) .* phi.(im*h*ω)
+    return Lfunc(z, ω, h) + h*NLfunc(z, ϵ, C) .* phi1.(im*h*ω)
 end
 
 @inline function ETDRK2(h::Float64, z::Array{T,1}, update::Array{T,1};ω, ϵ, C) where T<:ComplexF64
@@ -115,7 +115,7 @@ end
     yn += (phis[2]-phis[3]) *k
     k = NLfunc(phis[1]*z + h*phis[2]*k, ϵ, C) # k2
     yn += phis[3]*k
-    return exp.(im*h*ω) .* z + (h*yn)
+    return phis[1] * z + (h*yn)
 end
 
 @inline function ETDRK3(h::Float64, z::Array{T,1}, update::Array{T,1};ω, ϵ, C) where T<:ComplexF64
@@ -126,14 +126,14 @@ end
     yn += (phis[2]-3phis[3]+4phis[4]) *k13
     k2 = NLfunc(phis[5]*z + h*.5*phis[6]*k13, ϵ, C) # k2
     yn += (4*phis[3]-8*phis[4])*k2 
-    k3 = NLfunc(phis[1]*z+h*(-phis[2]*k13 + 2*phis[2]*k2)) # k3
+    k13 = NLfunc(phis[1]*z+ h*(-phis[2]*k13 + 2*phis[2]*k2), ϵ, C) # k3
     yn += (-phis[3]+4*phis[4])*k13
     return phis[1]* z + (h*yn)
 end
 
 @inline function ETDRK4(h::Float64, z::Array{T,1}, update::Array{T,1};ω, ϵ, C) where T<:ComplexF64
     #phis=[1=>exp(hL), 2=>phi_1(hL), 3=>phi_2(hL), 4=>phi_3(hL), 5=>exp(.5hL), 6=>phi_1(.5hL)]
-    phis = [phi(Diagonal(h*im*ω),3); phi(Diagonal(h/2*im*ω),1) 
+    phis = [phi(Diagonal(h*im*ω),3); phi(Diagonal(h/2*im*ω),1)] 
     yn = zeros(ComplexF64,3)
     k14  = NLfunc(z, ϵ, C)                          # k1
     yn += (phis[2]-3phis[3]+4phis[4]) *k14
@@ -141,14 +141,14 @@ end
     yn += (2*phis[3]-4*phis[4])*k23 
     k23 = NLfunc(phis[5]*z + h*.5*phis[6]*k23, ϵ, C) # k3
     yn += (2*phis[3]-4*phis[4])*k23 
-    k14 = NLfunc(phis[1]*z+h*((.5*phis[6]*(phis[5]-sparse(Matrix(I,3,3))))*k14 + phis[6]*k23)) # k4
+    k14 = NLfunc(phis[1]*z+h*((.5*phis[6]*(phis[5]-sparse(Matrix(I,3,3))))*k14 + phis[6]*k23), ϵ, C) # k4
     yn += (-phis[3]+4*phis[4])*k14
     return phis[1]* z + (h*yn)
 end
 
 @inline function ETDRK4B(h::Float64, z::Array{T,1}, update::Array{T,1};ω, ϵ, C) where T<:ComplexF64
     #phis=[1=>exp(hL), 2=>phi_1(hL), 3=>phi_2(hL), 4=>phi_3(hL), 5=>exp(.5hL), 6=>phi_1(.5hL), 7=>phi_2(.5hL)]
-    phis = [phi(Diagonal(h*im*ω),3); phi(Diagonal(h/2*im*ω),2) 
+    phis = [phi(Diagonal(h*im*ω),3); phi(Diagonal(h/2*im*ω),2)] 
     yn = zeros(ComplexF64,3)
     k14  = NLfunc(z, ϵ, C)                          # k1
     yn += (phis[2]-3phis[3]+4phis[4]) *k14
@@ -156,7 +156,7 @@ end
     yn += (2*phis[3]-4*phis[4])*k23 
     k23 = NLfunc(phis[5]*z + h*((.5*phis[6]-phis[7])*k14+.5*phis[6]*k23), ϵ, C) # k3
     yn += (2*phis[3]-4*phis[4])*k23 
-    k14 = NLfunc(phis[1]*z+h*((phis[2]-2*phis[3])*k14 + 2*phis[3]*k23)) # k4
+    k14 = NLfunc(phis[1]*z+h*((phis[2]-2*phis[3])*k14 + 2*phis[3]*k23), ϵ, C) # k4
     yn += (-phis[3]+4*phis[4])*k14
     return phis[1]* z + (h*yn)
 end
