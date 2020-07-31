@@ -1,5 +1,6 @@
 using LinearAlgebra, PyPlot, Random, DelimitedFiles, Printf, SparseArrays
 include("readwrite.jl")
+include("IMEX_methods.jl")
 #generating IC on unit circle
 function onUnitCircle(n::Int=3)
     z = Vector{ComplexF64}(undef, n);
@@ -204,6 +205,59 @@ end
     yn += k/6
     return exp.(im*h*ω) .* (z + h*yn)
 end
+
+#####IMEX methods
+# @inline function lincom(Aerow, stages)
+#     tmp = Aerow[1] * stages[1,:]
+#     for i = 2 : length(Aerow)
+#         tmp += Aerow[i] * stages[i,:]
+#     end
+#     return tmp
+# end
+
+@inline function lincomN(Airow, stages, nlfunc::Function; ϵ, C)
+    tmp = Airow[1]*nlfunc(stages[1,:], ϵ, C)
+    for i = 2 : length(Airow)
+        tmp += Airow[i]*nlfunc(stages[i,:], ϵ, C)
+    end
+    return tmp
+end
+
+@inline function ARK3RT(h::Float64, z::Array{T,1}, RHS::Array{T,1}; ω, ϵ, C) where T<:ComplexF64
+    invd = 1 ./(1 .- (h*ARK3.d*im*ω))
+    #stages
+    ks = zeros(ComplexF64,length(ARK3.b),3)
+    ks[1,:] = z;
+    #L.* zhat + NLfunc(zhat, fP, k); #first stage
+    for i = 2 :length(ARK3.b)
+        ks[i,:] = invd .* (z + h*(
+            im* (ω.* lincom(ARK3.Ae[i-1,1:i-1], ks[1:i-1,:]))
+            + lincomN(ARK3.Ai[i-1,1:i-1], ks[1:i-1,:], NLfunc, ϵ=ϵ, C=C)
+            )
+        )
+    end
+    return z + h*(im*(ω.*lincom(ARK3.b, ks)) + lincomN(ARK3.b, ks, NLfunc, ϵ=ϵ, C=C))
+end
+
+@inline function ARK4RT(h::Float64, z::Array{T,1}, RHS::Array{T,1}; ω, ϵ, C) where T<:ComplexF64
+    invd = 1 ./(1 .- (h*ARK4.d*im*ω))
+    #stages
+    ks = zeros(ComplexF64,length(ARK4.b),3)
+    ks[1,:] = z;
+    #L.* zhat + NLfunc(zhat, fP, k); #first stage
+    for i = 2 :length(ARK4.b)
+        ks[i,:] = invd .* (z + h*(
+            im* (ω.* lincom(ARK4.Ae[i-1,1:i-1], ks[1:i-1,:]))
+            + lincomN(ARK4.Ai[i-1,1:i-1], ks[1:i-1,:], NLfunc, ϵ=ϵ, C=C)
+            )
+        )
+    end
+    return z + h*(im*(ω.*lincom(ARK4.b, ks)) + lincomN(ARK4.b, ks, NLfunc, ϵ=ϵ, C=C))
+end
+
+
+
+
 
 @inline function no0rem(x::Int, y::Int)
     r = rem(x,y)
