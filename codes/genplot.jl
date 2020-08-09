@@ -1,4 +1,4 @@
-using PyPlot, DelimitedFiles, LinearAlgebra, DataFrames, GLM
+using PyPlot, DelimitedFiles, LinearAlgebra, DataFrames, GLM, Printf
 
 # Numerical Simulation Parameters
 N = 2^13;
@@ -149,7 +149,7 @@ function plotErrRationals!(k, hs::Vector{T}; nt::Float64=2.0) where T<:AbstractF
         color=:black, alpha=0.7)
 
 end
-
+fitdict=Dict{String,Float64}();
 function plotErrvH!(k, name::Vector{String}, hdict, mdict;#, m::Int, n::Int
     tru::String="IFRK3-000100", regfit::Bool=false, minV=0, nt::Float64=2.0)  
     k2 = k[2:Int(end/2)]
@@ -179,6 +179,7 @@ function plotErrvH!(k, name::Vector{String}, hdict, mdict;#, m::Int, n::Int
         err = saveerror(k, name, tru,nt, true, errtype="Matrix", hdict=hdict);
         data = DataFrame(logh=err[:,1], logerr=err[:,2]);
         ols=lm(@formula(logh ~ logerr), data);
+        push!(fitdict, mdict[name[1]] => ols.model.pp.beta0[1])
         errrange = range(minV, stop=maximum(err), length=1001)
         fitline = exp.(predict(ols, DataFrame(logerr=errrange)))
         #axvline(fitline[1], c=cdict[name[1]])
@@ -198,16 +199,20 @@ function plotErrvH2!(nt::Float64=2.)
     plotErrvH!(k,ETDlist, hdict, mdict, regfit=true, minV=minV, nt=Inf)
     plotErrvH!(k,ARK3list, hdict, mdict, regfit=true, minV=minV, nt=Inf)
     plotErrvH!(k,ARK4list, hdict, mdict, regfit=true, minV=minV, nt=Inf)
-    #plotErrvH!(k,IFr8list, hdict, mdict, regfit=false, nt=Inf)
-    #plotErrvH!(k,IFr6list, hdict, mdict, regfit=false, nt=Inf)
+    plotErrvH!(k,IFr8list, hdict, mdict, regfit=false, nt=Inf)
+    plotErrvH!(k,IFr6list, hdict, mdict, regfit=false, nt=Inf)
     plotErrvH!(k,IFlist[1:end-1], hdict, mdict, regfit=false, nt=Inf)
-    #plotErrvH!(k,IFr4list, hdict, mdict, regfit=false, nt=Inf)
+    plotErrvH!(k,IFr4list, hdict, mdict, regfit=false, nt=Inf)
     for (i,m) in enumerate(mds)
-        scatter([], [], c=cs[i], label=m)
+        if m == "IFRK3"
+            scatter([], [], c=cs[i], label=m)
+        else
+            scatter([], [], c=cs[i], label=m*", "*@sprintf("m≈%.2f",fitdict[m]))
+        end
     end
-    #=for (i,d) in enumerate(ds)
+    for (i,d) in enumerate(ds)
         scatter([], [], c=cs2[i], label="deg="*string(d), s=(d-4)*20+20)
-    end=#
+    end
     plot([], [], c=:black, marker="x", label="fitted")
     xlabel("h: time-step size")
     ylabel("Relative error ("*string(nt)*"-norm)")
