@@ -4,8 +4,8 @@
 h=0.025
 name=scheme*"-"*string(Int(h*1000000),pad=6)*"-d"*string(deg)
 =#
-scheme="IFRK3";
-h=0.001
+scheme="IFRK3"; deg = 0;
+h=0.0001
 name=scheme*"-"*string(Int(h*1_000_000),pad=6);
 T =10000
 M = ceil(Int, T/h);
