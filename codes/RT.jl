@@ -79,18 +79,18 @@ end
 end
 
 #Runge-Kutta 4(explicit)
-@inline function RK4(h::Float64, z::Array{T,1}, tend::Array{T,1}; ω, ϵ, C) where T<:ComplexF64
+@inline function RK4RT(h::Float64, z::Array{T,1}, tend::Array{T,1}; ω, ϵ, C) where T<:ComplexF64
     yn = deepcopy(z)
-    tend = tendRT(yn, ω=ω, ϵ=ϵ, C=C);
+    tend = tendRT!(yn, ω=ω, ϵ=ϵ, C=C);
     k = h*tend; #k1
     yn += 1/6*k;
-    tend = tendRT(z + (.5*k), ω=ω, ϵ=ϵ, C=C);
+    tend = tendRT!(z + (.5*k), ω=ω, ϵ=ϵ, C=C);
     k = h*tend; #k2
     yn += 1/3*k;
-    tend = tendRT(z + (.5*k), ω=ω, ϵ=ϵ, C=C);
+    tend = tendRT!(z + (.5*k), ω=ω, ϵ=ϵ, C=C);
     k = h*tend; #k3
     yn += 1/3*k;
-    tend = tendRT(z + k, ω=ω, ϵ=ϵ, C=C); #tend=k4
+    tend = tendRT!(z + k, ω=ω, ϵ=ϵ, C=C); #tend=k4
     return yn + (1/6)*h*tend
 end
 
@@ -375,7 +375,7 @@ function IFab(N::Int, h::Float64, every::Int, IC::Array{T,1};
 end
 
 function RT_amp(N::Int, h::Float64, every::Int, IC::Array{ComplexF64,1}; 
-    ω, ϵ, C, stepper::Function=RK4, name::String="zAmp")
+    ω, ϵ, C, stepper::Function=RK4RT, name::String="zAmp")
     z = deepcopy(IC)
     tend = deepcopy(IC)
     newtxt!(abs.(z), name=name)
@@ -396,13 +396,13 @@ function RT_amp(N::Int, h::Float64, every::Int, IC::Array{ComplexF64,1};
 end
 
 function RT(N::Int, h::Float64, every::Int, z::Array{ComplexF64,1}; 
-    ω, ϵ, C, stepper::Function=RK4_step, name::String="z")
+    ω, ϵ, C, stepper::Function=RK4RT, name::String="z")
     tend = deepcopy(z)
     newtxt!(z, name=name)
     for i=2:N+1
         z = stepper(h, z, tend, ω=ω, ϵ=ϵ, C=C)
-        print(z)
-        if rem(i, every) ==1
+        #print(z)
+        if rem(i, every) ==1 || every ==1
             addtxt!(z, name=name)
         end
     end
