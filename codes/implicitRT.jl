@@ -43,8 +43,7 @@ C = floatRT(5);       # Energy conserving constants
 IC = onUnitCircle(3)  # Initial condition
 ICr = vcat(real.(IC), imag.(IC));
 p = RTparams(ω,ϵ,C);
-
-truesol = 
+tsol = readdlm("../txtfiles/true_seed"*string(seed)*".txt");
 
 T = 1000.;
 tspan = (0., T);
@@ -52,68 +51,116 @@ dz = deepcopy(ICr); #p=3.;
 prob = ODEProblem(RTtend!, ICr, tspan, p);
 #prob = ODEProblem(easytend2!, ICr, tspan, p);
 
+
+
 # Choose algorithm.
-#alg = ImplicitEuler();
-alg = ImplicitMidpoint();
+alg = ImplicitEuler();
+#alg = ImplicitMidpoint();
 #alg = RadauIIA3();
 #alg = RadauIIA5();
 #alg = PDIRK44();
 
 # Set time step-size.
-dt = 0.05;#5e-5
-strideI = 1#Int(1/dt);
+dt = 0.001;#5e-5
 
+strideI = Int(1/dt);
+ind = 1:strideI:strideI*1000+1;
+#sol=solve(prob,alg,dt=dt);
+#truesol = 5*exp.(p*sol.t);
+#scatter(1:length(sol.t)-1, sol.t[2:end]-sol.t[1:end-1] .- 0.05)
+#complexsol, absvalsol = reshapetomat(sol.u);
+sol = Vector{Vector{Float64}}(undef,Int(1000/dt)+1);
+sol[1] = ICr;
+for i = 2 : length(sol)
+	tspan = (0, dt);
+	prob = ODEProblem(RTtend!, sol[i-1], tspan, p);
+	sol[i] = solve(prob, alg, dt=dt).u[2];
+end
+complexsol, absvalsol = reshapetomat(sol);
+writedlm("../txtfiles/ImplicitEulerh="*string(dt)*"seed"*string(seed)*".txt", absvalsol[ind,:])
+#=
+fig,ax=subplots()
+subplot(121)
+#semilogy(1:1000, abs.(tsol[2:end,1]-absvalsol[ind,1]), label="z1")
+#semilogy(1:1000, abs.(tsol[2:end,2]-absvalsol[ind,2]), label="z2")
+semilogy(1:1000, abs.(tsol[2:end,3]-absvalsol[ind,3]), label="z3")
+#plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,1],label="z1")
+#plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,2],label="z2")
+#plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,3],label="z3")
+title(@sprintf("h=%.3f",dt))
+legend()
+=#
+dt = 0.05;#5e-5
+strideI = Int(1/dt);
+ind = 1:strideI:strideI*1000+1;
+#sol=solve(prob,alg,dt=dt);
+#truesol = 5*exp.(p*sol.t);
+#scatter(1:length(sol.t)-1, sol.t[2:end]-sol.t[1:end-1] .- 0.05)
+#complexsol, absvalsol = reshapetomat(sol.u);
+sol = Vector{Vector{Float64}}(undef,Int(1000/dt)+1);
+sol[1] = ICr;
+for i = 2 : length(sol)
+	tspan = (0, dt);
+	prob = ODEProblem(RTtend!, sol[i-1], tspan, p);
+	sol[i] = solve(prob, alg, dt=dt).u[2];
+end
+complexsol, absvalsol = reshapetomat(sol);
+writedlm("../txtfiles/ImplicitEulerh="*string(dt)*"seed"*string(seed)*".txt", absvalsol[ind,:])
+#=
+subplot(122)
+#semilogy(1:1000, abs.(tsol[2:end,1]-absvalsol[ind,1]), label="z1")
+#semilogy(1:1000, abs.(tsol[2:end,2]-absvalsol[ind,2]), label="z2")
+semilogy(1:1000, abs.(tsol[2:end,3]-absvalsol[ind,3]), label="z3")
+#plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,1],label="z1")
+#plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,2],label="z2")
+#plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,3],label="z3")
+title(@sprintf("h=%.3f",dt))
+legend()
+suptitle("Implicit Euler")
+=#
+
+alg = PDIRK44();
+# Set time step-size.
+dt = 1.
+strideI = Int(1/dt);
+ind = 1:strideI:strideI*1000+1;
 sol=solve(prob,alg,dt=dt);
 #truesol = 5*exp.(p*sol.t);
 #scatter(1:length(sol.t)-1, sol.t[2:end]-sol.t[1:end-1] .- 0.05)
 complexsol, absvalsol = reshapetomat(sol.u);
-
-fig,ax=subplots()
+writedlm("../txtfiles/PDIRK44h="*string(dt)*"seed"*string(seed)*".txt", absvalsol[ind,:])
+#=fig,ax=subplots()
 subplot(121)
-plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,1],label="z1")
-plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,2],label="z2")
-plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,3],label="z3")
+#semilogy(sol.t[ind], abs.(tsol[2:end,1]-absvalsol[ind,1]), label="z1")writedlm("../txtfiles/ImplicitEulerh="*string(dt)*"seed"*string(seed)*".txt"
+writedlm("../txtfiles/ImplicitEulerh="*string(dt)*"seed"*string(seed)*".txt"
+writedlm("../txtfiles/PDIRK44h="*string(dt)*"seed"*string(seed)*".txt"
+writedlm("../txtfiles/PDIRK44h="*string(dt)*"seed"*string(seed)*".txt"
+#semilogy(sol.t[ind], abs.(tsol[2:end,2]-absvalsol[ind,2]), label="z2")
+semilogy(sol.t[ind], abs.(tsol[2:end,3]-absvalsol[ind,3]), label="z3")
+ylim(1e-1,1.5e0)
+#plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,1],label="z1")
+#plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,2],label="z2")
+#plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,3],label="z3")
 title(@sprintf("h=%.2f",dt))
-legend()
-
-dt = 0.001
-strideI = 1#Int(1/dt);
+#legend()
+=#
+dt = 4.;#5e-5
 sol=solve(prob,alg,dt=dt);
+#truesol = 5*exp.(p*sol.t);
+#scatter(1:length(sol.t)-1, sol.t[2:end]-sol.t[1:end-1] .- 0.05)
 complexsol, absvalsol = reshapetomat(sol.u);
-
+writedlm("../txtfiles/PDIRK44h="*string(dt)*"seed"*string(seed)*".txt", absvalsol)
+#=
+dt = Int(dt);
 subplot(122)
-plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,1],label="z1")
-plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,2],label="z2")
-plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,3],label="z3")
-title(@sprintf("h=%.3f",dt))
-legend()
-suptitle("Implicit Midpoint")
-
-alg = PDIRK44();
-dt = 1.
-strideI = 1#Int(1/dt);
-
-sol2=solve(prob,alg,dt=dt);
-complexsol2, absvalsol2 = reshapetomat(sol2.u);
-
-fig,ax=subplots()
-subplot(121)
-plot(sol2.t[1:strideI:end], absvalsol2[1:strideI:end,1],label="z1")
-plot(sol2.t[1:strideI:end], absvalsol2[1:strideI:end,2],label="z2")
-plot(sol2.t[1:strideI:end], absvalsol2[1:strideI:end,3],label="z3")
+ylim(1e-1,1.5e0)
+#semilogy(sol.t[2:end], abs.(tsol[dt:dt:end,1]-absvalsol[2:end,1]), label="z1")
+#semilogy(sol.t[2:end], abs.(tsol[dt:dt:end,2]-absvalsol[2:end,2]), label="z2")
+semilogy(sol.t[2:end], abs.(tsol[dt:dt:end,3]-absvalsol[2:end,3]), label="z3")
+#plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,1],label="z1")
+#plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,2],label="z2")
+#plot(sol.t[1:strideI:end], absvalsol[1:strideI:end,3],label="z3")
 title(@sprintf("h=%.2f",dt))
-legend()
-
-dt = 4.
-strideI = 1#Int(1/dt);
-
-sol2=solve(prob,alg,dt=dt);
-complexsol2, absvalsol2 = reshapetomat(sol2.u);
-
-subplot(122)
-plot(sol2.t[1:strideI:end], absvalsol2[1:strideI:end,1],label="z1")
-plot(sol2.t[1:strideI:end], absvalsol2[1:strideI:end,2],label="z2")
-plot(sol2.t[1:strideI:end], absvalsol2[1:strideI:end,3],label="z3")
-title(@sprintf("h=%.2f",dt))
-legend()
+#legend()
 suptitle("PDIRK44: 2 processor 4th order diagonally non-adaptive implicit method")
+=#

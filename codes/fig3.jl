@@ -14,9 +14,9 @@ L=1000;               # Number of state/amplitudes to save
 #IF_steppers = [IFE, IFRK2, IFRK3, IFRK4];
 #ETD_steppers = [ETD1, ETDRK2, ETDRK3, ETDRK4, ETDRK4B]
 #steppers=[IF_steppers;ETD_steppers];
-steppers1=[IFE, ETD1, CNimex, EUimex]
-steppers2=[IFRK3, ETDRK3, ARK3RT]
-ss = length(steppers)
+steppers1=[IFE, ETD1, CNimex, EUimex, ImplicitEuler]
+steppers2=[IFRK3, ETDRK3, ARK3RT, PDIRK44]
+#ss = length(steppers)
 
 #True solution
 tsol = readdlm("../txtfiles/true_seed"*string(seed)*".txt")[:,3]
@@ -55,9 +55,11 @@ for i = 1:4
 		steppers=steppers2
 		ind = 1:Int(hs[i]):T+1
 	end
-	for j = 1 : length(steppers)
+	for j = 1 : length(steppers)-1
     	axs[i].semilogy(ind, abs.((tsol[ind]-sol[j])./tsol[ind]), label=string(steppers[j]))
     end
+    j = length(steppers)
+    axs[i].semilogy(ind, abs.((tsol[ind]-sol[j])./tsol[ind]), linestyle="dashed", label=string(steppers[j]))
     axs[i].set_ylim(1e-7, 1.2)
     axs[i].set_title("h="*string(hs[i]))
     #axs[i].set_title("Relative errors of |z₃| with h="*string(hs[i]))
