@@ -179,7 +179,7 @@ function plotErrvH!(k, name::Vector{String}, hdict, mdict;#, m::Int, n::Int
         err = saveerror(k, name, tru,nt, true, errtype="Matrix", hdict=hdict);
         data = DataFrame(logh=err[:,1], logerr=err[:,2]);
         ols=lm(@formula(logh ~ logerr), data);
-        push!(fitdict, mdict[name[1]] => ols.model.pp.beta0[1])
+        push!(fitdict, mdict[name[1]] => ols.model.pp.beta0[2])
         errrange = range(minV, stop=maximum(err), length=1001)
         fitline = exp.(predict(ols, DataFrame(logerr=errrange)))
         #axvline(fitline[1], c=cdict[name[1]])
@@ -187,6 +187,14 @@ function plotErrvH!(k, name::Vector{String}, hdict, mdict;#, m::Int, n::Int
         scatter(fitline[1], exp.(errrange)[1], c=cdict[name[1]], marker="x") 
     end
 end
+
+#a + b log(h) = log(err)
+#A[:,1] = 1
+#A[:,2] = log(h)
+#x = (a,b)
+#RHS = log(err)
+#x = (A'*A)\(A'*RHS)
+#x(2) = slope
 
 function plotErrvH2!(nt::Float64=2.)
     fig,ax = subplots()
