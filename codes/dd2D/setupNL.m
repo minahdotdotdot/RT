@@ -16,7 +16,7 @@ ms(dp.Nz/2) = 0;
 % km, kk, and mm. 
 dpNL = struct('Nx', dp.Nx, 'Nz', dp.Nz, 'NxNz', dp.NxNz, ...
 	'km', km, 'kk', kk, 'mm', mm, 'kkk', dp.kkk, 'mmm',dp.mm, 'x',dp.x,'z',dp.z,...
-	'Lx', dp.Lx, 'Lz', dp.Lz, 'l_o',dp.l_o);
+	'Lx', dp.Lx, 'Lz', dp.Lz, 'l_o', dp.l_o);
 vars = {'dp', 'ks', 'ms', 'kk', 'mm'};
 clear(vars{:}); clear vars;
 
