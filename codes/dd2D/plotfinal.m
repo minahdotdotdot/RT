@@ -36,4 +36,5 @@ plot(t, FS,'DisplayName','FS')
 legend()
 title("Energies")
 saveas(gcf,join(['../../plots/',bname,dname,'T',sprintf('%05d',dT),'.png'],''))
+saveas(gcf,join(['../../plots/',bname,dname,'T',sprintf('%05d',dT),'.fig'],''))
 end

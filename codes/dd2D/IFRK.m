@@ -7,7 +7,7 @@ function [x, ES, FS]= IFRK(x, M, h, every, Severy, name, dp, RK)
 	for tt = 1 : M
 		x = IFRK_step(x, h, RK, dp);
 		if mod(tt, every) == 1
-			disp(sprintf('%02d%c done.',floor(tt*100/M),'%'))
+			disp(sprintf('%.2f%c done.',tt*100/M,'%'))
 			kk = kk+1; [ES(kk), FS(kk)] = computeE(x, dp);
             if mod(kk, Severy) ==1
 			    imk = imk +1;

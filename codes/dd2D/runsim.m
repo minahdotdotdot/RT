@@ -1,5 +1,5 @@
 %% Problem defininig params (including discretization)
-N=2^7; 
+N=2^8; 
 D=32;
 Pr=1;
 h=0.05;
@@ -27,7 +27,7 @@ xIC = randn(dp.NxNz,3)/sqrt(dp.NxNz); % Real in physical space.
 xIC = dd2Dfft(xIC, dp);
 
 %% Set simulation length.
-dT = 30;
+dT = 2000;
 M = dT/h;
 every = 100; %Severy = 5; (To save pictures)
 Severy=-1;
