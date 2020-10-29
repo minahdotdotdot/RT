@@ -40,4 +40,5 @@ finaldata=sprintf('../../data/%s%s.mat',bname,dname);
 save(finaldata,'xf', 'ES', 'FS','dT');
 
 %% Plot fields and energy evolution.
-plotfinal(finaldata, dp, bname, dname);
+highres=true;
+plotfinal(finaldata, dp, bname, dname,highres);

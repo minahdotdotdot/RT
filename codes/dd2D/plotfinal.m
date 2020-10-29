@@ -1,4 +1,4 @@
-function plotfinal(finaldata, dp, bname, dname)
+function plotfinal(finaldata, dp, bname, dname, highres)
 data = load(finaldata);
 x=dp.x/dp.l_o;
 z=dp.z/dp.l_o;dT=data.dT;
@@ -10,7 +10,11 @@ t = linspace(0,dT,length(ES));
 Psibox =real(ifft2(boxify(Psi, dp.Nx, dp.Nz)));
 Tbox =real(ifft2(boxify(T, dp.Nx, dp.Nz)));
 Sbox =real(ifft2(boxify(S, dp.Nx, dp.Nz)));
-
+if highress==true
+	Psibox = interpft(interpft(Psibox,1024)',1024)';
+	Tbox = interpft(interpft(Tbox,1024)',1024)';
+	Sbox = interpft(interpft(Sbox,1024)',1024)';
+end
 run cmap
 figure
 subplot(221)
