@@ -1,5 +1,5 @@
-function L = getL(N,D,Pr,dp,pp,p)
-	filename=sprintf('../../data/D%2dN%02dP%1dL.mat',D,log2(N),Pr);
+function L = getL(N,D,Pr,dp,pp,dname,p)
+	filename=sprintf('../../data/D=%sL.mat',dname);
 	if(exist(filename,'file'))
 		disp('L file already exists.');
 		data=load(filename);

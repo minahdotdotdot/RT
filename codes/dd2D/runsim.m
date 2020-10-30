@@ -15,7 +15,7 @@ pname=sprintf('../../data/%s%sparams.mat',bname,dname);
 
 %% Get or construct linear operator.
 worker=4;
-L=getL(N,D,Pr,dp,pp,[pname,worker]);
+L=getL(N,D,Pr,dp,pp,dname,[pname,worker]);
 
 %% Get other operators. We will be using IFRK with RK3. 
 bs = 3*2^7; % Size of one matrix dim assigned to each worker.
