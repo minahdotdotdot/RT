@@ -8,7 +8,7 @@ function [dp,pp] = define_params(N, D, Pr, a_ratio)
 	pp = struct('tau', tau, 'Pr', Pr, 'Ra', Ra, 'Sc', Sc, 'Rrho', Rrho);
 
 	%% Domain
-	a_ratio = 1;
+	%a_ratio = 1;
 	Nx = N; Nz = a_ratio*N; NxNz = Nx*Nz;
 	k_o = ( .25*(-2-Ra + Ra*sqrt(1+8/Ra)) )^(.25);     % WON'T NEED
 	l_o = 2*pi/k_o;
