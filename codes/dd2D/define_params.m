@@ -1,4 +1,4 @@
-function [dp,pp] = define_params(N, D, Pr)
+function [dp,pp] = define_params(N, D, Pr, a_ratio)
 	%% Problem Parameters 
 	tau = 0.01;
 	%Pr = 1; %water: 7

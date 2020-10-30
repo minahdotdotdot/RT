@@ -1,15 +1,16 @@
 %% Problem defininig params (including discretization)
-N=2^8; 
+N=2^7; 
 D=32;
 Pr=1;
 h=0.05;
 
 %% Define all params 
-[dp,pp]=define_params(N,D,Pr);
+a_ratio=2;
+[dp,pp]=define_params(N,D,Pr,a_ratio);
 
 %% Set up naming strings.
 bname=sprintf('I3%03d',h*1e3);
-dname=sprintf('D%2dN%02dP%1d',D,log2(dp.Nx),Pr);
+dname=sprintf('D%2dN%02dP%1da%1d',D,log2(dp.Nx),Pr,a_ratio);
 pname=sprintf('../../data/%s%sparams.mat',bname,dname);
 
 %% Get or construct linear operator.
@@ -41,4 +42,4 @@ save(finaldata,'xf', 'ES', 'FS','dT');
 
 %% Plot fields and energy evolution.
 highres=true;
-plotfinal(finaldata, dp, bname, dname,highres);
+plotfinal(finaldata, dp, bname, dname, highres);

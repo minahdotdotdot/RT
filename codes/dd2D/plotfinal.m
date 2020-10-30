@@ -1,4 +1,4 @@
-function plotfinal(finaldata, dp, bname, dname, highres)
+ function plotfinal(finaldata, dp, bname, dname, highres)
 data = load(finaldata);
 x=dp.x/dp.l_o;
 z=dp.z/dp.l_o;dT=data.dT;
